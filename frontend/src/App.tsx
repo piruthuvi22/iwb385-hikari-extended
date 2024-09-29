@@ -1,18 +1,15 @@
 import React from "react";
 
-import { Box, Button, ThemeProvider } from "@mui/material";
+import { ThemeProvider } from "@mui/material";
 import { theme } from "./theme/theme";
 import "./App.css";
+import GetStarted from "./pages/GetStarted";
 
 function App() {
   return (
     <ThemeProvider theme={theme}>
       <div className="App">
-        <Box>
-          <Button variant="contained" color="secondary">
-            Hello World
-          </Button>
-        </Box>
+        <GetStarted />
       </div>
     </ThemeProvider>
   );
