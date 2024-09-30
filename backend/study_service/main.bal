@@ -21,6 +21,14 @@ service on new http:Listener(9091) {
     }
 
     resource function post study\-session(dto:StudySessionDto studySessionDto) returns error? {
+
+        if studySessionDto.noMins < <decimal> 0 {
+            return error("Study session duration cannot be negative");
+        }
+
+        if studySessionDto.goalHours < <decimal> 0 {
+            return error("Goal hours cannot be negative");
+        }
         
         mongodb:Collection weeks = check self.db->getCollection("weeks");
 
@@ -135,7 +143,15 @@ service on new http:Listener(9091) {
         return error("Failed to get status");
     }
 
-        resource function get study\-status/[string studentId]/[string subjectId]/[int year]/[int weekNo]() returns dto:StudyStatusDto|error? {
+    resource function get study\-status/[string studentId]/[string subjectId]/[int year]/[int weekNo]() returns dto:StudyStatusDto|error? {
+
+        if weekNo < 1 {
+            return error("Invalid week number");
+        }
+        
+        if year < 1000 {
+            return error("Invalid year");
+        }
 
         mongodb:Collection weeks = check self.db->getCollection("weeks");
         
@@ -172,6 +188,59 @@ service on new http:Listener(9091) {
         }
 
         return error("Failed to get status");
+    }
+
+    resource function post adjust\-weekly\-goal(dto:GoalAdjustDto goalAdjust) returns error? {
+
+        if goalAdjust.goalHours < <decimal> 0 {
+            return error("Goal hours cannot be negative");
+        }
+        
+        mongodb:Collection weeks = check self.db->getCollection("weeks");
+
+        time:Utc currentTime = time:utcNow();
+
+        int weekNo = check getWeekNumber(time:utcToCivil(currentTime));
+        int year = time:utcToCivil(currentTime).year;
+
+        models:Week|mongodb:Error? week = check weeks->findOne({
+                weekNo: weekNo, 
+                year: year, 
+                studentId: goalAdjust.studentId, 
+                subjectId: goalAdjust.subjectId
+            });
+
+        if week is () {
+
+            models:Week newWeek = {
+                id: uuid:createType1AsString(),
+                weekNo: weekNo, 
+                year: year,
+                subjectId: goalAdjust.subjectId,
+                studentId: goalAdjust.studentId,
+                goalHours: goalAdjust.goalHours,
+                actualHours: 0,
+                studySessions: []
+            };
+
+            check weeks->insertOne(newWeek);
+
+        } else if week is models:Week {
+
+            if week.goalHours == goalAdjust.goalHours {
+                return ();
+            }
+
+            models:Week updatedWeek = week.clone();
+            
+            updatedWeek.goalHours = goalAdjust.goalHours;
+
+            mongodb:UpdateResult updateResult = check weeks->updateOne({id: week.id}, {set:updatedWeek});
+            if updateResult.modifiedCount != 1 {
+                return error("Failed to update the weekly goal");
+            }
+        }
+
     }
 
 }

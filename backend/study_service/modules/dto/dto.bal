@@ -17,3 +17,9 @@ public type StudyStatusDto record {|
     map<string>? lessonDates;
     string[]? studiedLessons;
 |};
+
+public type GoalAdjustDto record {|
+    string studentId;
+    string subjectId;
+    decimal goalHours;
+|};

@@ -4,7 +4,7 @@ POST http://localhost:9091/study-session
 {
     "subjectId": "MATH101",
     "studentId": "STU101",
-    "lessonId": "L1",
+    "lessonId": "L4",
     "noMins": 30,
     "goalHours": 10
 }
@@ -14,3 +14,12 @@ GET http://localhost:9091/current-study-status/STU101/MATH101
 
 ### Get Study Status for a Specific Week
 GET http://localhost:9091/study-status/STU101/MATH101/2024/37
+
+### Adjust Goal Hours
+POST http://localhost:9091/adjust-weekly-goal
+
+{
+    "studentId": "STU101",
+    "subjectId": "MATH101",
+    "goalHours": 10
+}
