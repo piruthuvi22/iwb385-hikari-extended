@@ -1,0 +1,16 @@
+### Record Study Session
+POST http://localhost:9091/study-session
+
+{
+    "subjectId": "MATH101",
+    "studentId": "STU101",
+    "lessonId": "L1",
+    "noMins": 30,
+    "goalHours": 10
+}
+
+### Get Current Week Study Status
+GET http://localhost:9091/current-study-status/STU101/MATH101
+
+### Get Study Status for a Specific Week
+GET http://localhost:9091/study-status/STU101/MATH101/2024/37
