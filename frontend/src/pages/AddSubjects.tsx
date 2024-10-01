@@ -16,6 +16,7 @@ import {
 import MenuIcon from "@mui/icons-material/Menu";
 import Banner from "../assets/addSubjectBg.jpg";
 import AddIcon from "@mui/icons-material/Add";
+import Menubar from "../components/Menubar";
 
 const subjects = [
   "Combined Maths",
@@ -89,17 +90,6 @@ export default function AddSubject() {
         >
           StRings
         </Typography>
-
-        <MenuIcon
-          style={{
-            position: "absolute",
-            top: 16,
-            right: 16,
-            color: "white",
-            fontSize: "2rem",
-            cursor: "pointer",
-          }}
-        />
       </Box>
 
       <Box width={"100%"} textAlign={"center"} mt={2}>
@@ -207,6 +197,7 @@ export default function AddSubject() {
           </Button>
         </DialogActions>
       </Dialog>
+      <Menubar></Menubar>
     </Box>
   );
 }
