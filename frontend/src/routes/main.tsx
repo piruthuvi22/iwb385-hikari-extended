@@ -5,6 +5,7 @@ import Signup from "../pages/Signup";
 import Dashboard from "../pages/Dashboard";
 import Lessons from "../pages/Lessons";
 import RecordStudySession from "../pages/RecordStudySession";
+import AddSubject from "../pages/AddSubjects";
 
 export const router = createBrowserRouter([
   {
@@ -31,5 +32,9 @@ export const router = createBrowserRouter([
   {
     path: "/record-study-session",
     element: <RecordStudySession />,
+  },
+  {
+    path: "/add-subject",
+    element: <AddSubject />,
   },
 ]);

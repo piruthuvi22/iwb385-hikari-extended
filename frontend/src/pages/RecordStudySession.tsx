@@ -1,30 +1,46 @@
-import React from "react";
+import React, { useState } from "react";
+import { buildStyles, CircularProgressbar } from "react-circular-progressbar";
+import "react-circular-progressbar/dist/styles.css";
 import {
+  Avatar,
   Box,
+  Button,
   Divider,
+  Fab,
   List,
+  ListItem,
+  ListItemAvatar,
   ListItemButton,
   ListItemIcon,
   ListItemText,
   ListSubheader,
+  Slider,
+  TextField,
   Typography,
   useTheme,
 } from "@mui/material";
 import {
+  Add,
   Article,
   Description,
+  Image,
   LibraryBooks,
   MenuBook,
   Send,
   StickyNote2,
 } from "@mui/icons-material";
-import CircularWithValueLabel, { CircularProgressWithLabel } from "../components/CircularProgress";
+import CircularWithValueLabel, {
+  CircularProgressWithLabel,
+} from "../components/CircularProgress";
+import DialogBox from "../components/DialogBox";
 
 export default function RecordStudySession() {
   const theme = useTheme();
 
+  const [open, setOpen] = useState(false);
+
   return (
-    <Box height={"100vh"} bgcolor={theme.palette.grey[100]}>
+    <Box height={"100vh"}>
       <Box
         sx={{
           position: "relative",
@@ -63,8 +79,33 @@ export default function RecordStudySession() {
         </Box>
       </Box>
       <Box>
-      {/* <CircularWithValueLabel  /> */}
+        <Box
+          display={"flex"}
+          flexDirection={"column"}
+          justifyContent={"center"}
+          alignItems={"center"}
+          py={2}
+        >
+          {/* <CircularWithValueLabel /> */}
+          <Box sx={{ width: 150 }}>
+            <CircularProgressbar
+              value={66}
+              strokeWidth={5}
+              text="66%"
+              styles={buildStyles({
+                strokeLinecap: "round",
+                textSize: "16px",
+                pathTransitionDuration: 0.5,
+                // Colors
+                pathColor: theme.palette.primary.main,
+                textColor: theme.palette.primary.main,
+                trailColor: theme.palette.grey[100],
+              })}
+            />
+          </Box>
 
+          <Typography color="text.secondary">2hrs 30min / 5hrs</Typography>
+        </Box>
         <Box padding={0}>
           <List
             sx={{ width: "100%", bgcolor: "background.paper" }}
@@ -78,18 +119,142 @@ export default function RecordStudySession() {
           >
             {Array.from({ length: 20 }).map((_, index) => (
               <>
-                <ListItemButton>
+                <ListItem secondaryAction={<></>}>
                   <ListItemIcon>
                     <Description />
                   </ListItemIcon>
-                  <ListItemText primary={`Chapter ${index + 1}`} />
-                </ListItemButton>
+                  <ListItemText
+                    primary={`Lesson ${index + 1}`}
+                    secondary="Last studies 2 days ago"
+                  />
+                </ListItem>
                 <Divider variant="middle" component="li" />
               </>
             ))}
           </List>
+          <Fab
+            sx={{ position: "fixed", bottom: 25, right: 25 }}
+            color="primary"
+            size="large"
+            onClick={() => setOpen(true)}
+          >
+            <Add />
+          </Fab>
         </Box>
       </Box>
+
+      <AddSession open={open} handleClose={() => setOpen(false)} />
     </Box>
   );
 }
+
+const AddSession = ({
+  open,
+  handleClose,
+}: {
+  open: boolean;
+  handleClose: () => void;
+}) => {
+  const [hour, setHour] = useState<number>(0);
+  const [minutes, setMinutes] = useState<number>(0);
+
+  return (
+    <DialogBox
+      open={open}
+      handleClose={handleClose}
+      title="How long did you study?"
+      actions={
+        <>
+          <Button variant="contained" onClick={handleClose}>
+            Save
+          </Button>
+          <Button variant="outlined" onClick={handleClose}>
+            Close
+          </Button>
+        </>
+      }
+    >
+      <>
+        <Box py={4}>
+          <Typography>Hours</Typography>
+          <Box display={"flex"} justifyContent={"space-between"} gap={2}>
+            <Slider
+              defaultValue={12}
+              min={0}
+              max={24}
+              getAriaValueText={(value) => `${value}hrs`}
+              value={typeof hour === "number" ? hour : 0}
+              aria-label="Default"
+              valueLabelDisplay="auto"
+              onChange={(e, value) => setHour(Number(value))}
+            />
+            <TextField
+              onChange={(e) => setHour(Number(e.target.value))}
+              type="number"
+              size="small"
+              value={hour}
+              slotProps={{
+                htmlInput: {
+                  min: 0,
+                  max: 24,
+                },
+              }}
+            />
+          </Box>
+
+          <Typography>Minutes</Typography>
+          <Box display={"flex"} justifyContent={"space-between"} gap={2}>
+            <Slider
+              defaultValue={12}
+              min={0}
+              max={59}
+              getAriaValueText={(value) => `${value}mins`}
+              value={typeof minutes === "number" ? minutes : 0}
+              aria-label="Default"
+              valueLabelDisplay="auto"
+              onChange={(e, value) => setMinutes(Number(value))}
+            />
+            <TextField
+              onChange={(e) => setMinutes(Number(e.target.value))}
+              type="number"
+              size="small"
+              value={minutes}
+              slotProps={{
+                htmlInput: {
+                  min: 0,
+                  max: 59,
+                  minLength: 5,
+                },
+              }}
+            />
+          </Box>
+          <Typography
+            textAlign={"center"}
+            variant="h6"
+            mt={2}
+            color="secondary"
+          >
+            <span
+              style={{
+                fontSize: "1.8rem",
+                fontWeight: 700,
+              }}
+            >
+              {hour}
+            </span>
+            hrs
+            <span
+              style={{
+                fontSize: "1.8rem",
+                fontWeight: 700,
+              }}
+            >
+              {minutes}
+            </span>
+            mins
+          </Typography>
+        </Box>
+      </>
+    </DialogBox>
+  );
+};

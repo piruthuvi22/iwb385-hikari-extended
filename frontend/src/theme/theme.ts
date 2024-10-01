@@ -13,6 +13,7 @@ export const theme = createTheme({
     },
     background: {
       default: "#f5f5f5",
+      // default: "#f5f5f5",
     },
   },
   typography:{
