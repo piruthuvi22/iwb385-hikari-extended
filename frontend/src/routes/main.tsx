@@ -3,6 +3,8 @@ import App from "../App";
 import Login from "../pages/Login";
 import Signup from "../pages/Signup";
 import Dashboard from "../pages/Dashboard";
+import Lessons from "../pages/Lessons";
+import RecordStudySession from "../pages/RecordStudySession";
 
 export const router = createBrowserRouter([
   {
@@ -21,5 +23,13 @@ export const router = createBrowserRouter([
   {
     path: "/dashboard",
     element: <Dashboard />,
+  },
+  {
+    path: "/lessons",
+    element: <Lessons />,
+  },
+  {
+    path: "/record-study-session",
+    element: <RecordStudySession />,
   },
 ]);
