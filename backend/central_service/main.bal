@@ -1,9 +1,31 @@
 import ballerina/http;
 
+configurable string OAUTH2 = ?;
+
+
+
 listener central = new http:Listener(9090);
 
+@http:ServiceConfig {
+    auth: [
+        {
+            jwtValidatorConfig: {
+                issuer: OAUTH2,
+                audience: "central_api",
+                signatureConfig: {
+                    jwksConfig: {
+                        url: OAUTH2 + ".well-known/jwks.json"
+                    }
+                }
+            },
+            scopes: ["openid", "profile", "email"]
+        }
+    ]
+}
 service /api/user on central {
-    resource function get .() {}
+    resource function get .() returns string {
+        return "HELLO";
+    }
 
     resource function get friends() {}
 
