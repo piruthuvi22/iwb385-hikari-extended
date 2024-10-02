@@ -1,0 +1,29 @@
+### Create User
+POST http://localhost:9092/api/users
+
+{
+    "name": "Alice",
+    "email": "alicegmailcom",
+    "role": "USER"
+}
+
+### Get users
+GET http://localhost:9092/api/users
+
+
+### Get user by email
+GET http://localhost:9092/api/users/sagini@gmail.com
+
+
+### Put subjectIds
+PUT  http://localhost:9092/api/users/01ef7f3e-8ce0-1890-a8f2-344592f9c750/subjects
+{
+    "subject_ids": [
+        {
+            "id": "01ef7f3e-8ce0-1890-a8f2-344592f9c750"
+        }
+    ]
+}
+
+### Delete user
+DELETE http://localhost:9092/api/users/01ef7f3e-8ce0-1890-a8f2-344592f9c750
