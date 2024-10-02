@@ -61,91 +61,91 @@ service /api on new http:Listener(9092) {
     resource function put users/[string id]/subjects(dto:IDInput newSubjectId) returns models:User?|error {
         mongodb:Collection users = check self.db->getCollection("users");
         models:User|error? user = check getUser(self.db, id);
-        if user is error {
-            return user;
-        }
-        models:ID[] updatedIds = [];
         if user is models:User {
-            updatedIds = user.subjectIds;
-            updatedIds.push(newSubjectId.newId);
+            return addSubject(user.subjectIds, newSubjectId.newId, users, id, "subjectIds", self.db);
         }
-        mongodb:UpdateResult updateResult = check users->updateOne({id}, {set: {"subjectIds": updatedIds}});
-        if updateResult.modifiedCount != 1 {
-            return error(string `Failed to update the user with id ${id}`);
-        }
-        return check getUser(self.db, id);
+        return user;
     }
 
     resource function put users/[string id]/followers(dto:IDInput newFollowersId) returns models:User?|error {
         mongodb:Collection users = check self.db->getCollection("users");
         models:User|error? user = check getUser(self.db, id);
-        if user is error {
-            return user;
-        }
-        models:ID[] updatedIds = [];
         if user is models:User {
-            updatedIds = user.followersIds;
-            updatedIds.push(newFollowersId.newId);
+            return addSubject(user.followersIds, newFollowersId.newId, users, id, "followersIds", self.db);
         }
-        mongodb:UpdateResult updateResult = check users->updateOne({id}, {set: {"followersIds": updatedIds}});
-        if updateResult.modifiedCount != 1 {
-            return error(string `Failed to update the user with id ${id}`);
-        }
-        return check getUser(self.db, id);
+        return user;
     }
 
     resource function put users/[string id]/following(dto:IDInput newFollowingId) returns models:User?|error {
         mongodb:Collection users = check self.db->getCollection("users");
         models:User|error? user = check getUser(self.db, id);
-        if user is error {
-            return user;
-        }
-        models:ID[] updatedIds = [];
         if user is models:User {
-            updatedIds = user.followingIds;
-            updatedIds.push(newFollowingId.newId);
+            return addSubject(user.followingIds, newFollowingId.newId, users, id, "followingIds", self.db);
         }
-        mongodb:UpdateResult updateResult = check users->updateOne({id}, {set: {"followingIds": updatedIds}});
-        if updateResult.modifiedCount != 1 {
-            return error(string `Failed to update the user with id ${id}`);
-        }
-        return check getUser(self.db, id);
+        return user;
     }
 
     resource function put users/[string id]/requested(dto:IDInput newRequestedId) returns models:User?|error {
         mongodb:Collection users = check self.db->getCollection("users");
         models:User|error? user = check getUser(self.db, id);
-        if user is error {
-            return user;
-        }
-        models:ID[] updatedIds = [];
         if user is models:User {
-            updatedIds = user.requestedIds;
-            updatedIds.push(newRequestedId.newId);
+            return addSubject(user.requestedIds, newRequestedId.newId, users, id, "requestedIds", self.db);
         }
-        mongodb:UpdateResult updateResult = check users->updateOne({id}, {set: {"requestedIds": updatedIds}});
-        if updateResult.modifiedCount != 1 {
-            return error(string `Failed to update the user with id ${id}`);
-        }
-        return check getUser(self.db, id);
+        return user;
     }
 
     resource function put users/[string id]/requestedBy(dto:IDInput newRequestedById) returns models:User?|error {
         mongodb:Collection users = check self.db->getCollection("users");
         models:User|error? user = check getUser(self.db, id);
-        if user is error {
-            return user;
-        }
-        models:ID[] updatedIds = [];
         if user is models:User {
-            updatedIds = user.requestedByIds;
-            updatedIds.push(newRequestedById.newId);
+            return addSubject(user.requestedByIds, newRequestedById.newId, users, id, "requestedByIds", self.db);
         }
-        mongodb:UpdateResult updateResult = check users->updateOne({id}, {set: {"requestedByIds": updatedIds}});
-        if updateResult.modifiedCount != 1 {
-            return error(string `Failed to update the user with id ${id}`);
+        return user;
+    }
+
+    resource function delete users/[string id]/subjects(dto:IDInput toBeDeletedId) returns models:User?|error {
+        mongodb:Collection users = check self.db->getCollection("users");
+        models:User|error? user = check getUser(self.db, id);
+        if user is models:User {
+            return deleteSubject(user.subjectIds, toBeDeletedId.newId, users, id, "subjectIds", self.db);
         }
-        return check getUser(self.db, id);
+        return user;
+    }
+
+    resource function delete users/[string id]/followers(dto:IDInput toBeDeletedId) returns models:User?|error {
+        mongodb:Collection users = check self.db->getCollection("users");
+        models:User|error? user = check getUser(self.db, id);
+        if user is models:User {
+            return deleteSubject(user.followersIds, toBeDeletedId.newId, users, id, "followersIds", self.db);
+        }
+        return user;
+    }
+
+    resource function delete users/[string id]/following(dto:IDInput toBeDeletedId) returns models:User?|error {
+        mongodb:Collection users = check self.db->getCollection("users");
+        models:User|error? user = check getUser(self.db, id);
+        if user is models:User {
+            return deleteSubject(user.followingIds, toBeDeletedId.newId, users, id, "followingIds", self.db);
+        }
+        return user;
+    }
+
+    resource function delete users/[string id]/requested(dto:IDInput toBeDeletedId) returns models:User?|error {
+        mongodb:Collection users = check self.db->getCollection("users");
+        models:User|error? user = check getUser(self.db, id);
+        if user is models:User {
+            return deleteSubject(user.requestedIds, toBeDeletedId.newId, users, id, "requestedIds", self.db);
+        }
+        return user;
+    }
+
+    resource function delete users/[string id]/requestedBy(dto:IDInput toBeDeletedId) returns models:User?|error {
+        mongodb:Collection users = check self.db->getCollection("users");
+        models:User|error? user = check getUser(self.db, id);
+        if user is models:User {
+            return deleteSubject(user.requestedByIds, toBeDeletedId.newId, users, id, "requestedByIds", self.db);
+        }
+        return user;
     }
 }
 
@@ -170,4 +170,39 @@ isolated function postUser(mongodb:Database db, string id) returns models:User|e
         return err;
     }
     return getUser(db, id);
+}
+
+isolated function addSubject(models:ID[] exisitingIds, models:ID newId, mongodb:Collection users, string id, string idName, mongodb:Database db) returns models:User|error? {
+    int index = exisitingIds.indexOf(newId) ?: -1;
+    if index > -1 {
+        return error(string `Subject with id ${newId.id} is already added`);
+    }
+    exisitingIds.push(newId);
+    map<json> updateField = {};
+    updateField[idName] = exisitingIds;
+    mongodb:UpdateResult updateResult = check users->updateOne({id}, {set: updateField});
+    if updateResult.modifiedCount != 1 {
+        return error(string `Failed to update the user with id ${id}`);
+    }
+    return check getUser(db, id);
+}
+
+isolated function deleteSubject(models:ID[] exisitingIds, models:ID newId, mongodb:Collection users, string id, string idName, mongodb:Database db) returns models:User?|error {
+    if exisitingIds.length() == 0 {
+        return error(string `No subject ids found`);
+    }
+    int? index = exisitingIds.indexOf(newId);
+    if (index > -1) {
+        models:ID _ = exisitingIds.remove(index ?: -1);
+    } else {
+        return error(string `Failed to find subject id with the id ${newId.id}`);
+    }
+
+    map<json> updateField = {};
+    updateField[idName] = exisitingIds;
+    mongodb:UpdateResult updateResult = check users->updateOne({id}, {set: updateField});
+    if updateResult.modifiedCount != 1 {
+        return error(string `Failed to update the user with id ${id}`);
+    }
+    return check getUser(db, id);
 }
