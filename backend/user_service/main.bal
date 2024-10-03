@@ -13,11 +13,7 @@ mongodb:Client mongoDb = check new ({
 
 @http:ServiceConfig {
     cors: {
-        allowOrigins: ["*"],
-        allowCredentials: false,
-        allowHeaders: ["CORELATION_ID"],
-        exposeHeaders: ["X-CUSTOM-HEADER"],
-        maxAge: 84900
+        allowOrigins: ["*"]
     }
 }
 
@@ -26,10 +22,7 @@ service /api on new http:Listener(9092) {
 
     @http:ResourceConfig {
         cors: {
-            allowOrigins: ["*"],
-            allowCredentials: true,
-            allowHeaders: ["Authorization", "Content-Type"],
-            allowMethods: ["GET", "POST", "PUT", "DELETE"]
+            allowOrigins: ["*"]
         }
     }
 
@@ -62,7 +55,7 @@ service /api on new http:Listener(9092) {
         mongodb:Collection users = check self.db->getCollection("users");
         models:User|error? user = check getUser(self.db, id);
         if user is models:User {
-            return addSubject(user.subjectIds, newSubjectId.newId, users, id, "subjectIds", self.db);
+            return addId(user.subjectIds, newSubjectId.newId, users, id, "subjectIds", self.db);
         }
         return user;
     }
@@ -71,7 +64,7 @@ service /api on new http:Listener(9092) {
         mongodb:Collection users = check self.db->getCollection("users");
         models:User|error? user = check getUser(self.db, id);
         if user is models:User {
-            return addSubject(user.followersIds, newFollowersId.newId, users, id, "followersIds", self.db);
+            return addId(user.followersIds, newFollowersId.newId, users, id, "followersIds", self.db);
         }
         return user;
     }
@@ -80,7 +73,7 @@ service /api on new http:Listener(9092) {
         mongodb:Collection users = check self.db->getCollection("users");
         models:User|error? user = check getUser(self.db, id);
         if user is models:User {
-            return addSubject(user.followingIds, newFollowingId.newId, users, id, "followingIds", self.db);
+            return addId(user.followingIds, newFollowingId.newId, users, id, "followingIds", self.db);
         }
         return user;
     }
@@ -89,7 +82,7 @@ service /api on new http:Listener(9092) {
         mongodb:Collection users = check self.db->getCollection("users");
         models:User|error? user = check getUser(self.db, id);
         if user is models:User {
-            return addSubject(user.requestedIds, newRequestedId.newId, users, id, "requestedIds", self.db);
+            return addId(user.requestedIds, newRequestedId.newId, users, id, "requestedIds", self.db);
         }
         return user;
     }
@@ -98,7 +91,7 @@ service /api on new http:Listener(9092) {
         mongodb:Collection users = check self.db->getCollection("users");
         models:User|error? user = check getUser(self.db, id);
         if user is models:User {
-            return addSubject(user.requestedByIds, newRequestedById.newId, users, id, "requestedByIds", self.db);
+            return addId(user.requestedByIds, newRequestedById.newId, users, id, "requestedByIds", self.db);
         }
         return user;
     }
@@ -107,7 +100,7 @@ service /api on new http:Listener(9092) {
         mongodb:Collection users = check self.db->getCollection("users");
         models:User|error? user = check getUser(self.db, id);
         if user is models:User {
-            return deleteSubject(user.subjectIds, toBeDeletedId.newId, users, id, "subjectIds", self.db);
+            return deleteId(user.subjectIds, toBeDeletedId.newId, users, id, "subjectIds", self.db);
         }
         return user;
     }
@@ -116,7 +109,7 @@ service /api on new http:Listener(9092) {
         mongodb:Collection users = check self.db->getCollection("users");
         models:User|error? user = check getUser(self.db, id);
         if user is models:User {
-            return deleteSubject(user.followersIds, toBeDeletedId.newId, users, id, "followersIds", self.db);
+            return deleteId(user.followersIds, toBeDeletedId.newId, users, id, "followersIds", self.db);
         }
         return user;
     }
@@ -125,7 +118,7 @@ service /api on new http:Listener(9092) {
         mongodb:Collection users = check self.db->getCollection("users");
         models:User|error? user = check getUser(self.db, id);
         if user is models:User {
-            return deleteSubject(user.followingIds, toBeDeletedId.newId, users, id, "followingIds", self.db);
+            return deleteId(user.followingIds, toBeDeletedId.newId, users, id, "followingIds", self.db);
         }
         return user;
     }
@@ -134,7 +127,7 @@ service /api on new http:Listener(9092) {
         mongodb:Collection users = check self.db->getCollection("users");
         models:User|error? user = check getUser(self.db, id);
         if user is models:User {
-            return deleteSubject(user.requestedIds, toBeDeletedId.newId, users, id, "requestedIds", self.db);
+            return deleteId(user.requestedIds, toBeDeletedId.newId, users, id, "requestedIds", self.db);
         }
         return user;
     }
@@ -143,7 +136,7 @@ service /api on new http:Listener(9092) {
         mongodb:Collection users = check self.db->getCollection("users");
         models:User|error? user = check getUser(self.db, id);
         if user is models:User {
-            return deleteSubject(user.requestedByIds, toBeDeletedId.newId, users, id, "requestedByIds", self.db);
+            return deleteId(user.requestedByIds, toBeDeletedId.newId, users, id, "requestedByIds", self.db);
         }
         return user;
     }
@@ -163,7 +156,7 @@ isolated function getUser(mongodb:Database db, string id) returns models:User|er
 isolated function postUser(mongodb:Database db, string id) returns models:User|error? {
     mongodb:Collection users = check db->getCollection("users");
     models:User newUser = {
-        id: id
+        id
     };
     mongodb:Error? err = check users->insertOne(newUser);
     if err is mongodb:Error {
@@ -172,7 +165,7 @@ isolated function postUser(mongodb:Database db, string id) returns models:User|e
     return getUser(db, id);
 }
 
-isolated function addSubject(models:ID[] exisitingIds, models:ID newId, mongodb:Collection users, string id, string idName, mongodb:Database db) returns models:User|error? {
+isolated function addId(models:ID[] exisitingIds, models:ID newId, mongodb:Collection users, string id, string idName, mongodb:Database db) returns models:User|error? {
     int index = exisitingIds.indexOf(newId) ?: -1;
     if index > -1 {
         return error(string `Subject with id ${newId.id} is already added`);
@@ -187,7 +180,7 @@ isolated function addSubject(models:ID[] exisitingIds, models:ID newId, mongodb:
     return check getUser(db, id);
 }
 
-isolated function deleteSubject(models:ID[] exisitingIds, models:ID newId, mongodb:Collection users, string id, string idName, mongodb:Database db) returns models:User?|error {
+isolated function deleteId(models:ID[] exisitingIds, models:ID newId, mongodb:Collection users, string id, string idName, mongodb:Database db) returns models:User?|error {
     if exisitingIds.length() == 0 {
         return error(string `No subject ids found`);
     }
