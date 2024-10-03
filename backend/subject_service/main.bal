@@ -2,7 +2,6 @@ import subject_service.dto;
 import subject_service.models;
 
 import ballerina/http;
-// import ballerina/io;
 import ballerina/uuid;
 import ballerinax/mongodb;
 
@@ -15,11 +14,7 @@ mongodb:Client mongoDb = check new ({
 
 @http:ServiceConfig {
     cors: {
-        allowOrigins: ["*"],
-        allowCredentials: false,
-        allowHeaders: ["CORELATION_ID"],
-        exposeHeaders: ["X-CUSTOM-HEADER"],
-        maxAge: 84900
+        allowOrigins: ["*"]
     }
 }
 
@@ -28,10 +23,7 @@ service /api on new http:Listener(9092) {
 
     @http:ResourceConfig {
         cors: {
-            allowOrigins: ["*"],
-            allowCredentials: true,
-            allowHeaders: ["Authorization", "Content-Type"],
-            allowMethods: ["GET", "POST", "PUT", "DELETE"]
+            allowOrigins: ["*"]
         }
     }
 
@@ -48,17 +40,12 @@ service /api on new http:Listener(9092) {
     }
 
     resource function get subjects/[string id]() returns models:Subject|error? {
-        mongodb:Collection subjects = check self.db->getCollection("subjects");
-        models:Subject|error? selectedSubject = check subjects->findOne({id});
-        if selectedSubject !is models:Subject {
-            return error(string `Failed to fetch subject with id ${id}`);
-        }
-        return selectedSubject;
+        return getSubject(self.db, id);
     }
 
     resource function post subjects(dto:SubjectDto subjectDto) returns models:Subject|error? {
         mongodb:Collection subjects = check self.db->getCollection("subjects");
-        models:Subject|error? existingSubject = check subjects->findOne({"name": subjectDto.name});
+        models:Subject|error? existingSubject = check subjects->findOne({"name": subjectDto.name}); //unique subject name
         if existingSubject is models:Subject {
             return error(string `Subject ${subjectDto.name}  is already added`);
         }
@@ -70,5 +57,112 @@ service /api on new http:Listener(9092) {
         check subjects->insertOne(newSubject);
         return newSubject;
     }
-    //need to implement delete subject and lessons
+
+    resource function put subjects/[string id](dto:SubjectDto subjectDto) returns models:Subject|error? {
+        mongodb:Collection subjects = check self.db->getCollection("subjects");
+        models:Subject|error? existingSubject = check subjects->findOne({id});
+        if existingSubject !is models:Subject {
+            return error(string `Subject with id ${id} not found`);
+        }
+
+        mongodb:UpdateResult updateResult = check subjects->updateOne({id}, {set: {name: subjectDto.name}});
+        if updateResult.modifiedCount != 1 {
+            return error(string `Failed to update the subject with id ${id}`);
+        }
+        return getSubject(self.db, id);
+    }
+
+    resource function post subjects/[string id]/lessons(dto:LessonDto lessonDto) returns models:Subject|error? {
+        mongodb:Collection subjects = check self.db->getCollection("subjects");
+        models:Subject|error? selectedSubject = check subjects->findOne({id});
+        if selectedSubject !is models:Subject {
+            return error(string `Subject with id ${id} not found`);
+        }
+
+        models:Lesson[] updateLesson = selectedSubject.lessons;
+        foreach models:Lesson lesson in updateLesson {
+            if lesson.name == lessonDto.name {
+                return error(string `Lesson ${lessonDto.name} is already added`);
+            }
+        }
+
+        updateLesson.push({id: uuid:createType1AsString(), name: lessonDto.name, no: lessonDto.no});
+        mongodb:UpdateResult updateResult = check subjects->updateOne({id}, {set: {lessons: updateLesson}});
+        if updateResult.modifiedCount != 1 {
+            return error(string `Failed to update the subject with id ${id}`);
+        }
+        return getSubject(self.db, id);
+    }
+
+    resource function put lessons/[string id](dto:LessonDto lessonDto) returns models:Subject|error? {
+        mongodb:Collection subjects = check self.db->getCollection("subjects");
+        map<json> filter = {};
+        filter["lessons.id"] = id;
+        models:Subject|error? selectedSubject = check subjects->findOne(filter);
+        if selectedSubject !is models:Subject {
+            return error(string `Lesson with id ${id} not found`);
+        }
+
+        models:Lesson[] updateLesson = selectedSubject.lessons;
+        foreach models:Lesson lesson in updateLesson {
+            if lesson.id == id {
+                lesson.name = lessonDto?.name;
+                lesson.no = lessonDto?.no; //if lessonDto.no || lessonDto.name is null, it will not update the value
+            }
+        }
+        mongodb:UpdateResult updateResult = check subjects->updateOne({id: selectedSubject.id}, {set: {lessons: updateLesson}});
+        if updateResult.modifiedCount != 1 {
+            return error(string `Failed to update the lesson with id ${id}`);
+        }
+        return getSubject(self.db, selectedSubject.id);
+    }
+
+    resource function get lessons/[string id]() returns models:Lesson|error? {
+        mongodb:Collection subjects = check self.db->getCollection("subjects");
+        map<json> filter = {};
+        filter["lessons.id"] = id;
+        models:Subject|error? selectedSubject = check subjects->findOne(filter);
+        if selectedSubject !is models:Subject {
+            return error(string `Subject wit id ${id} not found`);
+        }
+
+        models:Lesson[] selectedLesson = selectedSubject.lessons;
+        foreach models:Lesson lesson in selectedLesson {
+            if lesson.id == id {
+                return lesson;
+            }
+        }
+        return error(string `Lesson with id ${id} not found`);
+    }
+
+    //need to implement delete subject and delete lesson
+    resource function delete subjects/[string id]() returns string|error? {
+        return deleteSubject(self.db, id);
+    }
+}
+
+isolated function getSubject(mongodb:Database db, string id) returns models:Subject|error? {
+    mongodb:Collection subjects = check db->getCollection("subjects");
+    models:Subject|error? selectedSubject = check subjects->findOne({id});
+    if selectedSubject !is models:Subject {
+        return error(string `Failed to fetch subject with id ${id}`);
+    }
+    return selectedSubject;
+}
+
+isolated function deleteSubject(mongodb:Database db, string id) returns string|error? {
+    mongodb:Collection subjects = check db->getCollection("subjects");
+    models:Subject|error? selectedSubject = check subjects->findOne({id});
+    if selectedSubject !is models:Subject {
+        return error(string `Subject with id ${id} not found`);
+    }
+
+    mongodb:DeleteResult deleteResult = check subjects->deleteOne({id});
+    if deleteResult.deletedCount != 1 {
+        return error(string `Failed to delete the subject with id ${id}`);
+    }
+
+    //need to delete the subject from user service
+
+    return id;
 }
