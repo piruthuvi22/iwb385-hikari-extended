@@ -10,12 +10,16 @@ export function CircularProgressWithLabel(
 ) {
   return (
     <Box sx={{ position: "relative", display: "inline-flex" }}>
-      <CircularProgress variant="determinate" {...props} sx={{
-        "& .MuiCircularProgress-circle":{
-          // color:"#f00",
-          backgroundColor:"#f00"
-        }
-      }}  />
+      <CircularProgress
+        variant="determinate"
+        {...props}
+        sx={{
+          "& .MuiCircularProgress-circle": {
+            // color:"#f00",
+            backgroundColor: "#f00",
+          },
+        }}
+      />
       <Box
         sx={{
           top: 0,
@@ -52,5 +56,7 @@ export default function CircularWithValueLabel() {
   //   };
   // }, []);
 
-  return <CircularProgressWithLabel value={progress} size={150} thickness={5} />;
+  return (
+    <CircularProgressWithLabel value={progress} size={150} thickness={5} />
+  );
 }

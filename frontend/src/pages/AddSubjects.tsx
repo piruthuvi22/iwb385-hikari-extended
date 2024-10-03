@@ -61,13 +61,20 @@ export default function AddSubject() {
 
   return (
     <Box
-      height={"100vh"}
+      minHeight={"100vh"}
       bgcolor={theme.palette.grey[100]}
       display={"flex"}
       flexDirection={"column"}
       alignItems={"center"}
+      paddingBottom={10}
     >
-      <Box width={"100%"} height={"20vh"} position={"relative"}>
+      <Box
+        width={"100%"}
+        height={"20vh"}
+        position={"fixed"}
+        top={0}
+        zIndex={1000}
+      >
         <img
           src={Banner}
           alt="Top Logo Image"
@@ -89,12 +96,11 @@ export default function AddSubject() {
         </Typography>
       </Box>
 
-      <Box width={"100%"} textAlign={"center"} mt={2}>
+      <Box width={"100%"} textAlign={"center"} mt={"22vh"}>
         <Typography variant="h5" color="text.primary">
           Let's select your subjects!
         </Typography>
       </Box>
-
       {/* Display selected subjects as tiles */}
       {selectedSubjects.length > 0 && (
         <Box
