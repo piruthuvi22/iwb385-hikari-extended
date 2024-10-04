@@ -135,9 +135,32 @@ service /api on new http:Listener(9092) {
         return error(string `Lesson with id ${id} not found`);
     }
 
-    //need to implement delete subject and delete lesson
     resource function delete subjects/[string id]() returns string|error? {
         return deleteSubject(self.db, id);
+    }
+
+    resource function delete lessons/[string id]() returns string|error? {
+        mongodb:Collection subjects = check self.db->getCollection("subjects");
+        map<json> filter = {};
+        filter["lessons.id"] = id;
+        models:Subject|error? selectedSubject = check subjects->findOne(filter);
+        if selectedSubject !is models:Subject {
+            return error(string `Lesson with id ${id} not found`);
+        }
+
+        models:Lesson[] updateLesson = selectedSubject.lessons;
+        foreach int i in 0 ... (updateLesson.length() - 1) {
+            if (updateLesson[i].id == id) {
+                models:Lesson _ = updateLesson.remove(i);
+                break;
+            }
+        }
+
+        mongodb:UpdateResult updateResult = check subjects->updateOne({id: selectedSubject.id}, {set: {lessons: updateLesson}});
+        if updateResult.modifiedCount != 1 {
+            return error(string `Failed to delete the lesson with id ${id}`);
+        }
+        return id;
     }
 }
 
@@ -161,8 +184,5 @@ isolated function deleteSubject(mongodb:Database db, string id) returns string|e
     if deleteResult.deletedCount != 1 {
         return error(string `Failed to delete the subject with id ${id}`);
     }
-
-    //need to delete the subject from user service
-
     return id;
 }
