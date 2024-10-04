@@ -6,6 +6,8 @@ import Dashboard from "../pages/Dashboard";
 import Lessons from "../pages/Lessons";
 import RecordStudySession from "../pages/RecordStudySession";
 import AddSubject from "../pages/AddSubjects";
+import Profile from "../pages/Profile";
+import Friends from "../pages/Friends";
 
 export const router = createBrowserRouter([
   {
@@ -36,5 +38,13 @@ export const router = createBrowserRouter([
   {
     path: "/add-subject",
     element: <AddSubject />,
+  },
+  {
+    path: "/profile",
+    element: <Profile />,
+  },
+  {
+    path: "/friends",
+    element: <Friends />,
   },
 ]);

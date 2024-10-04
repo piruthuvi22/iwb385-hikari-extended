@@ -16,7 +16,7 @@ export const theme = createTheme({
       // default: "#f5f5f5",
     },
   },
-  typography:{
+  typography: {
     fontFamily: "Fredoka",
-  }
+  },
 });
