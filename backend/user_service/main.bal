@@ -2,7 +2,6 @@ import user_service.dto;
 import user_service.models;
 
 import ballerina/http;
-import ballerina/io;
 import ballerinax/mongodb;
 
 configurable string DATABASE_NAME = ?;
@@ -85,7 +84,6 @@ service /api on new http:Listener(9092) {
                 item.goalHours = subjectDto.subject.goalHours;
             }
         }
-        io:println("updateGoalHours: ", updateGoalHours);
         mongodb:UpdateResult updateResult = check users->updateOne({id}, {set: {"subjectIds": updateGoalHours}});
         if updateResult.modifiedCount != 1 {
             return error(string `Failed to update the user with id ${id}`);
