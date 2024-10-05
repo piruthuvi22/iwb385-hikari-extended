@@ -4,6 +4,7 @@ import Banner from "../assets/friends.jpg";
 import Menubar from "../components/Menubar";
 import { buildStyles, CircularProgressbar } from "react-circular-progressbar";
 import GroupIcon from "@mui/icons-material/Group";
+import { Link } from "react-router-dom";
 
 const friends = [
   {
@@ -86,10 +87,9 @@ export default function Friends() {
         </Typography>
 
         <Box position="absolute" top={16} right={16}>
-          <GroupIcon
-            sx={{ color: "white" }}
-            onClick={() => console.log("Add Friends clicked")}
-          />
+          <Link to="/add-friends">
+            <GroupIcon sx={{ color: "white", cursor: "pointer" }} />
+          </Link>
         </Box>
       </Box>
 

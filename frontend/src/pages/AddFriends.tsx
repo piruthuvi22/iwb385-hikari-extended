@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import {
   Box,
   Typography,
@@ -10,6 +11,7 @@ import {
 } from "@mui/material";
 import Banner from "../assets/addFriends.jpg";
 import Menubar from "../components/Menubar";
+import { useNavigate } from "react-router-dom";
 
 const initialFriendRequests = [
   {
@@ -39,20 +41,25 @@ const initialFriendsYouMayKnow = [
 
 export default function AddFriends() {
   const theme = useTheme();
+  const navigate = useNavigate();
 
   const [friendRequests, setFriendRequests] = useState(initialFriendRequests);
   const [friendsYouMayKnow, setFriendsYouMayKnow] = useState(
     initialFriendsYouMayKnow
   );
 
-  const handleAccept = (id: any) => {
+  const handleAccept = (event: React.MouseEvent, id: any) => {
+    event.stopPropagation();
+    event.preventDefault();
     setFriendRequests((prevRequests) =>
       prevRequests.filter((friend) => friend.id !== id)
     );
     console.log("Request accepted", id);
   };
 
-  const handleDelete = (id: any, isRequest: any) => {
+  const handleDelete = (event: React.MouseEvent, id: any, isRequest: any) => {
+    event.stopPropagation();
+    event.preventDefault();
     if (isRequest) {
       setFriendRequests((prevRequests) =>
         prevRequests.filter((friend) => friend.id !== id)
@@ -66,13 +73,18 @@ export default function AddFriends() {
     }
   };
 
-  const handleFollow = (id: any) => {
+  const handleFollow = (event: React.MouseEvent, id: any) => {
+    event.stopPropagation();
+    event.preventDefault();
     setFriendsYouMayKnow((prevFriends) =>
       prevFriends.filter((friend) => friend.id !== id)
     );
     console.log("Started following friend", id);
   };
 
+  const handleCardClick = (id: any) => {
+    navigate(`/friend/${id}`);
+  };
   return (
     <Box
       minHeight={"100vh"}
@@ -135,6 +147,7 @@ export default function AddFriends() {
                     flexDirection: "row",
                     alignItems: "center",
                   }}
+                  onClick={() => handleCardClick(friend.id)}
                 >
                   <Avatar
                     alt={friend.name}
@@ -166,7 +179,7 @@ export default function AddFriends() {
                           borderRadius: "1.5rem",
                           flex: 1,
                         }}
-                        onClick={() => handleAccept(friend.id)}
+                        onClick={(event) => handleAccept(event, friend.id)}
                       >
                         Accept
                       </Button>
@@ -178,7 +191,9 @@ export default function AddFriends() {
                           marginLeft: 1,
                           flex: 1,
                         }}
-                        onClick={() => handleDelete(friend.id, true)}
+                        onClick={(event) =>
+                          handleDelete(event, friend.id, true)
+                        }
                       >
                         Delete
                       </Button>
@@ -223,6 +238,7 @@ export default function AddFriends() {
                     flexDirection: "row",
                     alignItems: "center",
                   }}
+                  onClick={() => handleCardClick(friend.id)}
                 >
                   <Avatar
                     alt={friend.name}
@@ -254,7 +270,7 @@ export default function AddFriends() {
                           borderRadius: "1.5rem",
                           flex: 1,
                         }}
-                        onClick={() => handleFollow(friend.id)}
+                        onClick={(event) => handleFollow(event, friend.id)}
                       >
                         Follow
                       </Button>
@@ -266,7 +282,9 @@ export default function AddFriends() {
                           marginLeft: 1,
                           flex: 1,
                         }}
-                        onClick={() => handleDelete(friend.id, false)}
+                        onClick={(event) =>
+                          handleDelete(event, friend.id, false)
+                        }
                       >
                         Delete
                       </Button>
