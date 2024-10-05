@@ -51,13 +51,44 @@ service /api on new http:Listener(9092) {
         return id;
     }
 
-    resource function put users/[string id]/subjects(dto:IDInput newSubjectId) returns models:User?|error {
+    resource function put users/[string id]/subjects(dto:SubjectIdDto subjectDto) returns models:User?|error {
         mongodb:Collection users = check self.db->getCollection("users");
         models:User|error? user = check getUser(self.db, id);
-        if user is models:User {
-            return addId(user.subjectIds, newSubjectId.newId, users, id, "subjectIds", self.db);
+        if user !is models:User {
+            return user;
         }
-        return user;
+        models:SubjectGoal[] updateId = user.subjectIds;
+        foreach models:SubjectGoal item in updateId {
+            if item.id == subjectDto.subject.id {
+                return error(string `Subject with id ${subjectDto.subject.id} is already added`);
+            }
+        }
+        updateId.push(subjectDto.subject);
+        mongodb:UpdateResult updateResult = check users->updateOne({id}, {set: {"subjectIds": updateId}});
+        if updateResult.modifiedCount != 1 {
+            return error(string `Failed to update the user with id ${id}`);
+        }
+        return check getUser(self.db, id);
+    }
+
+    resource function put users/[string id]/subjects/[string subjectId]/goals(decimal goalHours) returns models:User?|error {
+        mongodb:Collection users = check self.db->getCollection("users");
+        models:User|error? user = check getUser(self.db, id);
+        if user !is models:User {
+            return user;
+        }
+        dto:SubjectIdDto subjectDto = {subject: {id: subjectId, goalHours}};
+        models:SubjectGoal[] updateGoalHours = user.subjectIds;
+        foreach models:SubjectGoal item in updateGoalHours {
+            if item.id == subjectDto.subject.id {
+                item.goalHours = subjectDto.subject.goalHours;
+            }
+        }
+        mongodb:UpdateResult updateResult = check users->updateOne({id}, {set: {"subjectIds": updateGoalHours}});
+        if updateResult.modifiedCount != 1 {
+            return error(string `Failed to update the user with id ${id}`);
+        }
+        return check getUser(self.db, id);
     }
 
     resource function put users/[string id]/followers(dto:IDInput newFollowersId) returns models:User?|error {
@@ -96,13 +127,28 @@ service /api on new http:Listener(9092) {
         return user;
     }
 
-    resource function delete users/[string id]/subjects(dto:IDInput toBeDeletedId) returns models:User?|error {
+    resource function delete users/[string id]/subjects(dto:SubjectIdDto subjectDto) returns models:User?|error {
         mongodb:Collection users = check self.db->getCollection("users");
         models:User|error? user = check getUser(self.db, id);
-        if user is models:User {
-            return deleteId(user.subjectIds, toBeDeletedId.newId, users, id, "subjectIds", self.db);
+        if user !is models:User {
+            return user;
         }
-        return user;
+        models:SubjectGoal[] updateId = user.subjectIds;
+        if updateId.length() == 0 {
+            return error(string `No subject ids found`);
+        }
+        foreach int i in 0 ... (updateId.length() - 1) {
+            if (updateId[i].id == subjectDto.subject.id) {
+                models:SubjectGoal _ = updateId.remove(i);
+                break;
+            }
+        }
+
+        mongodb:UpdateResult updateResult = check users->updateOne({id}, {set: {"subjectIds": updateId}});
+        if updateResult.modifiedCount != 1 {
+            return error(string `Failed to update the user with id ${id}`);
+        }
+        return check getUser(self.db, id);
     }
 
     resource function delete users/[string id]/followers(dto:IDInput toBeDeletedId) returns models:User?|error {
@@ -144,7 +190,7 @@ service /api on new http:Listener(9092) {
 
 isolated function getUser(mongodb:Database db, string id) returns models:User|error? {
     mongodb:Collection users = check db->getCollection("users");
-    models:User|error? selectedUser = check users->findOne({id});
+    models:User|error? selectedUser = check users->findOne({id, "isDeleted": false});
     if selectedUser is models:User {
         return selectedUser;
     } else if selectedUser !is error {

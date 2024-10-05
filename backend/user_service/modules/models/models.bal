@@ -1,6 +1,6 @@
 public type User record {|
     readonly string id;
-    ID[] subjectIds = [];
+    SubjectGoal[] subjectIds = [];
     ID[] followersIds = [];
     ID[] followingIds = [];
     ID[] requestedIds = [];
@@ -10,4 +10,9 @@ public type User record {|
 
 public type ID record {|
     string id;
+|};
+
+public type SubjectGoal record {|
+    string id;
+    decimal goalHours = 0;
 |};
