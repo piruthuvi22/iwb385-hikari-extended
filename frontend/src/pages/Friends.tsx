@@ -3,7 +3,7 @@ import { Box, Typography, Card, Avatar, Grid, useTheme } from "@mui/material";
 import Banner from "../assets/friends.jpg";
 import Menubar from "../components/Menubar";
 import { buildStyles, CircularProgressbar } from "react-circular-progressbar";
-import GroupAddIcon from "@mui/icons-material/GroupAdd";
+import GroupIcon from "@mui/icons-material/Group";
 
 const friends = [
   {
@@ -65,11 +65,14 @@ export default function Friends() {
       >
         <img
           src={Banner}
-          alt="Top Logo Image"
+          alt="Banner"
           style={{
             width: "100%",
             height: "100%",
             objectFit: "cover",
+            borderBottomLeftRadius: "1.5rem",
+            borderBottomRightRadius: "1.5rem",
+            boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
           }}
         />
         <Typography
@@ -83,7 +86,7 @@ export default function Friends() {
         </Typography>
 
         <Box position="absolute" top={16} right={16}>
-          <GroupAddIcon
+          <GroupIcon
             sx={{ color: "white" }}
             onClick={() => console.log("Add Friends clicked")}
           />
@@ -121,7 +124,7 @@ export default function Friends() {
                   <Avatar
                     alt={friend.name}
                     src={friend.profilePicture}
-                    sx={{ width: 60, height: 60, marginRight: 2 }}
+                    sx={{ width: 50, height: 50, marginRight: 2 }}
                   />
                   <Typography variant="h6" sx={{ marginTop: 0 }}>
                     {friend.name}

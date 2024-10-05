@@ -14,7 +14,10 @@ export default function Menubar() {
   useEffect(() => {
     if (location.pathname === "/home") {
       setValue(0);
-    } else if (location.pathname === "/friends") {
+    } else if (
+      location.pathname === "/friends" ||
+      location.pathname === "/add-friends"
+    ) {
       setValue(1);
     } else if (location.pathname === "/profile") {
       setValue(2);

@@ -77,11 +77,14 @@ export default function AddSubject() {
       >
         <img
           src={Banner}
-          alt="Top Logo Image"
+          alt="Banner"
           style={{
             width: "100%",
             height: "100%",
             objectFit: "cover",
+            borderBottomLeftRadius: "1.5rem",
+            borderBottomRightRadius: "1.5rem",
+            boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
           }}
         />
 
