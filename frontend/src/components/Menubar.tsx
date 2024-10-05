@@ -14,7 +14,11 @@ export default function Menubar() {
   useEffect(() => {
     if (location.pathname === "/home") {
       setValue(0);
-    } else if (location.pathname === "/friends") {
+    } else if (
+      location.pathname === "/friends" ||
+      location.pathname === "/add-friends" ||
+      location.pathname.startsWith("/friend/")
+    ) {
       setValue(1);
     } else if (location.pathname === "/profile") {
       setValue(2);
@@ -41,7 +45,11 @@ export default function Menubar() {
           handleNavigation(newValue);
         }}
         showLabels
-        sx={{ backgroundColor: "white" }}
+        sx={{
+          backgroundColor: "white",
+          borderTopLeftRadius: "1rem",
+          borderTopRightRadius: "1rem",
+        }}
       >
         <BottomNavigationAction label="Home" icon={<HomeIcon />} />
         <BottomNavigationAction label="Friends" icon={<GroupIcon />} />

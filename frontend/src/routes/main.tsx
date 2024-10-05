@@ -8,6 +8,8 @@ import RecordStudySession from "../pages/RecordStudySession";
 import AddSubject from "../pages/AddSubjects";
 import Profile from "../pages/Profile";
 import Friends from "../pages/Friends";
+import AddFriends from "../pages/AddFriends";
+import FriendProfile from "../pages/FriendProfile";
 
 export const router = createBrowserRouter([
   {
@@ -46,5 +48,13 @@ export const router = createBrowserRouter([
   {
     path: "/friends",
     element: <Friends />,
+  },
+  {
+    path: "/add-friends",
+    element: <AddFriends />,
+  },
+  {
+    path: "/friend/:id",
+    element: <FriendProfile />,
   },
 ]);
