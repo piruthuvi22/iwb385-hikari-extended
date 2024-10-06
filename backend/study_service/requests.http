@@ -1,25 +1,28 @@
 ### Record Study Session
-POST http://localhost:9091/study-session
+POST http://localhost:9092/api/study-session
 
 {
-    "subjectId": "MATH101",
-    "studentId": "STU101",
-    "lessonId": "L4",
+    "subjectId": "01ef813a-3213-1816-b7e7-efedfe66b24b",
+    "studentId": "66fbc1f1e3a6bb375d6b931c",
+    "lessonId": "01ef8201-0c9d-17ae-b130-e73ce32c95db",
     "noMins": 30,
-    "goalHours": 10
+    "goalHours": 1.5
 }
 
 ### Get Current Week Study Status
-GET http://localhost:9091/current-study-status/STU101/MATH101
+GET http://localhost:9092/api/current-study-status/66fbc1f1e3a6bb375d6b931c/01ef813a-3213-1816-b7e7-efedfe66b24b
 
 ### Get Study Status for a Specific Week
-GET http://localhost:9091/study-status/STU101/MATH101/2024/37
+GET http://localhost:9092/study-status/STU101/MATH101/2024/37
 
 ### Adjust Goal Hours
-POST http://localhost:9091/adjust-weekly-goal
+POST http://localhost:9092/adjust-weekly-goal
 
 {
     "studentId": "STU101",
     "subjectId": "MATH101",
     "goalHours": 10
 }
+
+### Get Study Summary
+GET http://localhost:9092/api/study-summary/66fbc1f1e3a6bb375d6b931c,STU101

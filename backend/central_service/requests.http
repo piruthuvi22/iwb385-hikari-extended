@@ -1,16 +1,30 @@
-@token = eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IlNyQjE4ejFjRDB2QUticm1FamZ4diJ9.eyJpc3MiOiJodHRwczovL2hpa2FyaS51ay5hdXRoMC5jb20vIiwic3ViIjoiYXV0aDB8NjZmYmMxZjFlM2E2YmIzNzVkNmI5MzFjIiwiYXVkIjpbImNlbnRyYWxfYXBpIiwiaHR0cHM6Ly9oaWthcmkudWsuYXV0aDAuY29tL3VzZXJpbmZvIl0sImlhdCI6MTcyNzc4MDAzMywiZXhwIjoxNzI3ODY2NDMzLCJzY29wZSI6Im9wZW5pZCBwcm9maWxlIGVtYWlsIiwiYXpwIjoiRWRRRUVMd0tRWVhPS2I4V2htck0zZHpPNzN0MkxyTGYifQ.BprxwOWSiZUlLDcx6ojHQkr3nbjTs4v_6jKoUstVJBRjnOf7gDNsN-sVFy5nPqu_k4TvexTRpNzmmSkLEp4-bt763MEpiFRDJBcHwMJkoY5kcOI4QBgy_6JUQ92T0-a1_NGUGf3dTbaFBWhjkd99qPevek8V9ro6EkKOtOdy3-AyHaQf1ZqsBdEZYprMMMewrwOhuCdnAh1bWLQ-AKNRtE3Kj7gV_EqfikXbV35g6zXMhyAp_z89Z3PZvOqkXcOtyb1eMFx6g99FwzFOjH4g97984uUc81qHhPaEzk1UJ83ipHVjcSMUZQqxQNPPkXHCIw5TA7UsIKEaB6XFrVbvMA
+@token = eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IlNyQjE4ejFjRDB2QUticm1FamZ4diJ9.eyJpc3MiOiJodHRwczovL2hpa2FyaS51ay5hdXRoMC5jb20vIiwic3ViIjoiYXV0aDB8NjZmYmMxZjFlM2E2YmIzNzVkNmI5MzFjIiwiYXVkIjpbImNlbnRyYWxfYXBpIiwiaHR0cHM6Ly9oaWthcmkudWsuYXV0aDAuY29tL3VzZXJpbmZvIl0sImlhdCI6MTcyODE5NzgyNywiZXhwIjoxNzI4Mjg0MjI3LCJzY29wZSI6Im9wZW5pZCBwcm9maWxlIGVtYWlsIiwiYXpwIjoiRWRRRUVMd0tRWVhPS2I4V2htck0zZHpPNzN0MkxyTGYifQ.BtKdcaW6uZtuJJaRRpl1qAdEhEcZlW99xpMrz4R0JGnEPOyeXWmroWv2WU6R5bFQJTbQGizVivI-SiHHVf639IPdNfwW7Q33RIr5EwB-E_TJe8yegNAnTO3JdJpeO8B95V1PGuc7lOKTMgSo_HgaEaejAT_38Tw7tvBonXN1BKwECyxfFc1zkqErO4mwP5kunILHwJzXhRRWc_mQjUqUBPB_d5CDr5yQ3uHSauc3aUyssjz_0vWsn0D2hRsuNDbX92IqJOU10nqTMV9eP5QlaweCg_z4otTC72BUthVnBsHOMNUgJW53cG-wMBL9r9qCo8I_c7eRbKvpUd2-_Z3DNA
 
-### TEST
-GET http://localhost:9090/api/user
+### User Details
+GET http://localhost:9094/central/api/users
+Authorization: Bearer {{token}}
+
+### Friend Details
+GET http://localhost:9094/central/api/users/friends
+Authorization: Bearer {{token}}
+
+### Study Status
+GET http://localhost:9094/central/api/subjects/01ef813a-3213-1816-b7e7-efedfe66b24b
+Authorization: Bearer {{token}}
+
+### Study Status Specific Week
+GET http://localhost:9094/central/api/subjects/01ef813a-3213-1816-b7e7-efedfe66b24b/2024/40
 Authorization: Bearer {{token}}
 
 # https://hikari.uk.auth0.com/authorize?response_type=code&client_id=EdQEELwKQYXOKb8WhmrM3dzO73t2LrLf&redirect_uri=http://localhost:3000&scope=openid profile email&audience=central_api&state=sldkfjsdlfjwoeijflskdjfowiejf
+# http://localhost:3000/?code=6Ai_lnAFPkma9w_TuRpd2a2iBjNwSnkd2-Ucz73uVjJ3E&state=sldkfjsdlfjwoeijflskdjfowiejf
+
 
 curl --request POST \
   --url 'https://hikari.uk.auth0.com/oauth/token' \
   --header 'content-type: application/x-www-form-urlencoded' \
   --data grant_type=authorization_code \
   --data 'client_id=EdQEELwKQYXOKb8WhmrM3dzO73t2LrLf' \
-  --data 'client_secret=' \
-  --data 'code=5sTXwxL9J8FY1LLO78ROKtSpl9UnoTAZf1fRLVfUlV6tB' \
+  --data 'client_secret=EShx7JYGgHT08Xq4rGu0LvCxc9qwtnhqzjsxr2EwKbbjPS18blka-7BDgPVENLqx' \
+  --data 'code=6Ai_lnAFPkma9w_TuRpd2a2iBjNwSnkd2-Ucz73uVjJ3E' \
   --data 'redirect_uri=http://localhost:3000'
