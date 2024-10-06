@@ -2,10 +2,6 @@ import React, { useState } from "react";
 import {
   Box,
   Button,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
   List,
   ListItem,
   ListItemText,
@@ -13,9 +9,10 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
-import MenuIcon from "@mui/icons-material/Menu";
 import Banner from "../assets/addSubjectBg.jpg";
 import AddIcon from "@mui/icons-material/Add";
+import Menubar from "../components/Menubar";
+import DialogBox from "../components/DialogBox";
 
 const subjects = [
   "Combined Maths",
@@ -55,28 +52,39 @@ export default function AddSubject() {
 
   const handleSubjectClick = (subject: string) => {
     if (!selectedSubjects.includes(subject)) {
-      setOpen(false);
-      setSearchText("");
       setSelectedSubjects([...selectedSubjects, subject]);
+      setFilteredSubjects(filteredSubjects.filter((s) => s !== subject));
+      setSearchText("");
+      setOpen(false);
     }
   };
 
   return (
     <Box
-      height={"100vh"}
+      minHeight={"100vh"}
       bgcolor={theme.palette.grey[100]}
       display={"flex"}
       flexDirection={"column"}
       alignItems={"center"}
+      paddingBottom={10}
     >
-      <Box width={"100%"} height={"20vh"} position={"relative"}>
+      <Box
+        width={"100%"}
+        height={"20vh"}
+        position={"fixed"}
+        top={0}
+        zIndex={1000}
+      >
         <img
           src={Banner}
-          alt="Top Logo Image"
+          alt="Banner"
           style={{
             width: "100%",
             height: "100%",
             objectFit: "cover",
+            borderBottomLeftRadius: "1.5rem",
+            borderBottomRightRadius: "1.5rem",
+            boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
           }}
         />
 
@@ -89,29 +97,24 @@ export default function AddSubject() {
         >
           StRings
         </Typography>
-
-        <MenuIcon
-          style={{
-            position: "absolute",
-            top: 16,
-            right: 16,
-            color: "white",
-            fontSize: "2rem",
-            cursor: "pointer",
-          }}
-        />
       </Box>
 
-      <Box width={"100%"} textAlign={"center"} mt={2}>
+      <Box width={"100%"} textAlign={"center"} mt={"22vh"}>
         <Typography variant="h5" color="text.primary">
           Let's select your subjects!
         </Typography>
       </Box>
-
       {/* Display selected subjects as tiles */}
       {selectedSubjects.length > 0 && (
-        <Box mb={2} mt={2} width={"65%"}>
-          <Box display="flex" flexDirection="column" gap={1.5}>
+        <Box
+          mb={2}
+          mt={2}
+          width={"100%"}
+          display="flex"
+          justifyContent="center"
+          mr={3}
+        >
+          <Box display="flex" flexDirection="column" gap={1.5} width={"65%"}>
             {selectedSubjects.map((subject, index) => (
               <Box
                 key={index}
@@ -161,52 +164,61 @@ export default function AddSubject() {
       </Box>
 
       {/* Dialog for Selecting a Subject */}
-      <Dialog open={open} onClose={handleClose}>
-        <DialogTitle>Select a Subject</DialogTitle>
-        <DialogContent>
-          <TextField
-            label="Search Subject"
-            value={searchText}
-            onChange={handleSearchChange}
-            fullWidth
-            margin="dense"
-            variant="outlined"
-            sx={{
-              "& .MuiOutlinedInput-root": {
-                borderRadius: "1.5rem",
-              },
-              "& .MuiOutlinedInput-notchedOutline": {
-                borderRadius: "1.5rem",
-              },
-            }}
-          />
-
-          <List>
-            {filteredSubjects.map((subject, index) => (
-              <ListItem
-                key={index}
-                component="div"
-                onClick={() => handleSubjectClick(subject)}
-                sx={{
-                  borderRadius: "1.5rem",
-                  "&:hover": {
-                    backgroundColor: "#D8D8FF",
-                    cursor: "pointer",
-                  },
-                }}
-              >
-                <ListItemText primary={subject} />
-              </ListItem>
-            ))}
-          </List>
-        </DialogContent>
-
-        <DialogActions>
+      <DialogBox
+        open={open}
+        title="Select a Subject"
+        handleClose={handleClose}
+        actions={
           <Button onClick={handleClose} color="secondary">
             Cancel
           </Button>
-        </DialogActions>
-      </Dialog>
+        }
+      >
+        {filteredSubjects.length > 0 ? (
+          <>
+            <TextField
+              label="Search Subject"
+              value={searchText}
+              onChange={handleSearchChange}
+              fullWidth
+              margin="dense"
+              variant="outlined"
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: "1.5rem",
+                },
+                "& .MuiOutlinedInput-notchedOutline": {
+                  borderRadius: "1.5rem",
+                },
+              }}
+            />
+
+            <List>
+              {filteredSubjects.map((subject, index) => (
+                <ListItem
+                  key={index}
+                  component="div"
+                  onClick={() => handleSubjectClick(subject)}
+                  sx={{
+                    borderRadius: "1.5rem",
+                    "&:hover": {
+                      backgroundColor: "#D8D8FF",
+                      cursor: "pointer",
+                    },
+                  }}
+                >
+                  <ListItemText primary={subject} />
+                </ListItem>
+              ))}
+            </List>
+          </>
+        ) : (
+          <Typography variant="body2" color="text.secondary">
+            No subjects available to add
+          </Typography>
+        )}
+      </DialogBox>
+      <Menubar></Menubar>
     </Box>
   );
 }

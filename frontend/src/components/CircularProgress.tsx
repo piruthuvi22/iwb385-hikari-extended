@@ -10,7 +10,16 @@ export function CircularProgressWithLabel(
 ) {
   return (
     <Box sx={{ position: "relative", display: "inline-flex" }}>
-      <CircularProgress  variant="determinate" {...props} />
+      <CircularProgress
+        variant="determinate"
+        {...props}
+        sx={{
+          "& .MuiCircularProgress-circle": {
+            // color:"#f00",
+            backgroundColor: "#f00",
+          },
+        }}
+      />
       <Box
         sx={{
           top: 0,
@@ -24,7 +33,7 @@ export function CircularProgressWithLabel(
         }}
       >
         <Typography
-          variant="caption"
+          variant="h4"
           component="div"
           sx={{ color: "text.secondary" }}
         >{`${Math.round(props.value)}%`}</Typography>
@@ -34,18 +43,20 @@ export function CircularProgressWithLabel(
 }
 
 export default function CircularWithValueLabel() {
-  const [progress, setProgress] = React.useState(10);
+  const [progress, setProgress] = React.useState(58);
 
-  React.useEffect(() => {
-    const timer = setInterval(() => {
-      setProgress((prevProgress) =>
-        prevProgress >= 100 ? 0 : prevProgress + 10
-      );
-    }, 800);
-    return () => {
-      clearInterval(timer);
-    };
-  }, []);
+  // React.useEffect(() => {
+  //   const timer = setInterval(() => {
+  //     setProgress((prevProgress) =>
+  //       prevProgress >= 100 ? 0 : prevProgress + 10
+  //     );
+  //   }, 800);
+  //   return () => {
+  //     clearInterval(timer);
+  //   };
+  // }, []);
 
-  return <CircularProgressWithLabel value={progress} />;
+  return (
+    <CircularProgressWithLabel value={progress} size={150} thickness={5} />
+  );
 }
