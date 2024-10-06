@@ -18,7 +18,7 @@ mongodb:Client mongoDb = check new ({
     }
 }
 
-service /api on new http:Listener(9092) {
+service /api on new http:Listener(9091) {
     private final mongodb:Database db;
 
     @http:ResourceConfig {
@@ -39,8 +39,16 @@ service /api on new http:Listener(9092) {
         return result;
     }
 
-    resource function get subjects/[string id]() returns models:Subject|error? {
-        return getSubject(self.db, id);
+    resource function get subjects/[string ids]() returns models:Subject|models:Subject[]|error? {
+        string[] idArray = re `,`.split(ids);
+        if idArray.length() == 1 {
+            return getSubject(self.db, idArray[0]);
+        }
+        mongodb:Collection subjects = check self.db->getCollection("subjects");
+        stream<models:Subject, error?> resultStream = check subjects->find();
+        models:Subject[]|error result = from models:Subject subject in resultStream where idArray.indexOf(subject.id) > -1
+            select subject;
+        return result;
     }
 
     resource function post subjects(dto:SubjectDto subjectDto) returns models:Subject|error? {

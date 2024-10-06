@@ -17,7 +17,7 @@ mongodb:Client mongoDb = check new ({
     }
 }
 
-service /api on new http:Listener(9092) {
+service /api on new http:Listener(9090) {
     private final mongodb:Database db;
 
     @http:ResourceConfig {
@@ -37,9 +37,17 @@ service /api on new http:Listener(9092) {
             select user;
         return result;
     }
-
-    resource function get users/[string id]() returns models:User|error? {
-        return getUser(self.db, id);
+    
+    resource function get users/[string ids]() returns models:User|models:User[]|error? {
+        string[] idArray = re `,`.split(ids);
+        if idArray.length() == 1 {
+            return getUser(self.db, idArray[0]);
+        }
+        mongodb:Collection users = check self.db->getCollection("users");
+        stream<models:User, error?> resultStream = check users->find();
+        models:User[]|error result = from models:User user in resultStream where idArray.indexOf(user.id) > -1
+            select user;
+        return result;
     }
 
     resource function delete users/[string id]() returns string|error? {
