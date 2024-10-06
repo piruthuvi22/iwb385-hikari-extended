@@ -27,7 +27,7 @@ export default function GetStarted() {
           Welcome Piruthuvi
         </Typography>
       </Box>
-      <Box flexGrow={"1"}>
+      <Box flexGrow={"1"} textAlign={"center"}>
         <img
           src={mathematics}
           alt="cover"
@@ -38,7 +38,7 @@ export default function GetStarted() {
           }}
         />
       </Box>
-      <Box flexGrow={"1"}>
+      <Box flexGrow={"1"} textAlign={"center"}>
         <Link
           to="/dashboard"
           style={{ textDecoration: "none", color: "white" }}
