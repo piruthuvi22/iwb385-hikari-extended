@@ -46,12 +46,13 @@ service /api on new http:Listener(9091) {
         }
         mongodb:Collection subjects = check self.db->getCollection("subjects");
         stream<models:Subject, error?> resultStream = check subjects->find();
-        models:Subject[]|error result = from models:Subject subject in resultStream where idArray.indexOf(subject.id) > -1
+        models:Subject[]|error result = from models:Subject subject in resultStream
+            where idArray.indexOf(subject.id) > -1
             select subject;
         return result;
     }
 
-    resource function post subjects(dto:SubjectDto subjectDto) returns models:Subject|error? {
+    resource function post subjects(dto:Subject subjectDto) returns models:Subject|error? {
         mongodb:Collection subjects = check self.db->getCollection("subjects");
         models:Subject|error? existingSubject = check subjects->findOne({"name": subjectDto.name}); //unique subject name
         if existingSubject is models:Subject {
@@ -66,7 +67,7 @@ service /api on new http:Listener(9091) {
         return newSubject;
     }
 
-    resource function put subjects/[string id](dto:SubjectDto subjectDto) returns models:Subject|error? {
+    resource function put subjects/[string id](dto:Subject subjectDto) returns models:Subject|error? {
         mongodb:Collection subjects = check self.db->getCollection("subjects");
         models:Subject|error? existingSubject = check subjects->findOne({id});
         if existingSubject !is models:Subject {
@@ -80,7 +81,7 @@ service /api on new http:Listener(9091) {
         return getSubject(self.db, id);
     }
 
-    resource function post subjects/[string id]/lessons(dto:LessonDto lessonDto) returns models:Subject|error? {
+    resource function post subjects/[string id]/lessons(dto:Lesson lessonDto) returns models:Subject|error? {
         mongodb:Collection subjects = check self.db->getCollection("subjects");
         models:Subject|error? selectedSubject = check subjects->findOne({id});
         if selectedSubject !is models:Subject {
@@ -102,7 +103,7 @@ service /api on new http:Listener(9091) {
         return getSubject(self.db, id);
     }
 
-    resource function put lessons/[string id](dto:LessonDto lessonDto) returns models:Subject|error? {
+    resource function put lessons/[string id](dto:Lesson lessonDto) returns models:Subject|error? {
         mongodb:Collection subjects = check self.db->getCollection("subjects");
         map<json> filter = {};
         filter["lessons.id"] = id;
