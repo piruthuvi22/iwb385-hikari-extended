@@ -1,9 +1,9 @@
 
-public type SubjectDto record {|
+public type Subject record {|
     string name;
 |};
 
-public type LessonDto record {|
+public type Lesson record {|
     string name;
     int no;
 |};
