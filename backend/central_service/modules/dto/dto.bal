@@ -47,3 +47,9 @@ public type SubjectStudySummary record {|
     decimal goalHours;
     decimal actualHours;
 |};
+
+public type StudySession record {|
+    string subjectId;
+    string lessonId;
+    int noMins;
+|};

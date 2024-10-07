@@ -225,7 +225,7 @@ service /api on new http:Listener(9092) {
         return userSummaries;
     }
 
-    resource function post adjust\-weekly\-goal(dto:GoalAdjust goalAdjust) returns error? {
+    resource function put adjust\-weekly\-goal(dto:GoalAdjust goalAdjust) returns error? {
 
         if goalAdjust.goalHours < <decimal>0 {
             return error("Goal hours cannot be negative");

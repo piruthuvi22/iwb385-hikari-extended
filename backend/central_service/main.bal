@@ -21,8 +21,7 @@ enum UserDetailLevel {
     FULL
 }
 
-@http:ServiceConfig {
-    auth: [
+http:ListenerAuthConfig[] auth_config = [
         {
             jwtValidatorConfig: {
                 issuer: OAUTH2,
@@ -35,7 +34,10 @@ enum UserDetailLevel {
             },
             scopes: ["openid", "profile", "email"]
         }
-    ]
+    ];
+
+@http:ServiceConfig {
+    auth: auth_config
 }
 service /central/api/users on central {
     resource function get .(http:RequestContext ctx) returns response:UserDetails|error? {
@@ -62,7 +64,7 @@ service /central/api/users on central {
         return friends;
     }
 
-    resource function post follow(http:RequestContext ctx) {
+    resource function post request(http:RequestContext ctx) {
     }
 
     resource function post unfollow(http:RequestContext ctx) {
@@ -76,7 +78,30 @@ service /central/api/users on central {
 
 }
 
+@http:ServiceConfig {
+    auth: auth_config
+}
 service /central/api/subjects on central {
+
+    resource function put [string subjectId] (http:RequestContext ctx) returns error? {
+        string userId = check getUserSub(ctx);
+        return check subjectClient->put("/api/users" + userId + "/subjects/", {id: subjectId});
+    }
+
+    resource function put [string subjectId]/goals/[decimal goalHours](http:RequestContext ctx) returns error? {
+        string userId = check getUserSub(ctx);
+        http:Response res = check subjectClient->put("/api/users" + userId + "/subjects/" + subjectId + "/goals", {goalHours: goalHours});
+        if (res.statusCode != 200) {
+            return error("Failed to update goal hours");
+        }
+        return check studyClient->put("/api/adjust-weekly-goals", {studentId: userId, subjectId: subjectId, goalHours: goalHours});
+    }
+
+    resource function delete [string subjectId] (http:RequestContext ctx) returns error? {
+        string userId = check getUserSub(ctx);
+        return check subjectClient->put("/api/users" + userId + "/subjects/", {id: subjectId});
+    }
+
     resource function get [string subjectId](http:RequestContext ctx) returns response:StudyStatus|error? {
         string userId = check getUserSub(ctx);
         return check getStudyDetails(userId, subjectId);
@@ -89,10 +114,19 @@ service /central/api/subjects on central {
 
 }
 
+@http:ServiceConfig {
+    auth: auth_config
+}
 service /central/api/study on central {
 
-    resource function post .(http:RequestContext ctx) {
-        // string userId = check getUserSub(ctx);
+    resource function post .(http:RequestContext ctx, dto:StudySession studySession) returns error? {
+        string userId = check getUserSub(ctx);
+        dto:User user = check getUser(userId);
+        decimal[] goalHours = from var subject in user.subjectIds
+            where subject.id == studySession.subjectId
+            select subject.goalHours ?: 0;
+
+        return check studyClient->post("api/study-session/", {...studySession, studentId: userId, goalHours: goalHours[0]});
     }
 
 }
