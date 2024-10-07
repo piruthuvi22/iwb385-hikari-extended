@@ -1,5 +1,7 @@
 public type User record {|
     readonly string id;
+    string name;
+    string email;
     SubjectGoal[] subjectIds = [];
     ID[] followersIds = [];
     ID[] followingIds = [];
