@@ -39,10 +39,11 @@ http:ListenerAuthConfig[] auth_config = [
     auth: auth_config
 }
 service /central/api/users on central {
+    
     resource function get .(http:RequestContext ctx) returns response:UserDetails|error? {
         string userId = check getUserSub(ctx);
         dto:User user = check getUser(userId);
-        response:UserDetails userDto = {id: user.id};
+        response:UserDetails userDto = {id: user.id, email: user.email, name: user.name};
 
         string subjectIds = from var subject in user.subjectIds
             select subject.id + ",";
@@ -63,16 +64,40 @@ service /central/api/users on central {
         return friends;
     }
 
-    resource function post request(http:RequestContext ctx) {
+    // To make a friend request
+    resource function put request(http:RequestContext ctx, string friendId) returns error? {
+        string userId = check getUserSub(ctx);
+        return check userClient->put("/api/users/requests", {requestedBy: userId, requested: friendId});
     }
 
-    resource function post unfollow(http:RequestContext ctx) {
+    // To accept a friend request
+    resource function put accept\-request(http:RequestContext ctx, string friendId) returns error?  {
+        string userId = check getUserSub(ctx);
+        return check userClient->put("/api/users/follow", {follower: userId, following: friendId});
     }
 
-    resource function post accept\-request(http:RequestContext ctx) {
+    // To revoke a friend request
+    resource function delete request(http:RequestContext ctx, string friendId) returns error? {
+        string userId = check getUserSub(ctx);
+        return check userClient->delete("/api/users/requests", {requestedBy: userId, requested: friendId});
     }
 
-    resource function post reject\-request(http:RequestContext ctx) {
+    // To unfollow a friend
+    resource function delete follow(http:RequestContext ctx, string friendId) returns error? {
+        string userId = check getUserSub(ctx);
+        return check userClient->delete("/api/users/follow", {follower: userId, following: friendId});
+    }
+
+    // To reject a friend request
+    resource function delete reject\-request(http:RequestContext ctx, string friendId) returns error? {
+        string userId = check getUserSub(ctx);
+        return check userClient->delete("/api/users/requests", {requestedBy: friendId, requested: userId});
+    }
+
+    // To remove a follower
+    resource function delete remove\-follower(http:RequestContext ctx, string friendId) returns error? {
+        string userId = check getUserSub(ctx);
+        return check userClient->delete("/api/users/follow", {follower: friendId, following: userId});
     }
 
 }
@@ -156,15 +181,15 @@ function getUsers(dto:ID[] usersObject, UserDetailLevel detailLevel = NAME) retu
     }
     response:UserDetails[] userDtos = [];
     if users is dto:User {
-        userDtos.push({id: users.id});
+        userDtos.push({id: users.id, email: users.email, name: users.name});
         return userDtos;
     }
     foreach var user in users {
-        response:UserDetails userDto = {id: user.id};
+        response:UserDetails userDto = {id: user.id, email: user.email, name: user.name};
         if detailLevel == FULL {
             string subjectIds = from var subject in user.subjectIds
                 select subject.id + ",";
-            dto:Subject[] subjects = check subjectClient->get("api/subjects/" + subjectIds);
+            response:SubjectGoal[] subjects = check subjectClient->get("api/subjects/" + subjectIds);
             if userStudySummaries is map<dto:UserStudySummary> {
                 dto:UserStudySummary studentSummary = userStudySummaries.get(user.id);
                 foreach var subject in subjects {

@@ -1,8 +1,8 @@
 public type UserDetails record {|
     string id;
-    string? email = ();
-    string? name = ();
-    Subject[] subjects = [];
+    string email;
+    string name;
+    Subject[]|SubjectGoal[] subjects = <Subject[]> [];
 |};
 
 public type Friends record {|
@@ -28,8 +28,12 @@ public type Subject record {|
     readonly string id;
     string name;
     Lesson[] lessons;
-    decimal goalHours;
-    decimal actualHours;
+|};
+
+public type SubjectGoal record {|
+    *Subject;
+    decimal goalHours = 0;
+    decimal actualHours = 0;
 |};
 
 public type Lesson record {|

@@ -1,15 +1,13 @@
 public type User record {|
     readonly string id;
+    string name;
+    string email;
     UserSubject[] subjectIds = [];
     ID[] followersIds = [];
     ID[] followingIds = [];
     ID[] requestedIds = [];
     ID[] requestedByIds = [];
     boolean isDeleted = false;
-|};
-
-public type ID record {|
-    string id;
 |};
 
 public type UserSubject record {|
@@ -20,8 +18,8 @@ public type UserSubject record {|
 public type Subject record {|
     readonly string id;
     string name;
-    decimal goalHours;
-    decimal actualHours;
+    decimal goalHours = 0;
+    decimal actualHours = 0;
     Lesson[] lessons;
 |};
 
@@ -49,7 +47,7 @@ public type UserStudySummary record {|
 
 public type SubjectStudySummary record {|
     string id;
-    decimal goalHours;
+    decimal goalHours ;
     decimal actualHours;
 |};
 
@@ -57,4 +55,26 @@ public type StudySession record {|
     string subjectId;
     string lessonId;
     int noMins;
+|};
+
+public type ID record {|
+    string id;
+|};
+
+# Description.
+# Scenario: User A follows User B (Based on Insta)
+# + following - User A  
+# + follower - User B
+public type Follow record {|
+    ID following;
+    ID follower;
+|};
+
+# Description.
+# Scenario: User A requests User B
+# + requested - User B 
+# + requestedBy - User A
+public type Request record {|
+    ID requested;
+    ID requestedBy;
 |};
