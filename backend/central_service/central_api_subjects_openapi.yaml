@@ -1,0 +1,246 @@
+openapi: 3.0.1
+info:
+  title: Central Api Subjects
+  version: 0.1.0
+servers:
+- url: "{server}:{port}/central/api/subjects"
+  variables:
+    server:
+      default: http://localhost
+    port:
+      default: "9094"
+paths:
+  /{subjectId}:
+    get:
+      operationId: getSubjectid
+      parameters:
+      - name: subjectId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StudyStatus'
+        "202":
+          description: Accepted
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+    put:
+      operationId: putSubjectid
+      parameters:
+      - name: subjectId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "202":
+          description: Accepted
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+    delete:
+      operationId: deleteSubjectid
+      parameters:
+      - name: subjectId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        "202":
+          description: Accepted
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+  /{subjectId}/goals/{goalHours}:
+    put:
+      operationId: putSubjectidGoalsGoalhours
+      parameters:
+      - name: subjectId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: goalHours
+        in: path
+        required: true
+        schema:
+          type: number
+          format: double
+      responses:
+        "202":
+          description: Accepted
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+  /{subjectId}/{year}/{weekNo}:
+    get:
+      operationId: getSubjectidYearWeekno
+      parameters:
+      - name: subjectId
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: year
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      - name: weekNo
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StudyStatus'
+        "202":
+          description: Accepted
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+components:
+  schemas:
+    ErrorPayload:
+      required:
+      - message
+      - method
+      - path
+      - reason
+      - status
+      - timestamp
+      type: object
+      properties:
+        timestamp:
+          type: string
+        status:
+          type: integer
+          format: int64
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
+          type: string
+    Lesson:
+      required:
+      - id
+      - name
+      - "no"
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        "no":
+          type: integer
+          format: int64
+      additionalProperties: false
+    StudyStatus:
+      required:
+      - actualHours
+      - goalHours
+      - lessonDates
+      - lessons
+      - studentId
+      - studiedLessons
+      - subjectId
+      - weekNo
+      - year
+      type: object
+      properties:
+        studentId:
+          type: string
+        subjectId:
+          type: string
+        weekNo:
+          type: integer
+          format: int64
+        year:
+          type: integer
+          format: int64
+        actualHours:
+          type: number
+          format: double
+        goalHours:
+          type: number
+          format: double
+          nullable: true
+        lessonDates:
+          type: object
+          additionalProperties:
+            type: string
+          nullable: true
+        studiedLessons:
+          type: array
+          nullable: true
+          items:
+            type: string
+        lessons:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/Lesson'
+      additionalProperties: false
