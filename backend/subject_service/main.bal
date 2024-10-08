@@ -52,36 +52,36 @@ service /api on new http:Listener(9091) {
         return result;
     }
 
-    resource function post subjects(dto:Subject subjectDto) returns models:Subject|error? {
+    resource function post subjects(dto:Subject subject) returns models:Subject|error? {
         mongodb:Collection subjects = check self.db->getCollection("subjects");
-        models:Subject|error? existingSubject = check subjects->findOne({"name": subjectDto.name}); //unique subject name
+        models:Subject|error? existingSubject = check subjects->findOne({"name": subject.name}); //unique subject name
         if existingSubject is models:Subject {
-            return error(string `Subject ${subjectDto.name}  is already added`);
+            return error(string `Subject ${subject.name}  is already added`);
         }
 
         models:Subject newSubject = {
             id: uuid:createType1AsString(),
-            name: subjectDto.name
+            name: subject.name
         };
         check subjects->insertOne(newSubject);
         return newSubject;
     }
 
-    resource function put subjects/[string id](dto:Subject subjectDto) returns models:Subject|error? {
+    resource function put subjects/[string id](dto:Subject subject) returns models:Subject|error? {
         mongodb:Collection subjects = check self.db->getCollection("subjects");
         models:Subject|error? existingSubject = check subjects->findOne({id});
         if existingSubject !is models:Subject {
             return error(string `Subject with id ${id} not found`);
         }
 
-        mongodb:UpdateResult updateResult = check subjects->updateOne({id}, {set: {name: subjectDto.name}});
+        mongodb:UpdateResult updateResult = check subjects->updateOne({id}, {set: {name: subject.name}});
         if updateResult.modifiedCount != 1 {
             return error(string `Failed to update the subject with id ${id}`);
         }
         return getSubject(self.db, id);
     }
 
-    resource function post subjects/[string id]/lessons(dto:Lesson lessonDto) returns models:Subject|error? {
+    resource function post subjects/[string id]/lessons(dto:Lesson newLesson) returns models:Subject|error? {
         mongodb:Collection subjects = check self.db->getCollection("subjects");
         models:Subject|error? selectedSubject = check subjects->findOne({id});
         if selectedSubject !is models:Subject {
@@ -90,12 +90,12 @@ service /api on new http:Listener(9091) {
 
         models:Lesson[] updateLesson = selectedSubject.lessons;
         foreach models:Lesson lesson in updateLesson {
-            if lesson.name == lessonDto.name {
-                return error(string `Lesson ${lessonDto.name} is already added`);
+            if lesson.name == newLesson.name {
+                return error(string `Lesson ${newLesson.name} is already added`);
             }
         }
 
-        updateLesson.push({id: uuid:createType1AsString(), name: lessonDto.name, no: lessonDto.no});
+        updateLesson.push({id: uuid:createType1AsString(), name: newLesson.name, no: newLesson.no});
         mongodb:UpdateResult updateResult = check subjects->updateOne({id}, {set: {lessons: updateLesson}});
         if updateResult.modifiedCount != 1 {
             return error(string `Failed to update the subject with id ${id}`);
@@ -103,7 +103,7 @@ service /api on new http:Listener(9091) {
         return getSubject(self.db, id);
     }
 
-    resource function put lessons/[string id](dto:Lesson lessonDto) returns models:Subject|error? {
+    resource function put lessons/[string id](dto:Lesson newLesson) returns models:Subject|error? {
         mongodb:Collection subjects = check self.db->getCollection("subjects");
         map<json> filter = {};
         filter["lessons.id"] = id;
@@ -115,8 +115,8 @@ service /api on new http:Listener(9091) {
         models:Lesson[] updateLesson = selectedSubject.lessons;
         foreach models:Lesson lesson in updateLesson {
             if lesson.id == id {
-                lesson.name = lessonDto?.name;
-                lesson.no = lessonDto?.no; //if lessonDto.no || lessonDto.name is null, it will not update the value
+                lesson.name = newLesson?.name;
+                lesson.no = newLesson?.no; //if newLesson.no || newLesson.name is null, it will not update the value
             }
         }
         mongodb:UpdateResult updateResult = check subjects->updateOne({id: selectedSubject.id}, {set: {lessons: updateLesson}});
