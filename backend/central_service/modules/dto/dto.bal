@@ -10,10 +10,6 @@ public type User record {|
     boolean isDeleted = false;
 |};
 
-public type ID record {|
-    string id;
-|};
-
 public type UserSubject record {|
     readonly string id;
     decimal goalHours;
@@ -59,4 +55,26 @@ public type StudySession record {|
     string subjectId;
     string lessonId;
     int noMins;
+|};
+
+public type ID record {|
+    string id;
+|};
+
+# Description.
+# Scenario: User A follows User B (Based on Insta)
+# + following - User A  
+# + follower - User B
+public type Follow record {|
+    ID following;
+    ID follower;
+|};
+
+# Description.
+# Scenario: User A requests User B
+# + requested - User B 
+# + requestedBy - User A
+public type Request record {|
+    ID requested;
+    ID requestedBy;
 |};

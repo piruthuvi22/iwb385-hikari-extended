@@ -39,6 +39,7 @@ http:ListenerAuthConfig[] auth_config = [
     auth: auth_config
 }
 service /central/api/users on central {
+    
     resource function get .(http:RequestContext ctx) returns response:UserDetails|error? {
         string userId = check getUserSub(ctx);
         dto:User user = check getUser(userId);
@@ -63,16 +64,40 @@ service /central/api/users on central {
         return friends;
     }
 
-    resource function post request(http:RequestContext ctx) {
+    // To make a friend request
+    resource function put request(http:RequestContext ctx, string friendId) returns error? {
+        string userId = check getUserSub(ctx);
+        return check userClient->put("/api/users/requests", {requestedBy: userId, requested: friendId});
     }
 
-    resource function post unfollow(http:RequestContext ctx) {
+    // To accept a friend request
+    resource function put accept\-request(http:RequestContext ctx, string friendId) returns error?  {
+        string userId = check getUserSub(ctx);
+        return check userClient->put("/api/users/follow", {follower: userId, following: friendId});
     }
 
-    resource function post accept\-request(http:RequestContext ctx) {
+    // To revoke a friend request
+    resource function delete request(http:RequestContext ctx, string friendId) returns error? {
+        string userId = check getUserSub(ctx);
+        return check userClient->delete("/api/users/requests", {requestedBy: userId, requested: friendId});
     }
 
-    resource function post reject\-request(http:RequestContext ctx) {
+    // To unfollow a friend
+    resource function delete follow(http:RequestContext ctx, string friendId) returns error? {
+        string userId = check getUserSub(ctx);
+        return check userClient->delete("/api/users/follow", {follower: userId, following: friendId});
+    }
+
+    // To reject a friend request
+    resource function delete reject\-request(http:RequestContext ctx, string friendId) returns error? {
+        string userId = check getUserSub(ctx);
+        return check userClient->delete("/api/users/requests", {requestedBy: friendId, requested: userId});
+    }
+
+    // To remove a follower
+    resource function delete remove\-follower(http:RequestContext ctx, string friendId) returns error? {
+        string userId = check getUserSub(ctx);
+        return check userClient->delete("/api/users/follow", {follower: friendId, following: userId});
     }
 
 }
