@@ -1,6 +1,6 @@
 public type User record {|
     readonly string id;
-    Subject[] subjectIds = [];
+    UserSubject[] subjectIds = [];
     ID[] followersIds = [];
     ID[] followingIds = [];
     ID[] requestedIds = [];
@@ -12,12 +12,17 @@ public type ID record {|
     string id;
 |};
 
+public type UserSubject record {|
+    readonly string id;
+    decimal goalHours;
+|};
+
 public type Subject record {|
     readonly string id;
-    string? name = ();
-    Lesson[] lessons = [];
-    decimal goalHours?;
-    decimal actualHours?;
+    string name;
+    decimal goalHours;
+    decimal actualHours;
+    Lesson[] lessons;
 |};
 
 public type StudyStatus record {|

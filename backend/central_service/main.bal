@@ -1,5 +1,4 @@
 import central_service.dto;
-// import ballerina/io;
 import central_service.response;
 
 import ballerina/http;
@@ -124,7 +123,7 @@ service /central/api/study on central {
         dto:User user = check getUser(userId);
         decimal[] goalHours = from var subject in user.subjectIds
             where subject.id == studySession.subjectId
-            select subject.goalHours ?: 0;
+            select subject.goalHours;
 
         return check studyClient->post("api/study-session/", {...studySession, studentId: userId, goalHours: goalHours[0]});
     }

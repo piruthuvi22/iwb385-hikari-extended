@@ -26,10 +26,10 @@ public type StudyStatus record {|
 
 public type Subject record {|
     readonly string id;
-    string? name = ();
-    Lesson[] lessons = [];
-    decimal goalHours?;
-    decimal actualHours?;
+    string name;
+    Lesson[] lessons;
+    decimal goalHours;
+    decimal actualHours;
 |};
 
 public type Lesson record {|
