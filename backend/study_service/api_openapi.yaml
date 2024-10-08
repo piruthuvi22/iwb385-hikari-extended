@@ -1,0 +1,306 @@
+openapi: 3.0.1
+info:
+  title: Study service api
+  version: 0.1.0
+servers:
+  - url: "{server}:{port}/api"
+    variables:
+      server:
+        default: http://localhost
+      port:
+        default: "9092"
+paths:
+  /study-session:
+    post:
+      operationId: postStudySession
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StudySession"
+        required: true
+      responses:
+        "202":
+          description: Accepted
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorPayload"
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorPayload"
+  /current-study-status/{studentId}/{subjectId}:
+    get:
+      operationId: getCurrentStudyStatusStudentidSubjectid
+      parameters:
+        - name: studentId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: subjectId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StudyStatus"
+        "202":
+          description: Accepted
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorPayload"
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorPayload"
+  /study-status/{studentId}/{subjectId}/{year}/{weekNo}:
+    get:
+      operationId: getStudyStatusStudentidSubjectidYearWeekno
+      parameters:
+        - name: studentId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: subjectId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: year
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: weekNo
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StudyStatus"
+        "202":
+          description: Accepted
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorPayload"
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorPayload"
+  /study-summary/{studentIds}:
+    get:
+      operationId: getStudySummaryStudentids
+      parameters:
+        - name: studentIds
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - type: object
+                    additionalProperties:
+                      $ref: "#/components/schemas/UserSummary"
+                  - $ref: "#/components/schemas/UserSummary"
+        "202":
+          description: Accepted
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorPayload"
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorPayload"
+  /adjust-weekly-goal:
+    put:
+      operationId: putAdjustWeeklyGoal
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GoalAdjust"
+        required: true
+      responses:
+        "202":
+          description: Accepted
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorPayload"
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorPayload"
+components:
+  schemas:
+    ErrorPayload:
+      required:
+        - message
+        - method
+        - path
+        - reason
+        - status
+        - timestamp
+      type: object
+      properties:
+        timestamp:
+          type: string
+        status:
+          type: integer
+          format: int64
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
+          type: string
+    GoalAdjust:
+      required:
+        - goalHours
+        - studentId
+        - subjectId
+      type: object
+      properties:
+        studentId:
+          type: string
+        subjectId:
+          type: string
+        goalHours:
+          type: number
+          format: double
+      additionalProperties: false
+    StudySession:
+      required:
+        - goalHours
+        - lessonId
+        - noMins
+        - studentId
+        - subjectId
+      type: object
+      properties:
+        subjectId:
+          type: string
+        studentId:
+          type: string
+        lessonId:
+          type: string
+        noMins:
+          type: number
+          format: double
+        goalHours:
+          type: number
+          format: double
+      additionalProperties: false
+    StudyStatus:
+      required:
+        - actualHours
+        - lessonDates
+        - studentId
+        - studiedLessons
+        - subjectId
+        - weekNo
+        - year
+      type: object
+      properties:
+        studentId:
+          type: string
+        subjectId:
+          type: string
+        weekNo:
+          type: integer
+          format: int64
+        year:
+          type: integer
+          format: int64
+        actualHours:
+          type: number
+          format: double
+        goalHours:
+          type: number
+          format: double
+          default: 0
+        lessonDates:
+          type: object
+          additionalProperties:
+            type: string
+          nullable: true
+        studiedLessons:
+          type: array
+          nullable: true
+          items:
+            type: string
+      additionalProperties: false
+    SubjectSummary:
+      required:
+        - actualHours
+        - goalHours
+        - id
+      type: object
+      properties:
+        id:
+          type: string
+        goalHours:
+          type: number
+          format: double
+        actualHours:
+          type: number
+          format: double
+      additionalProperties: false
+    UserSummary:
+      required:
+        - id
+        - subjects
+      type: object
+      properties:
+        id:
+          type: string
+        subjects:
+          type: array
+          items:
+            $ref: "#/components/schemas/SubjectSummary"
+      additionalProperties: false
