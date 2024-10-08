@@ -1,19 +1,26 @@
-import user_service.models;
-
 public type User record {|
     readonly string id;
     string name;
     string email;
-    models:SubjectGoal[] subjectIds = [];
+    SubjectGoal[] subjectIds = [];
     boolean isDeleted = false;
 |};
 
 public type Id record {|
-    models:ID newId;
+    ID newId;
 |};
 
 public type SubjectId record {|
-    models:SubjectGoal subject;
+    SubjectGoal subject;
+|};
+
+public type ID record {|
+    string id;
+|};
+
+public type SubjectGoal record {|
+    string id;
+    decimal goalHours = 0;
 |};
 
 # Description.
@@ -21,8 +28,8 @@ public type SubjectId record {|
 # + following - User A  
 # + follower - User B
 public type Follow record {|
-    models:ID following;
-    models:ID follower;
+    ID following;
+    ID follower;
 |};
 
 # Description.
@@ -30,6 +37,6 @@ public type Follow record {|
 # + requested - User B 
 # + requestedBy - User A
 public type Request record {|
-    models:ID requested;
-    models:ID requestedBy;
+    ID requested;
+    ID requestedBy;
 |};

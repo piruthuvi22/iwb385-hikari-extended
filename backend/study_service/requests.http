@@ -16,7 +16,7 @@ GET http://localhost:9092/api/current-study-status/66fbc1f1e3a6bb375d6b931c/01ef
 GET http://localhost:9092/study-status/STU101/MATH101/2024/37
 
 ### Adjust Goal Hours
-POST http://localhost:9092/adjust-weekly-goal
+POST http://localhost:9092/api/adjust-weekly-goal
 
 {
     "studentId": "STU101",

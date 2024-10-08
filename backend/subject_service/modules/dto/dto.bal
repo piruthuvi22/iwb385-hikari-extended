@@ -1,4 +1,3 @@
-
 public type Subject record {|
     string name;
 |};
