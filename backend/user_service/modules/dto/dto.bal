@@ -1,15 +1,22 @@
-import user_service.models;
-
 public type User record {|
     readonly string id;
-    models:SubjectGoal[] subjectIds = [];
+    SubjectGoal[] subjectIds = [];
     boolean isDeleted = false;
 |};
 
 public type IDInput record {|
-    models:ID newId;
+    ID newId;
 |};
 
 public type SubjectIdDto record {|
-    models:SubjectGoal subject;
+    SubjectGoal subject;
+|};
+
+public type ID record {|
+    string id;
+|};
+
+public type SubjectGoal record {|
+    string id;
+    decimal goalHours = 0;
 |};

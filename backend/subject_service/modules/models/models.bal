@@ -1,4 +1,3 @@
-
 public type Subject record {|
     readonly string id;
     string name;

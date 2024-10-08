@@ -1,9 +1,8 @@
-import central_service.dto;
 public type UserDetails record {|
     string id;
     string? email = ();
     string? name = ();
-    dto:Subject[] subjects = [];
+    Subject[] subjects = [];
 |};
 
 public type Friends record {|
@@ -22,5 +21,19 @@ public type StudyStatus record {|
     decimal? goalHours;
     map<string>? lessonDates;
     string[]? studiedLessons;
-    dto:Lesson[]? lessons;
+    Lesson[]? lessons;
+|};
+
+public type Subject record {|
+    readonly string id;
+    string name;
+    Lesson[] lessons;
+    decimal goalHours;
+    decimal actualHours;
+|};
+
+public type Lesson record {|
+    readonly string id;
+    string name;
+    int no;
 |};
