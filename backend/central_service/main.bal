@@ -42,7 +42,7 @@ service /central/api/users on central {
     resource function get .(http:RequestContext ctx) returns response:UserDetails|error? {
         string userId = check getUserSub(ctx);
         dto:User user = check getUser(userId);
-        response:UserDetails userDto = {id: user.id};
+        response:UserDetails userDto = {id: user.id, email: user.email, name: user.name};
 
         string subjectIds = from var subject in user.subjectIds
             select subject.id + ",";
@@ -156,15 +156,15 @@ function getUsers(dto:ID[] usersObject, UserDetailLevel detailLevel = NAME) retu
     }
     response:UserDetails[] userDtos = [];
     if users is dto:User {
-        userDtos.push({id: users.id});
+        userDtos.push({id: users.id, email: users.email, name: users.name});
         return userDtos;
     }
     foreach var user in users {
-        response:UserDetails userDto = {id: user.id};
+        response:UserDetails userDto = {id: user.id, email: user.email, name: user.name};
         if detailLevel == FULL {
             string subjectIds = from var subject in user.subjectIds
                 select subject.id + ",";
-            dto:Subject[] subjects = check subjectClient->get("api/subjects/" + subjectIds);
+            response:SubjectGoal[] subjects = check subjectClient->get("api/subjects/" + subjectIds);
             if userStudySummaries is map<dto:UserStudySummary> {
                 dto:UserStudySummary studentSummary = userStudySummaries.get(user.id);
                 foreach var subject in subjects {
