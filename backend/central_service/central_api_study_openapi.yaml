@@ -1,0 +1,76 @@
+openapi: 3.0.1
+info:
+  title: Central Api Study
+  version: 0.1.0
+servers:
+- url: "{server}:{port}/central/api/study"
+  variables:
+    server:
+      default: http://localhost
+    port:
+      default: "9094"
+paths:
+  /:
+    post:
+      operationId: post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StudySession'
+        required: true
+      responses:
+        "202":
+          description: Accepted
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+components:
+  schemas:
+    ErrorPayload:
+      required:
+      - message
+      - method
+      - path
+      - reason
+      - status
+      - timestamp
+      type: object
+      properties:
+        timestamp:
+          type: string
+        status:
+          type: integer
+          format: int64
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
+          type: string
+    StudySession:
+      required:
+      - lessonId
+      - noMins
+      - subjectId
+      type: object
+      properties:
+        subjectId:
+          type: string
+        lessonId:
+          type: string
+        noMins:
+          type: integer
+          format: int64
+      additionalProperties: false
