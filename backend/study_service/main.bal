@@ -116,6 +116,17 @@ service /api on new http:Listener(9092) {
         }
 
         if week is () {
+            models:Week newWeek = {
+                id: uuid:createType1AsString(),
+                weekNo: weekNo,
+                year: year,
+                subjectId: subjectId,
+                studentId: studentId,
+                goalHours: 0,
+                actualHours: 0,
+                studySessions: []
+            };
+            check weeks->insertOne(newWeek);
             return {
                 studentId: studentId,
                 subjectId: subjectId,

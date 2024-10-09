@@ -10,6 +10,11 @@ public type User record {|
     boolean isDeleted = false;
 |};
 
+public type UserInsert record {|
+    string name;
+    string email;
+|};
+
 public type UserSubject record {|
     readonly string id;
     decimal goalHours;
@@ -77,4 +82,9 @@ public type Follow record {|
 public type Request record {|
     ID requested;
     ID requestedBy;
+|};
+
+public type GoalAdjust record {|
+    string subjectId;
+    decimal goalHours;
 |};
