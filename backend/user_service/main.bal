@@ -220,6 +220,11 @@ isolated function getUser(mongodb:Database db, string id) returns models:User|er
 
 isolated function postUser(mongodb:Database db, dto:User user) returns models:User|error? {
     mongodb:Collection users = check db->getCollection("users");
+    models:User|error? existingUser = getUser(db, user.id);
+    if existingUser is models:User {
+        return error(string `User with id ${user.id} already exists`);
+    }
+
     models:User newUser = {
         id: user.id,
         name: user.name,
