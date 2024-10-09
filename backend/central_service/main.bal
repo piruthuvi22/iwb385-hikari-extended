@@ -3,6 +3,7 @@ import central_service.response;
 
 import ballerina/http;
 import ballerina/jwt;
+// import ballerina/io;
 
 configurable string OAUTH2 = ?;
 configurable string USER_SERVICE = ?;
@@ -21,35 +22,49 @@ enum UserDetailLevel {
 }
 
 http:ListenerAuthConfig[] auth_config = [
-        {
-            jwtValidatorConfig: {
-                issuer: OAUTH2,
-                audience: "central_api",
-                signatureConfig: {
-                    jwksConfig: {
-                        url: OAUTH2 + ".well-known/jwks.json"
-                    }
+    {
+        jwtValidatorConfig: {
+            issuer: OAUTH2,
+            audience: "central_api",
+            signatureConfig: {
+                jwksConfig: {
+                    url: OAUTH2 + ".well-known/jwks.json"
                 }
-            },
-            scopes: ["openid", "profile", "email"]
-        }
-    ];
+            }
+        },
+        scopes: ["openid", "profile", "email"]
+    }
+];
 
 @http:ServiceConfig {
     auth: auth_config
 }
 service /central/api/users on central {
-    
+
     resource function get .(http:RequestContext ctx) returns response:UserDetails|error? {
         string userId = check getUserSub(ctx);
         dto:User user = check getUser(userId);
         response:UserDetails userDto = {id: user.id, email: user.email, name: user.name};
-
+        if user.subjectIds.length() == 0 {
+            return userDto;
+        }
         string subjectIds = from var subject in user.subjectIds
             select subject.id + ",";
+
         subjectIds = subjectIds.substring(0, subjectIds.length() - 1);
-        userDto.subjects = check subjectClient->get("api/subjects/" + subjectIds);
+        response:Subject|response:Subject[] subjects = check subjectClient->get("api/subjects/" + subjectIds);
+        if subjects is response:Subject {
+            userDto.subjects = [subjects];
+        } else {
+            userDto.subjects = subjects;
+        }
         return userDto;
+    }
+
+    resource function post .(http:RequestContext ctx, dto:UserInsert userDto) returns error|response:UserDetails? {
+        string userId = check getUserSub(ctx);
+        dto:User user = check userClient->post("api/users", {id: userId, name: userDto.name, email: userDto.email});
+        return {id: user.id, email: user.email, name: user.name};
     }
 
     resource function get friends(http:RequestContext ctx) returns response:Friends|error? {
@@ -67,37 +82,37 @@ service /central/api/users on central {
     // To make a friend request
     resource function put request(http:RequestContext ctx, string friendId) returns error? {
         string userId = check getUserSub(ctx);
-        return check userClient->put("/api/users/requests", {requestedBy: userId, requested: friendId});
+        return check userClient->put("api/users/requests", {requestedBy: userId, requested: friendId});
     }
 
     // To accept a friend request
-    resource function put accept\-request(http:RequestContext ctx, string friendId) returns error?  {
+    resource function put accept\-request(http:RequestContext ctx, string friendId) returns error? {
         string userId = check getUserSub(ctx);
-        return check userClient->put("/api/users/follow", {follower: userId, following: friendId});
+        return check userClient->put("api/users/follow", {follower: userId, following: friendId});
     }
 
     // To revoke a friend request
     resource function delete request(http:RequestContext ctx, string friendId) returns error? {
         string userId = check getUserSub(ctx);
-        return check userClient->delete("/api/users/requests", {requestedBy: userId, requested: friendId});
+        return check userClient->delete("api/users/requests", {requestedBy: userId, requested: friendId});
     }
 
     // To unfollow a friend
     resource function delete follow(http:RequestContext ctx, string friendId) returns error? {
         string userId = check getUserSub(ctx);
-        return check userClient->delete("/api/users/follow", {follower: userId, following: friendId});
+        return check userClient->delete("api/users/follow", {follower: userId, following: friendId});
     }
 
     // To reject a friend request
     resource function delete reject\-request(http:RequestContext ctx, string friendId) returns error? {
         string userId = check getUserSub(ctx);
-        return check userClient->delete("/api/users/requests", {requestedBy: friendId, requested: userId});
+        return check userClient->delete("api/users/requests", {requestedBy: friendId, requested: userId});
     }
 
     // To remove a follower
     resource function delete remove\-follower(http:RequestContext ctx, string friendId) returns error? {
         string userId = check getUserSub(ctx);
-        return check userClient->delete("/api/users/follow", {follower: friendId, following: userId});
+        return check userClient->delete("api/users/follow", {follower: friendId, following: userId});
     }
 
 }
@@ -107,23 +122,26 @@ service /central/api/users on central {
 }
 service /central/api/subjects on central {
 
-    resource function put [string subjectId] (http:RequestContext ctx) returns error? {
+    resource function put .(http:RequestContext ctx, dto:ID subject) returns error? {
         string userId = check getUserSub(ctx);
-        return check subjectClient->put("/api/users" + userId + "/subjects/", {id: subjectId});
+        _ = check userClient->put("api/users/" + userId + "/subjects/", {subject: subject}, targetType = anydata);
     }
 
-    resource function put [string subjectId]/goals/[decimal goalHours](http:RequestContext ctx) returns error? {
+    resource function put goals(http:RequestContext ctx, dto:GoalAdjust goalAdjust) returns error? {
         string userId = check getUserSub(ctx);
-        http:Response res = check subjectClient->put("/api/users" + userId + "/subjects/" + subjectId + "/goals", {goalHours: goalHours});
+        if goalAdjust.goalHours < <decimal>0 {
+            return error("Goal hours cannot be negative");
+        }
+        http:Response res = check userClient->put("api/users/" + userId + "/subjects" + "/goals", {subject: {goalHours: goalAdjust.goalHours, id: goalAdjust.subjectId}});
         if (res.statusCode != 200) {
             return error("Failed to update goal hours");
         }
-        return check studyClient->put("/api/adjust-weekly-goals", {studentId: userId, subjectId: subjectId, goalHours: goalHours});
+        return check studyClient->put("api/adjust-weekly-goal", {studentId: userId, subjectId: goalAdjust.subjectId, goalHours: goalAdjust.goalHours});
     }
 
-    resource function delete [string subjectId] (http:RequestContext ctx) returns error? {
+    resource function delete .(http:RequestContext ctx, dto:ID subject) returns error? {
         string userId = check getUserSub(ctx);
-        return check subjectClient->put("/api/users" + userId + "/subjects/", {id: subjectId});
+        _ = check userClient->delete("api/users/" + userId + "/subjects", {subject: subject}, targetType = anydata);
     }
 
     resource function get [string subjectId](http:RequestContext ctx) returns response:StudyStatus|error? {
@@ -219,12 +237,19 @@ function getUsers(dto:ID[] usersObject, UserDetailLevel detailLevel = NAME) retu
 function getStudyDetails(string userId, string subjectId, int? year = (), int? weekNo = ()) returns response:StudyStatus|error {
     dto:User user = check getUser(userId);
     decimal? goalHours = 0;
+    boolean found = false;
     foreach var subject in user.subjectIds {
         if (subject.id == subjectId) {
             goalHours = subject.goalHours;
+            found = true;
             break;
         }
     }
+
+    if !found {
+        return error("User is not enrolled in the subject");
+    }
+
     dto:Subject subject = check subjectClient->get("api/subjects/" + subjectId);
     dto:StudyStatus studyStatus;
 

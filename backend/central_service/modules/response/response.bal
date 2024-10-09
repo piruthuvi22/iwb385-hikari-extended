@@ -1,5 +1,5 @@
 public type UserDetails record {|
-    string id;
+    readonly string id;
     string email;
     string name;
     Subject[]|SubjectGoal[] subjects = <Subject[]> [];

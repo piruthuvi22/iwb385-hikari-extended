@@ -84,23 +84,19 @@ service /api on new http:Listener(9090) {
         return check getUser(self.db, id);
     }
 
-    resource function put users/[string id]/subjects/[string subjectId]/goals(decimal goalHours) returns models:User?|error {
+    resource function put users/[string id]/subjects/goals(dto:SubjectId subjectDto) returns models:User?|error {
         mongodb:Collection users = check self.db->getCollection("users");
         models:User|error? user = check getUser(self.db, id);
         if user !is models:User {
             return user;
         }
-        dto:SubjectId subjectDto = {subject: {id: subjectId, goalHours}};
         models:SubjectGoal[] updateGoalHours = user.subjectIds;
         foreach models:SubjectGoal item in updateGoalHours {
             if item.id == subjectDto.subject.id {
                 item.goalHours = subjectDto.subject.goalHours;
             }
         }
-        mongodb:UpdateResult updateResult = check users->updateOne({id}, {set: {"subjectIds": updateGoalHours}});
-        if updateResult.modifiedCount != 1 {
-            return error(string `Failed to update the user with id ${id}`);
-        }
+        _ = check users->updateOne({id}, {set: {"subjectIds": updateGoalHours}});
         return check getUser(self.db, id);
     }
 

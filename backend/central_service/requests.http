@@ -1,4 +1,19 @@
-@token = eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IlNyQjE4ejFjRDB2QUticm1FamZ4diJ9.eyJpc3MiOiJodHRwczovL2hpa2FyaS51ay5hdXRoMC5jb20vIiwic3ViIjoiYXV0aDB8NjZmYmMxZjFlM2E2YmIzNzVkNmI5MzFjIiwiYXVkIjpbImNlbnRyYWxfYXBpIiwiaHR0cHM6Ly9oaWthcmkudWsuYXV0aDAuY29tL3VzZXJpbmZvIl0sImlhdCI6MTcyODM4NDMwMiwiZXhwIjoxNzI4NDcwNzAyLCJzY29wZSI6Im9wZW5pZCBwcm9maWxlIGVtYWlsIiwiYXpwIjoiRWRRRUVMd0tRWVhPS2I4V2htck0zZHpPNzN0MkxyTGYifQ.kghNjUt4vmRi_Sdk7P34U4DIuY9ibrgjYJ7xRQnQY85zebKAL0wTx6d7TMwQRt6Y1CAiDpN_Ub1Ev93MMIJzpGmSyeovCFbxCsZJVxY9PMp8CTdihSX6oSMZJnaR6S9QTeCIV_56rMlr9eVVBo8ipVmJWG3-FN8Nm6_M7lllS12afmLaY6pCYzVH5uUsgBTOnnBb0-N6l82NM9YwM-aiHtYYTE9kUilePb6gDZBBwukgWvFfaG9JCzOXyysHBLB79gxo1aNdTVqXsPyVmbsBFrV3CuhS4vfR84SJcMMH5YShd_nzf_RB9RJMKSg-d5cP2FHDgROQwVsRVOsjPkYdLg
+@token = {{harithatoken}}
+
+@testtoken = eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IlNyQjE4ejFjRDB2QUticm1FamZ4diJ9.eyJpc3MiOiJodHRwczovL2hpa2FyaS51ay5hdXRoMC5jb20vIiwic3ViIjoiYXV0aDB8NjZmYmMxZjFlM2E2YmIzNzVkNmI5MzFjIiwiYXVkIjpbImNlbnRyYWxfYXBpIiwiaHR0cHM6Ly9oaWthcmkudWsuYXV0aDAuY29tL3VzZXJpbmZvIl0sImlhdCI6MTcyODQ2MTkxMiwiZXhwIjoxNzI4NTQ4MzEyLCJzY29wZSI6Im9wZW5pZCBwcm9maWxlIGVtYWlsIiwiYXpwIjoiRWRRRUVMd0tRWVhPS2I4V2htck0zZHpPNzN0MkxyTGYifQ.ARr3yJsQc01zCVyFk-KrZUfoXMlvIFUm7xOhybs3CVZn-siFBVwuuaAJweYNWlp3ttHSkUx5K3b_gmcXFdO3BCwXpSiKZGowcZUx50ICmv4trd-bbwEzogWrqdf4Yc_l1Qq5RuetYzFSbsubO8Y1lNANChqLkpBxgkX6H90NY2xrW2ccm3dP-Tsvbv__SPy-W56o0tfe-Pu9YW6ZCvym5LBsAmZbSAwccOTsg1Z8XCZ2QfBrDBmxTDMCY0FaNRHe8dON0bIdBMn34RxKDU9eFnxtzZJlA5UOsjWCfXU4gfpw74ucuSxYI98v6aUg-ik-rZHi9Y9nFoUQpVBcxh5vyA
+
+@harithatoken = eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IlNyQjE4ejFjRDB2QUticm1FamZ4diJ9.eyJpc3MiOiJodHRwczovL2hpa2FyaS51ay5hdXRoMC5jb20vIiwic3ViIjoiYXV0aDB8NjcwNjM5NDcyNTZhN2JkZWY3N2RiMDA3IiwiYXVkIjpbImNlbnRyYWxfYXBpIiwiaHR0cHM6Ly9oaWthcmkudWsuYXV0aDAuY29tL3VzZXJpbmZvIl0sImlhdCI6MTcyODQ2Mjg2NSwiZXhwIjoxNzI4NTQ5MjY1LCJzY29wZSI6Im9wZW5pZCBwcm9maWxlIGVtYWlsIiwiYXpwIjoiRWRRRUVMd0tRWVhPS2I4V2htck0zZHpPNzN0MkxyTGYifQ.pW9UKn6JeYiYAzVtOkQXqXSAESrZN_EsT3XoV56_4U7yu10CzgA8mUK2q2lR-DQbEX9b7dMBnf3wX65p_QXBst9ssYHn_cOSa-nF-wHy0DMoxbRO5o9obt7H0f6zRJdH-uiNCajWhSLFsMhz4s8nem8tCtxwzMOnFv0IY21Be2r1S5jfviyHaMpvLoZyv2k3n0Of08JfMiXekJFgSLdERhUFggtCFaOdIfhFJ7-dOrRi8m8FXl78mCGXnlHuH7OvuEUhHdsMxpzXqHCQs5rGRmjaFhkQHiiD9Dt5NM_yKhFvT6d3_FO72obx4k469VoSJno5T-yGgXzufHSYArDNcg
+
+@rashmitoken = eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IlNyQjE4ejFjRDB2QUticm1FamZ4diJ9.eyJpc3MiOiJodHRwczovL2hpa2FyaS51ay5hdXRoMC5jb20vIiwic3ViIjoiYXV0aDB8NjcwNjM5MmUyNTZhN2JkZWY3N2RhZmYyIiwiYXVkIjpbImNlbnRyYWxfYXBpIiwiaHR0cHM6Ly9oaWthcmkudWsuYXV0aDAuY29tL3VzZXJpbmZvIl0sImlhdCI6MTcyODQ2Mjc1MywiZXhwIjoxNzI4NTQ5MTUzLCJzY29wZSI6Im9wZW5pZCBwcm9maWxlIGVtYWlsIiwiYXpwIjoiRWRRRUVMd0tRWVhPS2I4V2htck0zZHpPNzN0MkxyTGYifQ.UbpHqCr60xun54KOhkgCjkZ2fUSOlEX7-SruFTB3pDoWXz4nscX4kvY-iW3FQ2ECRPVZeEB_MrlKBJO2b_4Mk3b2Y7YNdZOgbWnPZJbji0NZtKX62uuL5GH5UsxLphM6_nggfAIBWnUH_8mXJt0GiP4xls8kKuUd-hZDcHITG0IRaDVlPTwA0ZWESfewbM16BMuPUZTH5i-0vncjc0P6lbihHxkpDq8dYkQ_M1DmIzhXF14fkQbQ0DOxaF9JzcJvYrmTa5U3_XPN-gexNRktATGfYMSTJNA59WO11j4Y1L8SPlH4mwAZX0gRxxIEqu4iMILvf07sL82d3pOtF3bAgA
+
+### Create User
+POST http://localhost:9094/central/api/users
+Authorization: Bearer {{token}}
+
+{
+    "name": "Haritha Hasathcharu",
+    "email": "haritha@hikari.com"
+}
 
 ### User Details
 GET http://localhost:9094/central/api/users
@@ -8,12 +23,37 @@ Authorization: Bearer {{token}}
 GET http://localhost:9094/central/api/users/friends
 Authorization: Bearer {{token}}
 
+### Enroll Subject
+PUT http://localhost:9094/central/api/subjects
+Authorization: Bearer {{token}}
+
+{
+    "id": "01ef813a-7e5e-1c10-81bf-c2a58dd33537"
+}
+
+### Unenroll Subject
+DELETE http://localhost:9094/central/api/subjects
+Authorization: Bearer {{token}}
+
+{
+    "id": "01ef813a-7e5e-1c10-81bf-c2a58dd33537"
+}
+
+### Adjust Goal Hours
+PUT http://localhost:9094/central/api/subjects/goals
+Authorization: Bearer {{token}}
+
+{
+    "subjectId": "01ef813a-7e5e-1c10-81bf-c2a58dd33537",
+    "goalHours": 11
+}
+
 ### Study Status
-GET http://localhost:9094/central/api/subjects/01ef813a-3213-1816-b7e7-efedfe66b24b
+GET http://localhost:9094/central/api/subjects/01ef813a-7e5e-1c10-81bf-c2a58dd33537
 Authorization: Bearer {{token}}
 
 ### Study Status Specific Week
-GET http://localhost:9094/central/api/subjects/01ef813a-3213-1816-b7e7-efedfe66b24b/2024/40
+GET http://localhost:9094/central/api/subjects/01ef813a-7e5e-1c10-81bf-c2a58dd33537/2024/40
 Authorization: Bearer {{token}}
 
 ### Record Study Session
@@ -31,8 +71,7 @@ Authorization: Bearer {{token}}
 
 
 # https://hikari.uk.auth0.com/authorize?response_type=code&client_id=EdQEELwKQYXOKb8WhmrM3dzO73t2LrLf&redirect_uri=http://localhost:3000&scope=openid profile email&audience=central_api&state=sldkfjsdlfjwoeijflskdjfowiejf
-# http://localhost:3000/?code=w_AirKZ0cIaM6TsbSzrv8my3wXI3_5TC1JY5uC6UtrCAp&state=sldkfjsdlfjwoeijflskdjfowiejf
-
+# http://localhost:3000/?code=7TzBAowJ_H22AGXKEots8ormBdInF5PIwLNXM5TO_IT0Y&state=sldkfjsdlfjwoeijflskdjfowiejf
 
 curl --request POST \
   --url 'https://hikari.uk.auth0.com/oauth/token' \
@@ -40,5 +79,5 @@ curl --request POST \
   --data grant_type=authorization_code \
   --data 'client_id=EdQEELwKQYXOKb8WhmrM3dzO73t2LrLf' \
   --data 'client_secret=QIMWclKJRknZwrFOehvs3SmDjpibp3wBN8x0Yvxak4P4ehO4yaXaCRA2EcQ7bnSK' \
-  --data 'code=w_AirKZ0cIaM6TsbSzrv8my3wXI3_5TC1JY5uC6UtrCAp' \
+  --data 'code=7TzBAowJ_H22AGXKEots8ormBdInF5PIwLNXM5TO_IT0Y' \
   --data 'redirect_uri=http://localhost:3000'
