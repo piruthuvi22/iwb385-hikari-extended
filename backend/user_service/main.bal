@@ -11,20 +11,8 @@ mongodb:Client mongoDb = check new ({
     connection: CONNECTION_URL
 });
 
-@http:ServiceConfig {
-    cors: {
-        allowOrigins: ["*"]
-    }
-}
-
 service /api on new http:Listener(9090) {
     private final mongodb:Database db;
-
-    @http:ResourceConfig {
-        cors: {
-            allowOrigins: ["*"]
-        }
-    }
 
     function init() returns error? {
         self.db = check mongoDb->getDatabase(DATABASE_NAME);
@@ -47,6 +35,20 @@ service /api on new http:Listener(9090) {
         stream<models:User, error?> resultStream = check users->find();
         models:User[]|error result = from models:User user in resultStream
             where idArray.indexOf(user.id) > -1
+            select user;
+        return result;
+    }
+
+    resource function get users/search(string searchItem) returns models:User[]|error? {
+        mongodb:Collection users = check self.db->getCollection("users");
+        map<json> query = {};
+        if (searchItem == "") {
+            return error(string `Search query is empty`);
+        }
+        query = {name: {"$regex": searchItem, "$options": "i"}};
+        stream<models:User, error?> resultStream = check users->find(query);
+        models:User[]|error result = from models:User user in resultStream
+            limit 10
             select user;
         return result;
     }
