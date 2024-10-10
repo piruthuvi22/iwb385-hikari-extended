@@ -51,7 +51,10 @@ service class ResponseErrorInterceptor {
 }
 
 @http:ServiceConfig {
-    auth: auth_config
+    auth: auth_config,
+    cors: {
+        allowOrigins: ["*"]
+    }
 }
 service http:InterceptableService /central/api/users on central {
 
@@ -209,7 +212,10 @@ service http:InterceptableService /central/api/users on central {
 }
 
 @http:ServiceConfig {
-    auth: auth_config
+    auth: auth_config,
+    cors: {
+        allowOrigins: ["*"]
+    }
 }
 service http:InterceptableService /central/api/subjects on central {
 
@@ -295,7 +301,10 @@ service http:InterceptableService /central/api/subjects on central {
 }
 
 @http:ServiceConfig {
-    auth: auth_config
+    auth: auth_config,
+    cors: {
+        allowOrigins: ["*"]
+    }
 }
 service http:InterceptableService /central/api/study on central {
 
