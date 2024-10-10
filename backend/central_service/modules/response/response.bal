@@ -1,3 +1,4 @@
+import ballerina/http;
 public type UserDetails record {|
     readonly string id;
     string email;
@@ -40,4 +41,24 @@ public type Lesson record {|
     readonly string id;
     string name;
     int no;
+|};
+
+public type NotFoundError record {|
+    *http:NotFound;
+|};
+
+public type UnauthorizedError record {|
+    *http:Unauthorized;
+|};
+
+public type BadRequestError record {|
+    *http:BadRequest;
+|};
+
+public type InternalServerError record {|
+    *http:InternalServerError;
+|};
+
+public type SuccessMessage record {|
+    *http:Ok;
 |};

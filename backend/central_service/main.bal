@@ -11,9 +11,13 @@ configurable string STUDY_SERVICE = ?;
 
 listener central = new http:Listener(9094);
 
-http:Client userClient = check new (USER_SERVICE);
-http:Client subjectClient = check new (SUBJECT_SERVICE);
-http:Client studyClient = check new (STUDY_SERVICE);
+isolated http:Client userClient = check new (USER_SERVICE);
+isolated http:Client subjectClient = check new (SUBJECT_SERVICE);
+isolated http:Client studyClient = check new (STUDY_SERVICE);
+
+const string JWT_VALIDATION_FAILED = "JWT validation failed";
+
+final response:SuccessMessage & readonly SUCCESS_MESSAGE = {body: {message: "Success"}};
 
 enum UserDetailLevel {
     NAME,
@@ -35,83 +39,171 @@ http:ListenerAuthConfig[] auth_config = [
     }
 ];
 
+service class ResponseErrorInterceptor {
+    *http:ResponseErrorInterceptor;
+
+    remote function interceptResponseError(error err) returns http:InternalServerError {
+        return {
+            mediaType: "application/org+json",
+            body: {message: "Oops! Something went wrong :(", details: err.message()}
+        };
+    }
+}
+
 @http:ServiceConfig {
     auth: auth_config
 }
-service /central/api/users on central {
+service http:InterceptableService /central/api/users on central {
 
-    resource function get .(http:RequestContext ctx) returns response:UserDetails|error? {
-        string userId = check getUserSub(ctx);
-        dto:User user = check getUser(userId);
+    public function createInterceptors() returns ResponseErrorInterceptor {
+        return new ResponseErrorInterceptor();
+    }
+
+    isolated resource function get .(http:RequestContext ctx) returns response:UserDetails|http:Unauthorized|http:NotFound|error {
+
+        string|http:Unauthorized userId = getUserSub(ctx);
+        if userId is http:Unauthorized {
+            return userId;
+        }
+
+        dto:User|http:NotFound user = check getUser(userId);
+        if user is http:NotFound {
+            return user;
+        }
+
         response:UserDetails userDto = {id: user.id, email: user.email, name: user.name};
+
         if user.subjectIds.length() == 0 {
             return userDto;
         }
+
         string subjectIds = from var subject in user.subjectIds
             select subject.id + ",";
 
         subjectIds = subjectIds.substring(0, subjectIds.length() - 1);
-        response:Subject|response:Subject[] subjects = check subjectClient->get("api/subjects/" + subjectIds);
+        response:Subject|response:Subject[] subjects;
+
+        lock {
+            subjects = check subjectClient->get("api/subjects/" + subjectIds);
+        }
+
         if subjects is response:Subject {
             userDto.subjects = [subjects];
         } else {
             userDto.subjects = subjects;
         }
+
         return userDto;
     }
 
-    resource function post .(http:RequestContext ctx, dto:UserInsert userDto) returns error|response:UserDetails? {
-        string userId = check getUserSub(ctx);
-        dto:User user = check userClient->post("api/users", {id: userId, name: userDto.name, email: userDto.email});
+    resource function post .(http:RequestContext ctx, dto:UserInsert userDto) returns error|response:UserDetails|http:Unauthorized {
+
+        string|http:Unauthorized userId = getUserSub(ctx);
+        if userId is http:Unauthorized {
+            return userId;
+        }
+
+        dto:User user;
+        lock {
+            user = check userClient->post("api/users", {id: userId, name: userDto.name, email: userDto.email});
+        }
+
         return {id: user.id, email: user.email, name: user.name};
+
     }
 
-    resource function get friends(http:RequestContext ctx) returns response:Friends|error? {
-        string userId = check getUserSub(ctx);
-        dto:User user = check getUser(userId);
-        response:Friends friends = {
-            following: check getUsers(user.followingIds, FULL),
-            followers: check getUsers(user.followersIds),
-            requested: check getUsers(user.requestedIds),
-            requestedBy: check getUsers(user.requestedByIds)
-        };
-        return friends;
+    resource function get friends(http:RequestContext ctx) returns response:Friends|http:NotFound|http:Unauthorized|error {
+
+        string|http:Unauthorized userId = getUserSub(ctx);
+        if userId is http:Unauthorized {
+            return userId;
+        }
+
+        return getFriends(userId);
     }
 
     // To make a friend request
-    resource function put friend\-request(http:RequestContext ctx, dto:ID friend) returns error? {
-        string userId = check getUserSub(ctx);
-        _ = check userClient->put("api/users/requests", {requestedBy: {id: userId}, requested: friend}, targetType = boolean);
+    resource function put friend\-request(http:RequestContext ctx, dto:ID friend) returns response:Friends|http:NotFound|http:Unauthorized|error {
+
+        string|http:Unauthorized userId = getUserSub(ctx);
+        if userId is http:Unauthorized {
+            return userId;
+        }
+
+        lock {
+            _ = check userClient->put("api/users/requests", {requestedBy: {id: userId}, requested: friend.cloneReadOnly()}, targetType = boolean);
+        }
+        return getFriends(userId);
     }
 
     // To accept a friend request
-    resource function put accept\-friend\-request(http:RequestContext ctx, dto:ID friend) returns error? {
-        string userId = check getUserSub(ctx);
-        _ = check userClient->put("api/users/follow", {follower: {id: userId}, following: friend}, targetType = boolean);
+    resource function put accept\-friend\-request(http:RequestContext ctx, dto:ID friend) returns response:Friends|http:NotFound|http:Unauthorized|error {
+
+        string|http:Unauthorized userId = getUserSub(ctx);
+        if userId is http:Unauthorized {
+            return userId;
+        }
+
+        lock {
+            _ = check userClient->put("api/users/follow", {follower: {id: userId}, following: friend.cloneReadOnly()}, targetType = boolean);
+        }
+        return getFriends(userId);
     }
 
     // To revoke a friend request
-    resource function delete friend\-request(http:RequestContext ctx, dto:ID friend) returns error? {
-        string userId = check getUserSub(ctx);
-        _ = check userClient->delete("api/users/requests", {requestedBy: {id:userId}, requested: friend}, targetType = boolean);
+    resource function delete friend\-request(http:RequestContext ctx, dto:ID friend) returns response:Friends|http:NotFound|http:Unauthorized|error {
+
+        string|http:Unauthorized userId = getUserSub(ctx);
+        if userId is http:Unauthorized {
+            return userId;
+        }
+
+        lock {
+            _ = check userClient->delete("api/users/requests", {requestedBy: {id: userId}, requested: friend.cloneReadOnly()}, targetType = boolean);
+        }
+        return getFriends(userId);
     }
 
     // To unfollow a friend
-    resource function delete follow\-friend(http:RequestContext ctx, dto:ID friend) returns error? {
-        string userId = check getUserSub(ctx);
-        _ = check userClient->delete("api/users/follow", {follower: friend, following: {id:userId}}, targetType = boolean);
+    resource function delete follow\-friend(http:RequestContext ctx, dto:ID friend) returns response:Friends|http:NotFound|http:Unauthorized|error {
+
+        string|http:Unauthorized userId = getUserSub(ctx);
+        if userId is http:Unauthorized {
+            return userId;
+        }
+
+        lock {
+            _ = check userClient->delete("api/users/follow", {follower: friend.cloneReadOnly(), following: {id: userId}}, targetType = boolean);
+        }
+        return getFriends(userId);
     }
 
     // To reject a friend request
-    resource function delete reject\-friend\-request(http:RequestContext ctx, dto:ID friend) returns error? {
-        string userId = check getUserSub(ctx);
-        _ = check userClient->delete("api/users/requests", {requestedBy: friend, requested: {id: userId}}, targetType = boolean);
+    resource function delete reject\-friend\-request(http:RequestContext ctx, dto:ID friend) returns response:Friends|http:NotFound|http:Unauthorized|error {
+
+        string|http:Unauthorized userId = getUserSub(ctx);
+        if userId is http:Unauthorized {
+            return userId;
+        }
+
+        lock {
+            _ = check userClient->delete("api/users/requests", {requestedBy: friend.cloneReadOnly(), requested: {id: userId}}, targetType = boolean);
+        }
+        return getFriends(userId);
     }
 
     // To remove a follower
-    resource function delete friend\-follower(http:RequestContext ctx, dto:ID friend) returns error? {
-        string userId = check getUserSub(ctx);
-        _ = check userClient->delete("api/users/follow", {follower: {id:userId}, following: friend}, targetType = boolean);
+    resource function delete friend\-follower(http:RequestContext ctx, dto:ID friend) returns response:Friends|http:NotFound|http:Unauthorized|error {
+
+        string|http:Unauthorized userId = getUserSub(ctx);
+        if userId is http:Unauthorized {
+            return userId;
+        }
+
+        lock {
+            _ = check userClient->delete("api/users/follow", {follower: {id: userId}, following: friend.cloneReadOnly()}, targetType = boolean);
+        }
+        return getFriends(userId);
     }
 
 }
@@ -119,37 +211,78 @@ service /central/api/users on central {
 @http:ServiceConfig {
     auth: auth_config
 }
-service /central/api/subjects on central {
+service http:InterceptableService /central/api/subjects on central {
 
-    resource function put .(http:RequestContext ctx, dto:ID subject) returns error? {
-        string userId = check getUserSub(ctx);
-        _ = check userClient->put("api/users/" + userId + "/subjects/", {subject: subject}, targetType = anydata);
+    public function createInterceptors() returns ResponseErrorInterceptor {
+        return new ResponseErrorInterceptor();
     }
 
-    resource function put goals(http:RequestContext ctx, dto:GoalAdjust goalAdjust) returns error? {
-        string userId = check getUserSub(ctx);
+    isolated resource function put .(http:RequestContext ctx, dto:ID subject) returns http:Ok|http:Unauthorized|error {
+
+        string|http:Unauthorized userId = getUserSub(ctx);
+        if userId is http:Unauthorized {
+            return userId;
+        }
+
+        lock {
+            _ = check userClient->put("api/users/" + userId + "/subjects/", {subject: subject.cloneReadOnly()}, targetType = anydata);
+        }
+        return SUCCESS_MESSAGE;
+    }
+
+    isolated resource function put goals(http:RequestContext ctx, dto:GoalAdjust goalAdjust) returns http:Ok|http:Unauthorized|error {
+
+        string|http:Unauthorized userId = getUserSub(ctx);
+        if userId is http:Unauthorized {
+            return userId;
+        }
+
         if goalAdjust.goalHours < <decimal>0 {
             return error("Goal hours cannot be negative");
         }
-        http:Response res = check userClient->put("api/users/" + userId + "/subjects" + "/goals", {subject: {goalHours: goalAdjust.goalHours, id: goalAdjust.subjectId}});
+        http:Response res;
+        lock {
+            res = check userClient->put("api/users/" + userId + "/subjects" + "/goals", {subject: {goalHours: goalAdjust.goalHours, id: goalAdjust.subjectId}});
+        }
         if (res.statusCode != 200) {
             return error("Failed to update goal hours");
         }
-        return check studyClient->put("api/adjust-weekly-goal", {studentId: userId, subjectId: goalAdjust.subjectId, goalHours: goalAdjust.goalHours});
+        lock {
+            res = check studyClient->put("api/adjust-weekly-goal", {studentId: userId, subjectId: goalAdjust.subjectId, goalHours: goalAdjust.goalHours});
+        }
+        return SUCCESS_MESSAGE;
     }
 
-    resource function delete .(http:RequestContext ctx, dto:ID subject) returns error? {
-        string userId = check getUserSub(ctx);
-        _ = check userClient->delete("api/users/" + userId + "/subjects", {subject: subject}, targetType = anydata);
+    isolated resource function delete .(http:RequestContext ctx, dto:ID subject) returns http:Ok|http:Unauthorized|error {
+
+        string|http:Unauthorized userId = getUserSub(ctx);
+        if userId is http:Unauthorized {
+            return userId;
+        }
+
+        lock {
+            _ = check userClient->delete("api/users/" + userId + "/subjects", {subject: subject.cloneReadOnly()}, targetType = anydata);
+        }
+        return SUCCESS_MESSAGE;
     }
 
-    resource function get [string subjectId](http:RequestContext ctx) returns response:StudyStatus|error? {
-        string userId = check getUserSub(ctx);
+    isolated resource function get [string subjectId](http:RequestContext ctx) returns response:StudyStatus|http:Unauthorized|http:NotFound|error {
+
+        string|http:Unauthorized userId = getUserSub(ctx);
+        if userId is http:Unauthorized {
+            return userId;
+        }
+
         return check getStudyDetails(userId, subjectId);
     }
 
-    resource function get [string subjectId]/[int year]/[int weekNo](http:RequestContext ctx) returns response:StudyStatus|error? {
-        string userId = check getUserSub(ctx);
+    isolated resource function get [string subjectId]/[int year]/[int weekNo](http:RequestContext ctx) returns response:StudyStatus|http:Unauthorized|http:NotFound|error {
+
+        string|http:Unauthorized userId = getUserSub(ctx);
+        if userId is http:Unauthorized {
+            return userId;
+        }
+
         return check getStudyDetails(userId, subjectId, year, weekNo);
     }
 
@@ -158,31 +291,60 @@ service /central/api/subjects on central {
 @http:ServiceConfig {
     auth: auth_config
 }
-service /central/api/study on central {
+service http:InterceptableService /central/api/study on central {
 
-    resource function post .(http:RequestContext ctx, dto:StudySession studySession) returns error? {
-        string userId = check getUserSub(ctx);
-        dto:User user = check getUser(userId);
+    public function createInterceptors() returns ResponseErrorInterceptor {
+        return new ResponseErrorInterceptor();
+    }
+
+    isolated resource function post .(http:RequestContext ctx, dto:StudySession studySession) returns response:StudyStatus|http:Unauthorized|http:NotFound|error {
+
+        string|http:Unauthorized userId = getUserSub(ctx);
+        if userId is http:Unauthorized {
+            return userId;
+        }
+
+        dto:User|http:NotFound user = check getUser(userId);
+        if user is http:NotFound {
+            return user;
+        }
+
         decimal[] goalHours = from var subject in user.subjectIds
             where subject.id == studySession.subjectId
             select subject.goalHours;
 
-        return check studyClient->post("api/study-session/", {...studySession, studentId: userId, goalHours: goalHours[0]});
+        lock {
+            _ = check studyClient->post("api/study-session/", {...studySession.cloneReadOnly(), studentId: userId, goalHours: goalHours[0]}, targetType = http:Response);
+        }
+        return getStudyDetails(userId, studySession.subjectId);
     }
 
 }
 
-function getUserSub(http:RequestContext ctx) returns string|error {
-    [jwt:Header, jwt:Payload] jwtInfo = check ctx.getWithType(http:JWT_INFORMATION);
+isolated function getUserSub(http:RequestContext ctx) returns string|http:Unauthorized {
+    [jwt:Header, jwt:Payload]|error jwtInfo = ctx.getWithType(http:JWT_INFORMATION);
+    if jwtInfo is error {
+        response:UnauthorizedError unauthorizedError = {body: {message: JWT_VALIDATION_FAILED}};
+        return unauthorizedError;
+    }
     return jwtInfo[1].sub.toString().substring(6);
 }
 
-function getUser(string userId) returns dto:User|error {
-    dto:User user = check userClient->get("api/users/" + userId);
+isolated function getUser(string userId) returns dto:User|http:NotFound|error {
+    dto:User|error user;
+    lock {
+        user = userClient->get("api/users/" + userId);
+    }
+    if user is error {
+        if user.message().startsWith("User with") {
+            response:NotFoundError notFoundError = {body: {message: "User not found"}};
+            return notFoundError;
+        }
+    }
     return user;
 }
 
-function getUsers(dto:ID[] usersObject, UserDetailLevel detailLevel = NAME) returns response:UserDetails[]|error {
+isolated function getUsers(dto:ID[] usersObject, UserDetailLevel detailLevel = NAME) returns response:UserDetails[]|error {
     if (usersObject.length() == 0) {
         return [];
     }
@@ -191,10 +353,16 @@ function getUsers(dto:ID[] usersObject, UserDetailLevel detailLevel = NAME) retu
         select user.id + ",";
 
     userIds = userIds.substring(0, userIds.length() - 1);
-    dto:User[]|dto:User users = check userClient->get("api/users/" + userIds);
+    dto:User[]|dto:User users;
+    lock {
+        users = check userClient->get("api/users/" + userIds);
+    }
+
     map<dto:UserStudySummary>? userStudySummaries = ();
     if detailLevel == FULL {
-        userStudySummaries = check studyClient->get("api/study-summary/" + userIds);
+        lock {
+            userStudySummaries = check studyClient->get("api/study-summary/" + userIds);
+        }
     }
     response:UserDetails[] userDtos = [];
     if users is dto:User {
@@ -215,11 +383,14 @@ function getUsers(dto:ID[] usersObject, UserDetailLevel detailLevel = NAME) retu
     return userDtos;
 }
 
-function getUserSubjectSummary(response:UserDetails userDto, dto:UserSubject[] subjectIdList, map<dto:UserStudySummary>? userStudySummaries) returns response:SubjectGoal[]|error {
+isolated function getUserSubjectSummary(response:UserDetails userDto, dto:UserSubject[] subjectIdList, map<dto:UserStudySummary>? userStudySummaries) returns response:SubjectGoal[]|error {
 
     string subjectIds = from var subject in subjectIdList
         select subject.id + ",";
-    response:SubjectGoal[] subjects = check subjectClient->get("api/subjects/" + subjectIds);
+    response:SubjectGoal[] subjects;
+    lock {
+        subjects = check subjectClient->get("api/subjects/" + subjectIds);
+    }
     if userStudySummaries is map<dto:UserStudySummary> {
         dto:UserStudySummary studentSummary = userStudySummaries.get(userDto.id);
         foreach var subject in subjects {
@@ -241,8 +412,31 @@ function getUserSubjectSummary(response:UserDetails userDto, dto:UserSubject[] s
     return subjects;
 }
 
-function getStudyDetails(string userId, string subjectId, int? year = (), int? weekNo = ()) returns response:StudyStatus|error {
-    dto:User user = check getUser(userId);
+isolated function getFriends(string userId) returns response:Friends|http:NotFound|error {
+
+    dto:User|http:NotFound user = check getUser(userId);
+
+    if user is http:NotFound {
+        return user;
+    }
+
+    response:Friends friends = {
+        following: check getUsers(user.followingIds, FULL),
+        followers: check getUsers(user.followersIds),
+        requested: check getUsers(user.requestedIds),
+        requestedBy: check getUsers(user.requestedByIds)
+    };
+
+    return friends;
+}
+
+isolated function getStudyDetails(string userId, string subjectId, int? year = (), int? weekNo = ()) returns response:StudyStatus|http:NotFound|error {
+
+    dto:User|http:NotFound user = check getUser(userId);
+    if user is http:NotFound {
+        return user;
+    }
+
     decimal? goalHours = 0;
     boolean found = false;
     foreach var subject in user.subjectIds {
@@ -257,14 +451,21 @@ function getStudyDetails(string userId, string subjectId, int? year = (), int? w
         return error("User is not enrolled in the subject");
     }
 
-    dto:Subject subject = check subjectClient->get("api/subjects/" + subjectId);
+    dto:Subject subject;
+    lock {
+        subject = check subjectClient->get("api/subjects/" + subjectId);
+    }
     dto:StudyStatus studyStatus;
 
     if year !is () && weekNo !is () {
-        studyStatus = check studyClient->get("api/study-status/" + userId + "/" + subjectId + "/" + year.toString() + "/" + weekNo.toString());
+        lock {
+            studyStatus = check studyClient->get("api/study-status/" + userId + "/" + subjectId + "/" + year.toString() + "/" + weekNo.toString());
+        }
         goalHours = studyStatus.goalHours;
     } else {
-        studyStatus = check studyClient->get("api/current-study-status/" + userId + "/" + subjectId);
+        lock {
+            studyStatus = check studyClient->get("api/current-study-status/" + userId + "/" + subjectId);
+        }
     }
 
     response:StudyStatus studyStatusDto = {
