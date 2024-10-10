@@ -20,7 +20,7 @@ service /api on new http:Listener(9092) {
         self.db = check mongoDb->getDatabase(DATABASE_NAME);
     }
 
-    resource function post study\-session(dto:StudySession studySessionDto) returns error? {
+    isolated resource function post study\-session(dto:StudySession studySessionDto) returns error? {
 
         if studySessionDto.noMins < <decimal>0 {
             return error("Study session duration cannot be negative");
@@ -80,7 +80,7 @@ service /api on new http:Listener(9092) {
 
     }
 
-    resource function get current\-study\-status/[string studentId]/[string subjectId]() returns dto:StudyStatus|error? {
+    isolated resource function get current\-study\-status/[string studentId]/[string subjectId]() returns dto:StudyStatus|error? {
 
         mongodb:Collection weeks = check self.db->getCollection("weeks");
 
@@ -153,7 +153,7 @@ service /api on new http:Listener(9092) {
         return error("Failed to get status");
     }
 
-    resource function get study\-status/[string studentId]/[string subjectId]/[int year]/[int weekNo]() returns dto:StudyStatus|error? {
+    isolated resource function get study\-status/[string studentId]/[string subjectId]/[int year]/[int weekNo]() returns dto:StudyStatus|error? {
 
         if weekNo < 1 {
             return error("Invalid week number");
@@ -199,7 +199,7 @@ service /api on new http:Listener(9092) {
         return error("Failed to get status");
     }
 
-    resource function get study\-summary/[string studentIds]() returns map<dto:UserSummary>|dto:UserSummary|error? {
+    isolated resource function get study\-summary/[string studentIds]() returns map<dto:UserSummary>|dto:UserSummary|error? {
 
         mongodb:Collection weeksCollection = check self.db->getCollection("weeks");
 
@@ -236,7 +236,7 @@ service /api on new http:Listener(9092) {
         return userSummaries;
     }
 
-    resource function put adjust\-weekly\-goal(dto:GoalAdjust goalAdjust) returns error? {
+    isolated resource function put adjust\-weekly\-goal(dto:GoalAdjust goalAdjust) returns error? {
 
         if goalAdjust.goalHours < <decimal>0 {
             return error("Goal hours cannot be negative");
@@ -291,7 +291,7 @@ service /api on new http:Listener(9092) {
 
 }
 
-function getStudiedLessons(models:Week week) returns string[] {
+isolated function getStudiedLessons(models:Week week) returns string[] {
     string[] studiedLessons = [];
     foreach var studySession in week.studySessions {
         if studiedLessons.indexOf(studySession.lessonId) == () {
@@ -301,7 +301,7 @@ function getStudiedLessons(models:Week week) returns string[] {
     return studiedLessons;
 }
 
-function getWeekNumber(time:Civil date) returns int|error {
+isolated function getWeekNumber(time:Civil date) returns int|error {
 
     time:Civil firstDayOfYear = {
         year: date.year,

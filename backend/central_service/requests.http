@@ -53,7 +53,7 @@ Authorization: Bearer {{token}}
 
 {
     "subjectId": "01ef813a-7e5e-1c10-81bf-c2a58dd33537",
-    "goalHours": 11
+    "goalHours": 1
 }
 
 ### Study Status
@@ -69,8 +69,8 @@ POST http://localhost:9094/central/api/study
 Authorization: Bearer {{token}}
 
 {
-    "subjectId": "01ef813a-3213-1816-b7e7-efedfe66b24b",
-    "lessonId": "01ef8201-0c9d-17ae-b130-e73ce32c95db",
+    "subjectId": "01ef813a-7e5e-1c10-81bf-c2a58dd33537",
+    "lessonId": "01ef8201-0c9d-19ae-b130-e73ce32c95db",
     "noMins": 30
 }
 
@@ -115,7 +115,7 @@ DELETE http://localhost:9094/central/api/users/follow-friend
 Authorization: Bearer {{token}}
 
 {
-    "id": "67063966256a7bdef77db020"
+    "id": "{{saginiId}}"
 }
 
 ### Remove a follower

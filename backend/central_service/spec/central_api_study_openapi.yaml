@@ -20,45 +20,35 @@ paths:
               $ref: '#/components/schemas/StudySession'
         required: true
       responses:
-        "202":
-          description: Accepted
         "500":
           description: InternalServerError
+        "201":
+          description: Created
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
-        "400":
-          description: BadRequest
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: '#/components/schemas/StudyStatus'
+        "401":
+          description: Unauthorized
+        "404":
+          description: NotFound
 components:
   schemas:
-    ErrorPayload:
+    Lesson:
       required:
-      - message
-      - method
-      - path
-      - reason
-      - status
-      - timestamp
+      - id
+      - name
+      - "no"
       type: object
       properties:
-        timestamp:
+        id:
           type: string
-        status:
+        name:
+          type: string
+        "no":
           type: integer
           format: int64
-        reason:
-          type: string
-        message:
-          type: string
-        path:
-          type: string
-        method:
-          type: string
+      additionalProperties: false
     StudySession:
       required:
       - lessonId
@@ -73,4 +63,50 @@ components:
         noMins:
           type: integer
           format: int64
+      additionalProperties: false
+    StudyStatus:
+      required:
+      - actualHours
+      - goalHours
+      - lessonDates
+      - lessons
+      - studentId
+      - studiedLessons
+      - subjectId
+      - weekNo
+      - year
+      type: object
+      properties:
+        studentId:
+          type: string
+        subjectId:
+          type: string
+        weekNo:
+          type: integer
+          format: int64
+        year:
+          type: integer
+          format: int64
+        actualHours:
+          type: number
+          format: double
+        goalHours:
+          type: number
+          format: double
+          nullable: true
+        lessonDates:
+          type: object
+          additionalProperties:
+            type: string
+          nullable: true
+        studiedLessons:
+          type: array
+          nullable: true
+          items:
+            type: string
+        lessons:
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/Lesson'
       additionalProperties: false
