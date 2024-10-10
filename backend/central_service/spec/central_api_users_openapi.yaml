@@ -1,0 +1,356 @@
+openapi: 3.0.1
+info:
+  title: Central Api Users
+  version: 0.1.0
+servers:
+- url: "{server}:{port}/central/api/users"
+  variables:
+    server:
+      default: http://localhost
+    port:
+      default: "9094"
+paths:
+  /:
+    get:
+      operationId: get
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDetails'
+        "202":
+          description: Accepted
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+    post:
+      operationId: post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserInsert'
+        required: true
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDetails'
+        "202":
+          description: Accepted
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+  /friends:
+    get:
+      operationId: getFriends
+      responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Friends'
+        "202":
+          description: Accepted
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+  /friend-request:
+    put:
+      operationId: putFriendRequest
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ID'
+        required: true
+      responses:
+        "202":
+          description: Accepted
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+    delete:
+      operationId: deleteFriendRequest
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ID'
+        required: true
+      responses:
+        "202":
+          description: Accepted
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+  /accept-friend-request:
+    put:
+      operationId: putAcceptFriendRequest
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ID'
+        required: true
+      responses:
+        "202":
+          description: Accepted
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+  /follow-friend:
+    delete:
+      operationId: deleteFollowFriend
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ID'
+        required: true
+      responses:
+        "202":
+          description: Accepted
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+  /reject-friend-request:
+    delete:
+      operationId: deleteRejectFriendRequest
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ID'
+        required: true
+      responses:
+        "202":
+          description: Accepted
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+  /friend-follower:
+    delete:
+      operationId: deleteFriendFollower
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ID'
+        required: true
+      responses:
+        "202":
+          description: Accepted
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+components:
+  schemas:
+    ErrorPayload:
+      required:
+      - message
+      - method
+      - path
+      - reason
+      - status
+      - timestamp
+      type: object
+      properties:
+        timestamp:
+          type: string
+        status:
+          type: integer
+          format: int64
+        reason:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        method:
+          type: string
+    Friends:
+      type: object
+      properties:
+        followers:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserDetails'
+          default: []
+        following:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserDetails'
+          default: []
+        requested:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserDetails'
+          default: []
+        requestedBy:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserDetails'
+          default: []
+      additionalProperties: false
+    ID:
+      required:
+      - id
+      type: object
+      properties:
+        id:
+          type: string
+      additionalProperties: false
+    Lesson:
+      required:
+      - id
+      - name
+      - "no"
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        "no":
+          type: integer
+          format: int64
+      additionalProperties: false
+    Subject:
+      required:
+      - id
+      - lessons
+      - name
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        lessons:
+          type: array
+          items:
+            $ref: '#/components/schemas/Lesson'
+      additionalProperties: false
+    SubjectGoal:
+      type: object
+      allOf:
+      - $ref: '#/components/schemas/Subject'
+      - type: object
+        properties:
+          goalHours:
+            type: number
+            format: double
+            default: 0
+          actualHours:
+            type: number
+            format: double
+            default: 0
+        additionalProperties: false
+    UserDetails:
+      required:
+      - email
+      - id
+      - name
+      type: object
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+        name:
+          type: string
+        subjects:
+          oneOf:
+          - type: array
+            items:
+              $ref: '#/components/schemas/Subject'
+          - type: array
+            items:
+              $ref: '#/components/schemas/SubjectGoal'
+      additionalProperties: false
+    UserInsert:
+      required:
+      - email
+      - name
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+      additionalProperties: false

@@ -10,44 +10,15 @@ servers:
     port:
       default: "9094"
 paths:
-  /{subjectId}:
-    get:
-      operationId: getSubjectid
-      parameters:
-      - name: subjectId
-        in: path
-        required: true
-        schema:
-          type: string
-      responses:
-        "200":
-          description: Ok
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/StudyStatus'
-        "202":
-          description: Accepted
-        "500":
-          description: InternalServerError
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorPayload'
-        "400":
-          description: BadRequest
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorPayload'
+  /:
     put:
-      operationId: putSubjectid
-      parameters:
-      - name: subjectId
-        in: path
+      operationId: put
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ID'
         required: true
-        schema:
-          type: string
       responses:
         "202":
           description: Accepted
@@ -64,13 +35,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorPayload'
     delete:
-      operationId: deleteSubjectid
-      parameters:
-      - name: subjectId
-        in: path
+      operationId: delete
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ID'
         required: true
-        schema:
-          type: string
       responses:
         "202":
           description: Accepted
@@ -86,22 +57,46 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorPayload'
-  /{subjectId}/goals/{goalHours}:
+  /goals:
     put:
-      operationId: putSubjectidGoalsGoalhours
+      operationId: putGoals
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GoalAdjust'
+        required: true
+      responses:
+        "202":
+          description: Accepted
+        "500":
+          description: InternalServerError
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+        "400":
+          description: BadRequest
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorPayload'
+  /{subjectId}:
+    get:
+      operationId: getSubjectid
       parameters:
       - name: subjectId
         in: path
         required: true
         schema:
           type: string
-      - name: goalHours
-        in: path
-        required: true
-        schema:
-          type: number
-          format: double
       responses:
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StudyStatus'
         "202":
           description: Accepted
         "500":
@@ -183,6 +178,26 @@ components:
           type: string
         method:
           type: string
+    GoalAdjust:
+      required:
+      - goalHours
+      - subjectId
+      type: object
+      properties:
+        subjectId:
+          type: string
+        goalHours:
+          type: number
+          format: double
+      additionalProperties: false
+    ID:
+      required:
+      - id
+      type: object
+      properties:
+        id:
+          type: string
+      additionalProperties: false
     Lesson:
       required:
       - id
