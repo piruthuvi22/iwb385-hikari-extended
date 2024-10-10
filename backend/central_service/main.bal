@@ -217,6 +217,12 @@ service http:InterceptableService /central/api/subjects on central {
         return new ResponseErrorInterceptor();
     }
 
+    isolated resource function get .() returns response:Subject[]|error {
+        lock {
+            return subjectClient->get("api/subjects");
+        }
+    }
+
     isolated resource function put .(http:RequestContext ctx, dto:ID subject) returns http:Ok|http:Unauthorized|error {
 
         string|http:Unauthorized userId = getUserSub(ctx);
