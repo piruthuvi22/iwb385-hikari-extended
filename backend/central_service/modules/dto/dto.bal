@@ -11,6 +11,7 @@ public type User record {|
 |};
 
 public type UserInsert record {|
+    readonly string id;
     string name;
     string email;
 |};
