@@ -14,20 +14,18 @@ paths:
     get:
       operationId: get
       responses:
+        "500":
+          description: InternalServerError
         "200":
           description: Ok
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserDetails'
-        "202":
-          description: Accepted
-        "500":
-          description: InternalServerError
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorPayload'
+        "401":
+          description: Unauthorized
+        "404":
+          description: NotFound
     post:
       operationId: post
       requestBody:
@@ -37,44 +35,32 @@ paths:
               $ref: '#/components/schemas/UserInsert'
         required: true
       responses:
+        "500":
+          description: InternalServerError
         "201":
           description: Created
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/UserDetails'
-        "202":
-          description: Accepted
-        "500":
-          description: InternalServerError
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorPayload'
-        "400":
-          description: BadRequest
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorPayload'
+        "401":
+          description: Unauthorized
   /friends:
     get:
       operationId: getFriends
       responses:
+        "500":
+          description: InternalServerError
         "200":
           description: Ok
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Friends'
-        "202":
-          description: Accepted
-        "500":
-          description: InternalServerError
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorPayload'
+        "401":
+          description: Unauthorized
+        "404":
+          description: NotFound
   /friend-request:
     put:
       operationId: putFriendRequest
@@ -85,20 +71,18 @@ paths:
               $ref: '#/components/schemas/ID'
         required: true
       responses:
-        "202":
-          description: Accepted
         "500":
           description: InternalServerError
+        "200":
+          description: Ok
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
-        "400":
-          description: BadRequest
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: '#/components/schemas/Friends'
+        "401":
+          description: Unauthorized
+        "404":
+          description: NotFound
     delete:
       operationId: deleteFriendRequest
       requestBody:
@@ -108,20 +92,18 @@ paths:
               $ref: '#/components/schemas/ID'
         required: true
       responses:
-        "202":
-          description: Accepted
         "500":
           description: InternalServerError
+        "200":
+          description: Ok
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
-        "400":
-          description: BadRequest
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: '#/components/schemas/Friends'
+        "401":
+          description: Unauthorized
+        "404":
+          description: NotFound
   /accept-friend-request:
     put:
       operationId: putAcceptFriendRequest
@@ -132,20 +114,18 @@ paths:
               $ref: '#/components/schemas/ID'
         required: true
       responses:
-        "202":
-          description: Accepted
         "500":
           description: InternalServerError
+        "200":
+          description: Ok
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
-        "400":
-          description: BadRequest
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: '#/components/schemas/Friends'
+        "401":
+          description: Unauthorized
+        "404":
+          description: NotFound
   /follow-friend:
     delete:
       operationId: deleteFollowFriend
@@ -156,20 +136,18 @@ paths:
               $ref: '#/components/schemas/ID'
         required: true
       responses:
-        "202":
-          description: Accepted
         "500":
           description: InternalServerError
+        "200":
+          description: Ok
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
-        "400":
-          description: BadRequest
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: '#/components/schemas/Friends'
+        "401":
+          description: Unauthorized
+        "404":
+          description: NotFound
   /reject-friend-request:
     delete:
       operationId: deleteRejectFriendRequest
@@ -180,20 +158,18 @@ paths:
               $ref: '#/components/schemas/ID'
         required: true
       responses:
-        "202":
-          description: Accepted
         "500":
           description: InternalServerError
+        "200":
+          description: Ok
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
-        "400":
-          description: BadRequest
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: '#/components/schemas/Friends'
+        "401":
+          description: Unauthorized
+        "404":
+          description: NotFound
   /friend-follower:
     delete:
       operationId: deleteFriendFollower
@@ -204,45 +180,20 @@ paths:
               $ref: '#/components/schemas/ID'
         required: true
       responses:
-        "202":
-          description: Accepted
         "500":
           description: InternalServerError
+        "200":
+          description: Ok
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorPayload'
-        "400":
-          description: BadRequest
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorPayload'
+                $ref: '#/components/schemas/Friends'
+        "401":
+          description: Unauthorized
+        "404":
+          description: NotFound
 components:
   schemas:
-    ErrorPayload:
-      required:
-      - message
-      - method
-      - path
-      - reason
-      - status
-      - timestamp
-      type: object
-      properties:
-        timestamp:
-          type: string
-        status:
-          type: integer
-          format: int64
-        reason:
-          type: string
-        message:
-          type: string
-        path:
-          type: string
-        method:
-          type: string
     Friends:
       type: object
       properties:
