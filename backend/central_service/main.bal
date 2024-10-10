@@ -3,7 +3,6 @@ import central_service.response;
 
 import ballerina/http;
 import ballerina/jwt;
-// import ballerina/io;
 
 configurable string OAUTH2 = ?;
 configurable string USER_SERVICE = ?;
@@ -80,39 +79,39 @@ service /central/api/users on central {
     }
 
     // To make a friend request
-    resource function put request(http:RequestContext ctx, string friendId) returns error? {
+    resource function put friend\-request(http:RequestContext ctx, dto:ID friend) returns error? {
         string userId = check getUserSub(ctx);
-        return check userClient->put("api/users/requests", {requestedBy: userId, requested: friendId});
+        _ = check userClient->put("api/users/requests", {requestedBy: {id: userId}, requested: friend}, targetType = boolean);
     }
 
     // To accept a friend request
-    resource function put accept\-request(http:RequestContext ctx, string friendId) returns error? {
+    resource function put accept\-friend\-request(http:RequestContext ctx, dto:ID friend) returns error? {
         string userId = check getUserSub(ctx);
-        return check userClient->put("api/users/follow", {follower: userId, following: friendId});
+        _ = check userClient->put("api/users/follow", {follower: {id: userId}, following: friend}, targetType = boolean);
     }
 
     // To revoke a friend request
-    resource function delete request(http:RequestContext ctx, string friendId) returns error? {
+    resource function delete friend\-request(http:RequestContext ctx, dto:ID friend) returns error? {
         string userId = check getUserSub(ctx);
-        return check userClient->delete("api/users/requests", {requestedBy: userId, requested: friendId});
+        _ = check userClient->delete("api/users/requests", {requestedBy: {id:userId}, requested: friend}, targetType = boolean);
     }
 
     // To unfollow a friend
-    resource function delete follow(http:RequestContext ctx, string friendId) returns error? {
+    resource function delete follow\-friend(http:RequestContext ctx, dto:ID friend) returns error? {
         string userId = check getUserSub(ctx);
-        return check userClient->delete("api/users/follow", {follower: userId, following: friendId});
+        _ = check userClient->delete("api/users/follow", {follower: friend, following: {id:userId}}, targetType = boolean);
     }
 
     // To reject a friend request
-    resource function delete reject\-request(http:RequestContext ctx, string friendId) returns error? {
+    resource function delete reject\-friend\-request(http:RequestContext ctx, dto:ID friend) returns error? {
         string userId = check getUserSub(ctx);
-        return check userClient->delete("api/users/requests", {requestedBy: friendId, requested: userId});
+        _ = check userClient->delete("api/users/requests", {requestedBy: friend, requested: {id: userId}}, targetType = boolean);
     }
 
     // To remove a follower
-    resource function delete remove\-follower(http:RequestContext ctx, string friendId) returns error? {
+    resource function delete friend\-follower(http:RequestContext ctx, dto:ID friend) returns error? {
         string userId = check getUserSub(ctx);
-        return check userClient->delete("api/users/follow", {follower: friendId, following: userId});
+        _ = check userClient->delete("api/users/follow", {follower: {id:userId}, following: friend}, targetType = boolean);
     }
 
 }
@@ -199,39 +198,47 @@ function getUsers(dto:ID[] usersObject, UserDetailLevel detailLevel = NAME) retu
     }
     response:UserDetails[] userDtos = [];
     if users is dto:User {
-        userDtos.push({id: users.id, email: users.email, name: users.name});
+        response:UserDetails userDto = {id: users.id, email: users.email, name: users.name};
+        if detailLevel == FULL {
+            userDto.subjects = check getUserSubjectSummary(userDto, users.subjectIds, userStudySummaries);
+        }
+        userDtos.push(userDto);
         return userDtos;
     }
     foreach var user in users {
         response:UserDetails userDto = {id: user.id, email: user.email, name: user.name};
         if detailLevel == FULL {
-            string subjectIds = from var subject in user.subjectIds
-                select subject.id + ",";
-            response:SubjectGoal[] subjects = check subjectClient->get("api/subjects/" + subjectIds);
-            if userStudySummaries is map<dto:UserStudySummary> {
-                dto:UserStudySummary studentSummary = userStudySummaries.get(user.id);
-                foreach var subject in subjects {
-                    subject.actualHours = 0;
-                    foreach var subjectSummary in studentSummary.subjects {
-                        if (subject.id == subjectSummary.id) {
-                            subject.actualHours = subjectSummary.actualHours;
-                            break;
-                        }
-                    }
-                    foreach var subjectGoal in user.subjectIds {
-                        if (subject.id == subjectGoal.id) {
-                            subject.goalHours = subjectGoal.goalHours;
-                            break;
-                        }
-                    }
-                }
-            }
-            userDto.subjects = subjects;
+            userDto.subjects = check getUserSubjectSummary(userDto, user.subjectIds, userStudySummaries);
         }
         userDtos.push(userDto);
     }
-
     return userDtos;
+}
+
+function getUserSubjectSummary(response:UserDetails userDto, dto:UserSubject[] subjectIdList, map<dto:UserStudySummary>? userStudySummaries) returns response:SubjectGoal[]|error {
+
+    string subjectIds = from var subject in subjectIdList
+        select subject.id + ",";
+    response:SubjectGoal[] subjects = check subjectClient->get("api/subjects/" + subjectIds);
+    if userStudySummaries is map<dto:UserStudySummary> {
+        dto:UserStudySummary studentSummary = userStudySummaries.get(userDto.id);
+        foreach var subject in subjects {
+            subject.actualHours = 0;
+            foreach var subjectSummary in studentSummary.subjects {
+                if (subject.id == subjectSummary.id) {
+                    subject.actualHours = subjectSummary.actualHours;
+                    break;
+                }
+            }
+            foreach var subjectGoal in subjectIdList {
+                if (subject.id == subjectGoal.id) {
+                    subject.goalHours = subjectGoal.goalHours;
+                    break;
+                }
+            }
+        }
+    }
+    return subjects;
 }
 
 function getStudyDetails(string userId, string subjectId, int? year = (), int? weekNo = ()) returns response:StudyStatus|error {
