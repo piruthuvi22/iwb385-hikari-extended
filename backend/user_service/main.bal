@@ -11,20 +11,8 @@ mongodb:Client mongoDb = check new ({
     connection: CONNECTION_URL
 });
 
-@http:ServiceConfig {
-    cors: {
-        allowOrigins: ["*"]
-    }
-}
-
 service /api on new http:Listener(9090) {
     private final mongodb:Database db;
-
-    @http:ResourceConfig {
-        cors: {
-            allowOrigins: ["*"]
-        }
-    }
 
     function init() returns error? {
         self.db = check mongoDb->getDatabase(DATABASE_NAME);
@@ -47,6 +35,20 @@ service /api on new http:Listener(9090) {
         stream<models:User, error?> resultStream = check users->find();
         models:User[]|error result = from models:User user in resultStream
             where idArray.indexOf(user.id) > -1
+            select user;
+        return result;
+    }
+
+    resource function get users/search(string searchItem) returns models:User[]|error? {
+        mongodb:Collection users = check self.db->getCollection("users");
+        map<json> query = {};
+        if (searchItem == "") {
+            return error(string `Search query is empty`);
+        }
+        query = {name: {"$regex": searchItem, "$options": "i"}};
+        stream<models:User, error?> resultStream = check users->find(query);
+        models:User[]|error result = from models:User user in resultStream
+            limit 10
             select user;
         return result;
     }
@@ -101,6 +103,15 @@ service /api on new http:Listener(9090) {
     }
 
     resource function put users/follow(dto:Follow follow) returns boolean|error {
+        dto:Request request = {
+            requested: follow.follower,
+            requestedBy: follow.following
+        };
+        boolean|error? isRequestDeleted = deleteRequest(self.db, request);
+        if isRequestDeleted is error || (isRequestDeleted is boolean && !isRequestDeleted) {
+            return isRequestDeleted;
+        }
+
         mongodb:Collection users = check self.db->getCollection("users");
         models:User|error? followerUser = check getUser(self.db, follow.follower.id);
         if followerUser !is models:User {
@@ -188,24 +199,7 @@ service /api on new http:Listener(9090) {
     }
 
     resource function delete users/requests(dto:Request toBeDeleted) returns boolean|error {
-        mongodb:Collection users = check self.db->getCollection("users");
-        models:User|error? requestedUser = check getUser(self.db, toBeDeleted.requested.id);
-        if requestedUser !is models:User {
-            return error(string `User with id ${toBeDeleted.requested.id} not found`);
-        }
-        models:User|error? updatedRequested = deleteId(requestedUser.requestedByIds, toBeDeleted.requestedBy, users, toBeDeleted.requested.id, "requestedByIds", self.db);
-        if updatedRequested !is models:User {
-            return error(string `Failed to update requested details to user with id ${toBeDeleted.requested.id}`);
-        }
-        models:User|error? requestedByUser = check getUser(self.db, toBeDeleted.requestedBy.id);
-        if requestedByUser !is models:User {
-            return error(string `User with id ${toBeDeleted.requestedBy.id} not found`);
-        }
-        models:User|error? updatedRequestedBy = deleteId(requestedByUser.requestedIds, toBeDeleted.requested, users, toBeDeleted.requestedBy.id, "requestedIds", self.db);
-        if updatedRequestedBy is models:User {
-            return true;
-        }
-        return false;
+        return deleteRequest(self.db, toBeDeleted);
     }
 }
 
@@ -271,3 +265,25 @@ isolated function deleteId(models:ID[] exisitingIds, models:ID newId, mongodb:Co
     }
     return check getUser(db, userId);
 }
+
+isolated function deleteRequest(mongodb:Database db, dto:Request toBeDeleted) returns boolean|error {
+    mongodb:Collection users = check db->getCollection("users");
+    models:User|error? requestedUser = check getUser(db, toBeDeleted.requested.id);
+    if requestedUser !is models:User {
+        return error(string `User with id ${toBeDeleted.requested.id} not found`);
+    }
+    models:User|error? updatedRequested = deleteId(requestedUser.requestedByIds, toBeDeleted.requestedBy, users, toBeDeleted.requested.id, "requestedByIds", db);
+    if updatedRequested !is models:User {
+        return error(string `Failed to update requested details to user with id ${toBeDeleted.requested.id}`);
+    }
+    models:User|error? requestedByUser = check getUser(db, toBeDeleted.requestedBy.id);
+    if requestedByUser !is models:User {
+        return error(string `User with id ${toBeDeleted.requestedBy.id} not found`);
+    }
+    models:User|error? updatedRequestedBy = deleteId(requestedByUser.requestedIds, toBeDeleted.requested, users, toBeDeleted.requestedBy.id, "requestedIds", db);
+    if updatedRequestedBy is models:User {
+        return true;
+    }
+    return false;
+}
+
