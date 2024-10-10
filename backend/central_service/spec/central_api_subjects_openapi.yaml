@@ -11,6 +11,19 @@ servers:
       default: "9094"
 paths:
   /:
+    get:
+      operationId: get
+      responses:
+        "500":
+          description: InternalServerError
+        "200":
+          description: Ok
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Subject'
     put:
       operationId: put
       requestBody:
@@ -193,6 +206,22 @@ components:
         lessons:
           type: array
           nullable: true
+          items:
+            $ref: '#/components/schemas/Lesson'
+      additionalProperties: false
+    Subject:
+      required:
+      - id
+      - lessons
+      - name
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        lessons:
+          type: array
           items:
             $ref: '#/components/schemas/Lesson'
       additionalProperties: false
