@@ -126,6 +126,10 @@ Authorization: Bearer {{token}}
     "id": "{{saginiId}}"
 }
 
+### Get all subjects
+GET http://localhost:9094/central/api/subjects
+Authorization: Bearer {{token}}
+
 ###
 
 
