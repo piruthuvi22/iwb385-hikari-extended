@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Button,
@@ -13,6 +13,14 @@ import Banner from "../assets/addSubjectBg.jpg";
 import AddIcon from "@mui/icons-material/Add";
 import Menubar from "../components/Menubar";
 import DialogBox from "../components/DialogBox";
+import { CircularProgress } from "@mui/material";
+import Loader from "../components/Loader";
+import axios from "axios";
+
+const ENDPOINT = "http://localhost:9094/central/api";
+
+const TOKEN =
+  "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IlNyQjE4ejFjRDB2QUticm1FamZ4diJ9.eyJpc3MiOiJodHRwczovL2hpa2FyaS51ay5hdXRoMC5jb20vIiwic3ViIjoiYXV0aDB8NjcwNjM5MmUyNTZhN2JkZWY3N2RhZmYyIiwiYXVkIjpbImNlbnRyYWxfYXBpIiwiaHR0cHM6Ly9oaWthcmkudWsuYXV0aDAuY29tL3VzZXJpbmZvIl0sImlhdCI6MTcyODU1MjAyMiwiZXhwIjoxNzI4NjM4NDIyLCJzY29wZSI6Im9wZW5pZCBwcm9maWxlIGVtYWlsIiwiYXpwIjoiRWRRRUVMd0tRWVhPS2I4V2htck0zZHpPNzN0MkxyTGYifQ.CwJHCEFjMsIJP6GADhC5Q1fQY2XMHwt6b9rw2QXz1K64CDXPJrb1dZR1dEVGUExgb7DpRyz9Gq_2sv0ADIYmVohXpmwrS8KTK0b9NkAiNubvTCHLcgKoOFv2Lwv8nZvbEuQJ9evrfVAEKHjBkS3ZX8DP-2JY7-l1aqzyCcdk6ImtimbfasvajpXyVurxRtQz2_TzVmGsdksmDUFGRK5Nq-IUyJENL7C5-dc-rKtJuZHkTUv6y46SOKFuB1QEVd-FM89B1AFmbgjis9kLldEW5CMsbDmD1CbatUiykFxIlAKLc9XmUxwYFH95hSzS8RCEN_mVW-Gkid7tXZ7SdSFU7g";
 
 const subjects = [
   "Combined Maths",
@@ -23,12 +31,69 @@ const subjects = [
   "Economics",
 ];
 
+interface SubjectResponse {
+  id: string;
+  name: string;
+}
+
 export default function AddSubject() {
   const theme = useTheme();
   const [open, setOpen] = useState(false);
   const [searchText, setSearchText] = useState("");
-  const [filteredSubjects, setFilteredSubjects] = useState(subjects);
-  const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
+  const [filteredSubjects, setFilteredSubjects] = useState<SubjectResponse[]>(
+    []
+  );
+  const [subjects, setSubjects] = useState<SubjectResponse[]>([]);
+  const [selectedSubjects, setSelectedSubjects] = useState<SubjectResponse[]>(
+    []
+  );
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    getSubjects();
+  }, []);
+
+  async function getSubjects() {
+    setLoading(true);
+    try {
+      const result = await fetch(ENDPOINT + "/subjects", {
+        headers: {
+          Authorization: "Bearer " + TOKEN,
+        },
+      });
+      const data = await result.json();
+      setSubjects(data);
+      setFilteredSubjects(data);
+      console.log(data);
+    } catch (error) {
+      console.error("Failed to fetch subjects", error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const handleSubjectClick = async (subject: SubjectResponse) => {
+    setLoading(true);
+
+    try {
+      const response = await axios.put(
+        ENDPOINT + "/subjects",
+        {
+          id: subject.id,
+        },
+        {
+          headers: {
+            Authorization: "Bearer " + TOKEN,
+          },
+        }
+      );
+      console.log("Subject updated:", response.data);
+    } catch (error) {
+      console.error("Error updating subject:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -45,19 +110,21 @@ export default function AddSubject() {
     const value = event.target.value;
     setSearchText(value);
     const filtered = subjects.filter((subject) =>
-      subject.toLowerCase().includes(value.toLowerCase())
+      subject.name.toLowerCase().includes(value.toLowerCase())
     );
     setFilteredSubjects(filtered);
   };
 
-  const handleSubjectClick = (subject: string) => {
-    if (!selectedSubjects.includes(subject)) {
-      setSelectedSubjects([...selectedSubjects, subject]);
-      setFilteredSubjects(filteredSubjects.filter((s) => s !== subject));
-      setSearchText("");
-      setOpen(false);
-    }
-  };
+  // const handleSubjectClick = (subject: SubjectResponse) => {
+  //   console.log(subject);
+
+  //   if (!selectedSubjects.includes(subject)) {
+  //     setSelectedSubjects([...selectedSubjects, subject]);
+  //     setFilteredSubjects(filteredSubjects.filter((s) => s !== subject));
+  //     setSearchText("");
+  //     setOpen(false);
+  //   }
+  // };
 
   return (
     <Box
@@ -98,7 +165,6 @@ export default function AddSubject() {
           StRings
         </Typography>
       </Box>
-
       <Box width={"100%"} textAlign={"center"} mt={"22vh"}>
         <Typography variant="h5" color="text.primary">
           Let's select your subjects!
@@ -129,7 +195,7 @@ export default function AddSubject() {
                   width: "100%",
                 }}
               >
-                <Typography variant="body1">{subject}</Typography>
+                <Typography variant="body1">{subject.name}</Typography>
                 <Typography variant="body2" color="text.secondary">
                   0 hrs
                 </Typography>
@@ -138,7 +204,6 @@ export default function AddSubject() {
           </Box>
         </Box>
       )}
-
       <Box
         width={"100%"}
         display={"flex"}
@@ -207,7 +272,7 @@ export default function AddSubject() {
                     },
                   }}
                 >
-                  <ListItemText primary={subject} />
+                  <ListItemText primary={subject.name} />
                 </ListItem>
               ))}
             </List>
@@ -218,6 +283,7 @@ export default function AddSubject() {
           </Typography>
         )}
       </DialogBox>
+      {loading && <Loader />}
       <Menubar></Menubar>
     </Box>
   );
