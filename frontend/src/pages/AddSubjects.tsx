@@ -13,7 +13,6 @@ import Banner from "../assets/addSubjectBg.jpg";
 import AddIcon from "@mui/icons-material/Add";
 import Menubar from "../components/Menubar";
 import DialogBox from "../components/DialogBox";
-import { CircularProgress } from "@mui/material";
 import Loader from "../components/Loader";
 import axios from "axios";
 
@@ -22,18 +21,10 @@ const ENDPOINT = "http://localhost:9094/central/api";
 const TOKEN =
   "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IlNyQjE4ejFjRDB2QUticm1FamZ4diJ9.eyJpc3MiOiJodHRwczovL2hpa2FyaS51ay5hdXRoMC5jb20vIiwic3ViIjoiYXV0aDB8NjcwNjM5MmUyNTZhN2JkZWY3N2RhZmYyIiwiYXVkIjpbImNlbnRyYWxfYXBpIiwiaHR0cHM6Ly9oaWthcmkudWsuYXV0aDAuY29tL3VzZXJpbmZvIl0sImlhdCI6MTcyODU1MjAyMiwiZXhwIjoxNzI4NjM4NDIyLCJzY29wZSI6Im9wZW5pZCBwcm9maWxlIGVtYWlsIiwiYXpwIjoiRWRRRUVMd0tRWVhPS2I4V2htck0zZHpPNzN0MkxyTGYifQ.CwJHCEFjMsIJP6GADhC5Q1fQY2XMHwt6b9rw2QXz1K64CDXPJrb1dZR1dEVGUExgb7DpRyz9Gq_2sv0ADIYmVohXpmwrS8KTK0b9NkAiNubvTCHLcgKoOFv2Lwv8nZvbEuQJ9evrfVAEKHjBkS3ZX8DP-2JY7-l1aqzyCcdk6ImtimbfasvajpXyVurxRtQz2_TzVmGsdksmDUFGRK5Nq-IUyJENL7C5-dc-rKtJuZHkTUv6y46SOKFuB1QEVd-FM89B1AFmbgjis9kLldEW5CMsbDmD1CbatUiykFxIlAKLc9XmUxwYFH95hSzS8RCEN_mVW-Gkid7tXZ7SdSFU7g";
 
-const subjects = [
-  "Combined Maths",
-  "Physics",
-  "Chemistry",
-  "ICT",
-  "Accouting",
-  "Economics",
-];
-
 interface SubjectResponse {
   id: string;
   name: string;
+  goalHours: number;
 }
 
 export default function AddSubject() {
@@ -56,15 +47,34 @@ export default function AddSubject() {
   async function getSubjects() {
     setLoading(true);
     try {
-      const result = await fetch(ENDPOINT + "/subjects", {
+      const availableSubjectsResponse = await axios.get(
+        ENDPOINT + "/subjects",
+        {
+          headers: {
+            Authorization: "Bearer " + TOKEN,
+          },
+        }
+      );
+      const availableSubjects = availableSubjectsResponse.data;
+      setSubjects(availableSubjects);
+      setFilteredSubjects(availableSubjects);
+
+      const enrolledSubjectsResponse = await axios.get(ENDPOINT + "/users", {
         headers: {
           Authorization: "Bearer " + TOKEN,
         },
       });
-      const data = await result.json();
-      setSubjects(data);
-      setFilteredSubjects(data);
-      console.log(data);
+      const enrolledSubjects = await enrolledSubjectsResponse.data.subjects;
+      setSelectedSubjects(enrolledSubjects);
+
+      const filteredAvailableSubjects = availableSubjects.filter(
+        (subject: SubjectResponse) =>
+          !enrolledSubjects.some(
+            (enrolled: SubjectResponse) => enrolled.id === subject.id
+          )
+      );
+      setSubjects(filteredAvailableSubjects);
+      setFilteredSubjects(filteredAvailableSubjects);
     } catch (error) {
       console.error("Failed to fetch subjects", error);
     } finally {
@@ -87,11 +97,16 @@ export default function AddSubject() {
           },
         }
       );
-      console.log("Subject updated:", response.data);
     } catch (error) {
       console.error("Error updating subject:", error);
     } finally {
       setLoading(false);
+      if (!selectedSubjects.includes(subject)) {
+        setSelectedSubjects([...selectedSubjects, subject]);
+        setFilteredSubjects(filteredSubjects.filter((s) => s !== subject));
+        setSearchText("");
+        setOpen(false);
+      }
     }
   };
 
@@ -114,17 +129,6 @@ export default function AddSubject() {
     );
     setFilteredSubjects(filtered);
   };
-
-  // const handleSubjectClick = (subject: SubjectResponse) => {
-  //   console.log(subject);
-
-  //   if (!selectedSubjects.includes(subject)) {
-  //     setSelectedSubjects([...selectedSubjects, subject]);
-  //     setFilteredSubjects(filteredSubjects.filter((s) => s !== subject));
-  //     setSearchText("");
-  //     setOpen(false);
-  //   }
-  // };
 
   return (
     <Box
@@ -196,9 +200,9 @@ export default function AddSubject() {
                 }}
               >
                 <Typography variant="body1">{subject.name}</Typography>
-                <Typography variant="body2" color="text.secondary">
-                  0 hrs
-                </Typography>
+                {/* <Typography variant="body2" color="text.secondary">
+                  {subject.goalHours} hrs
+                </Typography> */}
               </Box>
             ))}
           </Box>
