@@ -11,7 +11,7 @@ import Loader from "../components/Loader";
 const ENDPOINT = "http://localhost:9094/central/api";
 
 const TOKEN =
-  "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IlNyQjE4ejFjRDB2QUticm1FamZ4diJ9.eyJpc3MiOiJodHRwczovL2hpa2FyaS51ay5hdXRoMC5jb20vIiwic3ViIjoiYXV0aDB8NjcwNjM5MmUyNTZhN2JkZWY3N2RhZmYyIiwiYXVkIjpbImNlbnRyYWxfYXBpIiwiaHR0cHM6Ly9oaWthcmkudWsuYXV0aDAuY29tL3VzZXJpbmZvIl0sImlhdCI6MTcyODY0MDQxNywiZXhwIjoxNzI4NzI2ODE3LCJzY29wZSI6Im9wZW5pZCBwcm9maWxlIGVtYWlsIiwiYXpwIjoiRWRRRUVMd0tRWVhPS2I4V2htck0zZHpPNzN0MkxyTGYifQ.Ap0AhkYe_V6e8TyRBIAIB4RyuLK6DxgTx6AmbmDTYkbVjOWEEujC8OD419VUVgmKh-W6_5SpwR2LlT5SWSn5i_67pMSawvfcw0sxri9QNgtOQmYnbpbWhCvAEVPw1TDDtZdDtU5hSeXl3PCzwMgupENNiheXRqyjQUDYU0-8N14Fd2hPrxKjO_SgDeF6HkiVAAccZUpLPfQ472bR5fvZalQuz0RI2ZYaMNcLQHJsVUpaGNhYL2jizcQ1Iiz48tz58ddW8UZfWDqGh968iirFKkwyMSQt32m1oXQkVWKsuxAK-x9DLdJeIXub9bx32wr8g-dNcZxujuI0LWFy7XwR6Q";
+  "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IlNyQjE4ejFjRDB2QUticm1FamZ4diJ9.eyJpc3MiOiJodHRwczovL2hpa2FyaS51ay5hdXRoMC5jb20vIiwic3ViIjoiYXV0aDB8NjcwNjM5MmUyNTZhN2JkZWY3N2RhZmYyIiwiYXVkIjpbImNlbnRyYWxfYXBpIiwiaHR0cHM6Ly9oaWthcmkudWsuYXV0aDAuY29tL3VzZXJpbmZvIl0sImlhdCI6MTcyODg5MjA4OSwiZXhwIjoxNzI4OTc4NDg5LCJzY29wZSI6Im9wZW5pZCBwcm9maWxlIGVtYWlsIiwiYXpwIjoiRWRRRUVMd0tRWVhPS2I4V2htck0zZHpPNzN0MkxyTGYifQ.CQmr6tT3H81JFHDonTyvUMqCRLqoe1fmOm2u5gVlDdQbdXiEWyLB-bwGciPP3M6fPXtqhFCjG3FHFkHl1pBR6cGE-RZNyRFrfsMZU7lfi-XweVZINfy-1EWp2_gtMqVD4-sfVGnp89w4bDBvoSBUppR6YkCgjJVyLtnz81MybLs-pQEIBGV26IozWK8nAJL9d_9XXHiTjLy_peQO5ufD7NQNcnH0gPPYQLPr0xMwYXJwsix5XU7JTC_Ueg4Xu1pQOWvL_ODb_Ipm-LU_XS15morO_wNqRYKVv2w6qwlFlIVzKJyISJSCivsjt0HbXY8sfUqMucn5U1ZJY0H7lGNs7A";
 
 interface Subject {
   id: string;
@@ -43,7 +43,6 @@ export default function Friends() {
         },
       });
 
-      console.log(friends.data.following);
       setFriends(friends.data.following);
     } catch (error) {
       console.error("Failed to fetch subjects", error);
@@ -178,7 +177,7 @@ export default function Friends() {
                               // Colors
                               pathColor: theme.palette.primary.main,
                               textColor: theme.palette.primary.main,
-                              trailColor: theme.palette.grey[100],
+                              trailColor: theme.palette.grey[200],
                             })}
                           />
                         </Box>
