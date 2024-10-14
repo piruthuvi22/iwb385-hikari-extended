@@ -9,6 +9,9 @@ import {
   Button,
   useTheme,
   TextField,
+  List,
+  ListItem,
+  ListItemText,
 } from "@mui/material";
 import Banner from "../assets/addFriends.jpg";
 import Menubar from "../components/Menubar";
@@ -17,11 +20,12 @@ import axios from "axios";
 import Loader from "../components/Loader";
 import SearchIcon from "@mui/icons-material/Search";
 import DialogBox from "../components/DialogBox";
+import PersonAddIcon from "@mui/icons-material/PersonAdd";
 
 const ENDPOINT = "http://localhost:9094/central/api";
 
 const TOKEN =
-  "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IlNyQjE4ejFjRDB2QUticm1FamZ4diJ9.eyJpc3MiOiJodHRwczovL2hpa2FyaS51ay5hdXRoMC5jb20vIiwic3ViIjoiYXV0aDB8NjcwNjM5MmUyNTZhN2JkZWY3N2RhZmYyIiwiYXVkIjpbImNlbnRyYWxfYXBpIiwiaHR0cHM6Ly9oaWthcmkudWsuYXV0aDAuY29tL3VzZXJpbmZvIl0sImlhdCI6MTcyODg5MjA4OSwiZXhwIjoxNzI4OTc4NDg5LCJzY29wZSI6Im9wZW5pZCBwcm9maWxlIGVtYWlsIiwiYXpwIjoiRWRRRUVMd0tRWVhPS2I4V2htck0zZHpPNzN0MkxyTGYifQ.CQmr6tT3H81JFHDonTyvUMqCRLqoe1fmOm2u5gVlDdQbdXiEWyLB-bwGciPP3M6fPXtqhFCjG3FHFkHl1pBR6cGE-RZNyRFrfsMZU7lfi-XweVZINfy-1EWp2_gtMqVD4-sfVGnp89w4bDBvoSBUppR6YkCgjJVyLtnz81MybLs-pQEIBGV26IozWK8nAJL9d_9XXHiTjLy_peQO5ufD7NQNcnH0gPPYQLPr0xMwYXJwsix5XU7JTC_Ueg4Xu1pQOWvL_ODb_Ipm-LU_XS15morO_wNqRYKVv2w6qwlFlIVzKJyISJSCivsjt0HbXY8sfUqMucn5U1ZJY0H7lGNs7A";
+  "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IlNyQjE4ejFjRDB2QUticm1FamZ4diJ9.eyJpc3MiOiJodHRwczovL2hpa2FyaS51ay5hdXRoMC5jb20vIiwic3ViIjoiYXV0aDB8NjcwNjM5MmUyNTZhN2JkZWY3N2RhZmYyIiwiYXVkIjpbImNlbnRyYWxfYXBpIiwiaHR0cHM6Ly9oaWthcmkudWsuYXV0aDAuY29tL3VzZXJpbmZvIl0sImlhdCI6MTcyODkyNTkxNiwiZXhwIjoxNzI5MDEyMzE2LCJzY29wZSI6Im9wZW5pZCBwcm9maWxlIGVtYWlsIiwiYXpwIjoiRWRRRUVMd0tRWVhPS2I4V2htck0zZHpPNzN0MkxyTGYifQ.gQuzdVSptX8sODa2_wUYHr7FzdiS9AQzvHbcwR3BDgq8FODYFBAzsvb-IRnjFR_ehbOyC2mG8uD6dhEZsIZ5HrhyW-LDMbRBxlkDtxxJBHZ23WLTuM7lw3-Kg0x-dEzxMrLpChc4mxy1ccB92PtFhmcgq8fyTYmqW7N4_tD89D1HF5ZSKSALdSbcVvr_I9DQkeXCKh0CJ3kITrInUr_KFxixr9mHR54FbM4n4yk8GNOjXqwtbm5liUPpU3oH-hzx-N0dwIfMow1HyDG7M_bxfYIPY3Mt10s2-kPKxIglIAml7eNXnlAhCaaBsg_DxaobMVMOEUw547WG9kpmIxmEKw";
 
 interface FriendRequestResponse {
   id: string;
@@ -32,14 +36,25 @@ export default function AddFriends() {
   const theme = useTheme();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
+  const [searchText, setSearchText] = useState("");
+  const [filteredFriends, setFilteredFriends] = useState<
+    FriendRequestResponse[]
+  >([]);
 
   const [friendRequests, setFriendRequests] = useState<FriendRequestResponse[]>(
     []
   );
+  const [followingFriends, setFollowingFriends] = useState<
+    FriendRequestResponse[]
+  >([]);
+  const [requestedFriends, setRequestedFriends] = useState<
+    FriendRequestResponse[]
+  >([]);
   // const [friendsYouMayKnow, setFriendsYouMayKnow] = useState(
   //   initialFriendsYouMayKnow
   // );
   const [loading, setLoading] = useState(true);
+  const [hasSearched, setHasSearched] = useState(false);
 
   useEffect(() => {
     getFriends();
@@ -55,8 +70,8 @@ export default function AddFriends() {
       });
 
       setFriendRequests(friends.data.requestedBy);
-      // console.log(friends.data.requestedBy);
-      console.log(friends.data);
+      setFollowingFriends(friends.data.following);
+      setRequestedFriends(friends.data.requested);
     } catch (error) {
       console.error("Failed to fetch subjects", error);
     } finally {
@@ -64,8 +79,53 @@ export default function AddFriends() {
     }
   }
 
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(() => {
+      if (searchText) {
+        setHasSearched(true);
+        fetchFriends(searchText);
+      } else {
+        setHasSearched(false);
+        setFilteredFriends([]);
+      }
+    }, 500);
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchText]);
+
+  const fetchFriends = async (query: string) => {
+    try {
+      const response = await axios.get(ENDPOINT + "/users/search/" + query, {
+        headers: {
+          Authorization: `Bearer ${TOKEN}`,
+        },
+      });
+
+      const filtered = response.data.filter(
+        (friend: { id: string }) =>
+          !followingFriends.some(
+            (following: { id: string }) => following.id === friend.id
+          ) &&
+          !requestedFriends.some(
+            (requested: { id: string }) => requested.id === friend.id
+          )
+      );
+
+      setFilteredFriends(filtered);
+    } catch (error) {
+      console.error("Error fetching friends", error);
+    }
+  };
+
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchText(event.target.value);
+    const value = event.target.value;
+  };
+
   const handleClose = () => {
     setOpen(false);
+    setSearchText("");
+    setFilteredFriends([]);
+    setHasSearched(false);
   };
 
   const handleAccept = async (event: React.MouseEvent, id: any) => {
@@ -87,7 +147,6 @@ export default function AddFriends() {
       setFriendRequests((prevRequests) =>
         prevRequests.filter((friend) => friend.id !== id)
       );
-      console.log("Request accepted", response.data);
     } catch (error) {
       console.error("Error accepting friend request", error);
     }
@@ -111,8 +170,6 @@ export default function AddFriends() {
           },
         }
       );
-
-      console.log("Response:", response.data);
     } catch (error) {
       console.error("Error deleting friend request", error);
     }
@@ -121,13 +178,35 @@ export default function AddFriends() {
       setFriendRequests((prevRequests) =>
         prevRequests.filter((friend) => friend.id !== id)
       );
-      console.log("Friend request deleted", id);
     } else {
-      // Uncomment and use this if needed
       // setFriendsYouMayKnow((prevFriends) =>
       //   prevFriends.filter((friend) => friend.id !== id)
       // );
-      console.log("The friend you may know deleted", id);
+    }
+  };
+  const handleAddFriend = async (id: any) => {
+    try {
+      const response = await axios.put(
+        ENDPOINT + "/users/friend-request",
+        {
+          id: id,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${TOKEN}`,
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        setFilteredFriends((prevFriends) =>
+          prevFriends.filter((friend) => friend.id !== id)
+        );
+      } else {
+        console.error("Failed to send friend request");
+      }
+    } catch (error) {
+      console.error("Error sending friend request", error);
     }
   };
 
@@ -137,7 +216,6 @@ export default function AddFriends() {
     // setFriendsYouMayKnow((prevFriends) =>
     //   prevFriends.filter((friend) => friend.id !== id)
     // );
-    console.log("Started following friend", id);
   };
 
   const handleCardClick = (id: any) => {
@@ -371,7 +449,7 @@ export default function AddFriends() {
       </Box>
       <DialogBox
         open={open}
-        title="Search a Friend"
+        title="Select a Friend"
         handleClose={handleClose}
         actions={
           <Button onClick={handleClose} color="secondary">
@@ -379,23 +457,59 @@ export default function AddFriends() {
           </Button>
         }
       >
-        <TextField
-          label="Search Friend"
-          // value={searchText}
-          // onChange={handleSearchChange}
-          fullWidth
-          margin="dense"
-          variant="outlined"
-          sx={{
-            "& .MuiOutlinedInput-root": {
-              borderRadius: "1.5rem",
-            },
-            "& .MuiOutlinedInput-notchedOutline": {
-              borderRadius: "1.5rem",
-            },
-          }}
-        />
+        <Box mt={2}>
+          <TextField
+            label="Search Friend"
+            value={searchText}
+            onChange={handleSearchChange}
+            fullWidth
+            margin="dense"
+            variant="outlined"
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                borderRadius: "1.5rem",
+              },
+              "& .MuiOutlinedInput-notchedOutline": {
+                borderRadius: "1.5rem",
+              },
+            }}
+          />
+
+          {filteredFriends.length > 0 ? (
+            <List>
+              {filteredFriends.map((friend) => (
+                <ListItem
+                  key={friend.id}
+                  component="div"
+                  sx={{
+                    borderRadius: "1.5rem",
+                    "&:hover": {
+                      backgroundColor: "#D8D8FF",
+                      cursor: "pointer",
+                    },
+                  }}
+                >
+                  <ListItemText primary={friend.name} />
+                  <PersonAddIcon
+                    sx={{ cursor: "pointer" }}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      handleAddFriend(friend.id);
+                    }}
+                  />
+                </ListItem>
+              ))}
+            </List>
+          ) : (
+            hasSearched && (
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+                No friends to add
+              </Typography>
+            )
+          )}
+        </Box>
       </DialogBox>
+
       {loading && <Loader />}
       <Menubar />
     </Box>
