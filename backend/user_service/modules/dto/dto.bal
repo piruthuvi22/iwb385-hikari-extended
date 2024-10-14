@@ -2,6 +2,10 @@ public type User record {|
     readonly string id;
     string name;
     string email;
+|};
+
+public type UserSubject record {|
+    *User;
     SubjectGoal[] subjectIds = [];
     boolean isDeleted = false;
 |};

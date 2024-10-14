@@ -3,6 +3,7 @@ import central_service.response;
 
 import ballerina/http;
 import ballerina/jwt;
+import ballerina/io;
 
 configurable string OAUTH2 = ?;
 configurable string USER_SERVICE = ?;
@@ -42,11 +43,23 @@ http:ListenerAuthConfig[] auth_config = [
 service class ResponseErrorInterceptor {
     *http:ResponseErrorInterceptor;
 
-    remote function interceptResponseError(error err) returns http:InternalServerError {
-        return {
-            mediaType: "application/org+json",
-            body: {message: "Oops! Something went wrong :(", details: err.message()}
-        };
+    remote function interceptResponseError(error err) returns http:Unauthorized|http:InternalServerError|http:BadRequest {
+
+        if err.toString() ==  string `error InternalListenerAuthnError ("")` {
+            http:Unauthorized unauthorizedError = {body: {message: "Authentication Failed"}};
+            return unauthorizedError;
+        }
+
+        if err.toString().startsWith("error InternalPayloadBindingListenerError") {
+            response:BadRequestError badRequestError = {body: {message: "Bad Request", details: err.message()}};
+            return badRequestError;
+        }
+
+        io:println(err.toBalString());
+
+        response:InternalServerError internalServerError = {body: {message: "Oops! Something went wrong :(", details: err.message()}};
+
+        return internalServerError;
     }
 }
 
@@ -99,23 +112,36 @@ service http:InterceptableService /central/api/users on central {
         return userDto;
     }
 
-    resource function post .(http:RequestContext ctx, dto:UserInsert userDto) returns error|response:UserDetails|http:Unauthorized {
+    isolated resource function get search/[string search] () returns response:User[]|error {
 
-        string|http:Unauthorized userId = getUserSub(ctx);
-        if userId is http:Unauthorized {
-            return userId;
+        response:User[]|error users;
+        lock {
+            users = check userClient->get("api/users/search?searchItem=" + search);
+        }
+        return users;
+
+    } 
+
+    isolated resource function post .(dto:UserInsert userDto) returns response:UserDetails|http:Unauthorized|http:BadRequest|error {
+
+        dto:User|error user;
+        lock {
+            user = userClient->post("api/users", userDto.cloneReadOnly());
         }
 
-        dto:User user;
-        lock {
-            user = check userClient->post("api/users", {id: userId, name: userDto.name, email: userDto.email});
+        if user is error {
+            if user.toString().includes(string `"message":"User with id ${userDto.id} already exists"`) {
+                response:BadRequestError badRequestError = {body: {message: "User already exists"}};
+                return badRequestError;
+            }
+            return user;
         }
 
         return {id: user.id, email: user.email, name: user.name};
 
     }
 
-    resource function get friends(http:RequestContext ctx) returns response:Friends|http:NotFound|http:Unauthorized|error {
+    isolated resource function get friends(http:RequestContext ctx) returns response:Friends|http:NotFound|http:Unauthorized|error {
 
         string|http:Unauthorized userId = getUserSub(ctx);
         if userId is http:Unauthorized {
@@ -126,7 +152,7 @@ service http:InterceptableService /central/api/users on central {
     }
 
     // To make a friend request
-    resource function put friend\-request(http:RequestContext ctx, dto:ID friend) returns response:Friends|http:NotFound|http:Unauthorized|error {
+    isolated resource function put friend\-request(http:RequestContext ctx, dto:ID friend) returns response:Friends|http:NotFound|http:Unauthorized|error {
 
         string|http:Unauthorized userId = getUserSub(ctx);
         if userId is http:Unauthorized {
@@ -140,7 +166,7 @@ service http:InterceptableService /central/api/users on central {
     }
 
     // To accept a friend request
-    resource function put accept\-friend\-request(http:RequestContext ctx, dto:ID friend) returns response:Friends|http:NotFound|http:Unauthorized|error {
+    isolated resource function put accept\-friend\-request(http:RequestContext ctx, dto:ID friend) returns response:Friends|http:NotFound|http:Unauthorized|error {
 
         string|http:Unauthorized userId = getUserSub(ctx);
         if userId is http:Unauthorized {
@@ -154,7 +180,7 @@ service http:InterceptableService /central/api/users on central {
     }
 
     // To revoke a friend request
-    resource function delete friend\-request(http:RequestContext ctx, dto:ID friend) returns response:Friends|http:NotFound|http:Unauthorized|error {
+    isolated resource function delete friend\-request(http:RequestContext ctx, dto:ID friend) returns response:Friends|http:NotFound|http:Unauthorized|error {
 
         string|http:Unauthorized userId = getUserSub(ctx);
         if userId is http:Unauthorized {
@@ -168,7 +194,7 @@ service http:InterceptableService /central/api/users on central {
     }
 
     // To unfollow a friend
-    resource function delete follow\-friend(http:RequestContext ctx, dto:ID friend) returns response:Friends|http:NotFound|http:Unauthorized|error {
+    isolated resource function delete follow\-friend(http:RequestContext ctx, dto:ID friend) returns response:Friends|http:NotFound|http:Unauthorized|error {
 
         string|http:Unauthorized userId = getUserSub(ctx);
         if userId is http:Unauthorized {
@@ -182,7 +208,7 @@ service http:InterceptableService /central/api/users on central {
     }
 
     // To reject a friend request
-    resource function delete reject\-friend\-request(http:RequestContext ctx, dto:ID friend) returns response:Friends|http:NotFound|http:Unauthorized|error {
+    isolated resource function delete reject\-friend\-request(http:RequestContext ctx, dto:ID friend) returns response:Friends|http:NotFound|http:Unauthorized|error {
 
         string|http:Unauthorized userId = getUserSub(ctx);
         if userId is http:Unauthorized {
@@ -196,7 +222,7 @@ service http:InterceptableService /central/api/users on central {
     }
 
     // To remove a follower
-    resource function delete friend\-follower(http:RequestContext ctx, dto:ID friend) returns response:Friends|http:NotFound|http:Unauthorized|error {
+    isolated resource function delete friend\-follower(http:RequestContext ctx, dto:ID friend) returns response:Friends|http:NotFound|http:Unauthorized|error {
 
         string|http:Unauthorized userId = getUserSub(ctx);
         if userId is http:Unauthorized {
@@ -278,7 +304,7 @@ service http:InterceptableService /central/api/subjects on central {
         return SUCCESS_MESSAGE;
     }
 
-    isolated resource function get [string subjectId](http:RequestContext ctx) returns response:StudyStatus|http:Unauthorized|http:NotFound|error {
+    isolated resource function get [string subjectId](http:RequestContext ctx) returns response:StudyStatus|http:Unauthorized|http:NotFound|http:BadRequest|error {
 
         string|http:Unauthorized userId = getUserSub(ctx);
         if userId is http:Unauthorized {
@@ -288,7 +314,7 @@ service http:InterceptableService /central/api/subjects on central {
         return check getStudyDetails(userId, subjectId);
     }
 
-    isolated resource function get [string subjectId]/[int year]/[int weekNo](http:RequestContext ctx) returns response:StudyStatus|http:Unauthorized|http:NotFound|error {
+    isolated resource function get [string subjectId]/[int year]/[int weekNo](http:RequestContext ctx) returns response:StudyStatus|http:Unauthorized|http:NotFound|http:BadRequest|error {
 
         string|http:Unauthorized userId = getUserSub(ctx);
         if userId is http:Unauthorized {
@@ -312,7 +338,7 @@ service http:InterceptableService /central/api/study on central {
         return new ResponseErrorInterceptor();
     }
 
-    isolated resource function post .(http:RequestContext ctx, dto:StudySession studySession) returns response:StudyStatus|http:Unauthorized|http:NotFound|error {
+    isolated resource function post .(http:RequestContext ctx, dto:StudySession studySession) returns response:StudyStatus|http:Unauthorized|http:NotFound|http:BadRequest|error {
 
         string|http:Unauthorized userId = getUserSub(ctx);
         if userId is http:Unauthorized {
@@ -346,12 +372,12 @@ isolated function getUserSub(http:RequestContext ctx) returns string|http:Unauth
 }
 
 isolated function getUser(string userId) returns dto:User|http:NotFound|error {
-    dto:User|error user;
+    dto:User|http:ApplicationResponseError|error user;
     lock {
         user = userClient->get("api/users/" + userId);
     }
     if user is error {
-        if user.message().startsWith("User with") {
+        if user.toString().includes(string `"message":"User with id ${userId} not found"`) {
             response:NotFoundError notFoundError = {body: {message: "User not found"}};
             return notFoundError;
         }
@@ -445,7 +471,7 @@ isolated function getFriends(string userId) returns response:Friends|http:NotFou
     return friends;
 }
 
-isolated function getStudyDetails(string userId, string subjectId, int? year = (), int? weekNo = ()) returns response:StudyStatus|http:NotFound|error {
+isolated function getStudyDetails(string userId, string subjectId, int? year = (), int? weekNo = ()) returns response:StudyStatus|http:NotFound|http:BadRequest|error {
 
     dto:User|http:NotFound user = check getUser(userId);
     if user is http:NotFound {
@@ -463,7 +489,8 @@ isolated function getStudyDetails(string userId, string subjectId, int? year = (
     }
 
     if !found {
-        return error("User is not enrolled in the subject");
+        response:BadRequestError badRequestError = {body: {message: "User is not enrolled in the subject"}};
+        return badRequestError;
     }
 
     dto:Subject subject;

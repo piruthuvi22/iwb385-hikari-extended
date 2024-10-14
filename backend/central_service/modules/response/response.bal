@@ -1,8 +1,13 @@
 import ballerina/http;
-public type UserDetails record {|
+
+public type User record {|
     readonly string id;
-    string email;
     string name;
+    string email;
+|};
+
+public type UserDetails record {|
+    *User;
     Subject[]|SubjectGoal[] subjects = <Subject[]> [];
 |};
 
