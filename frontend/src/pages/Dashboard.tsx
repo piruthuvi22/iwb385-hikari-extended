@@ -1,6 +1,6 @@
 import { useAuth0 } from "@auth0/auth0-react";
 import { Button, Typography } from "@mui/material";
-import React from "react";
+import React, { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 export default function Dashboard() {
@@ -18,35 +18,24 @@ export default function Dashboard() {
     error,
   } = useAuth0();
 
-  React.useEffect(() => {
+  useEffect(() => {
     getAccessToken();
   }, []);
-
-  if (isLoading) {
-    return <div>Loading ...</div>;
-  }
-
-  async function logoutSession() {
-    // const id = await getIdTokenClaims();
-    await logout({
-      logoutParams: { returnTo: "http://localhost:3000/auth/login" },
-    });
-  }
 
   async function getAccessToken() {
     try {
       const token = await getAccessTokenSilently();
-      console.log("Token", token);
-
+      console.info("AccessToken:", token);
       setAccessToken(token);
     } catch (error) {
-      console.error("Error", error);
-      // await logout();
+      console.error("AccessTokenError:", error);
       navigate("/dashboard");
     }
   }
-  console.log("Error2", error);
 
+  if (isLoading) {
+    return <div>Loading ...</div>;
+  }
   return isAuthenticated ? (
     <div>
       <Typography>Dashboard Page</Typography>
@@ -54,7 +43,15 @@ export default function Dashboard() {
       <h2>{user?.name}</h2>
       <p>{user?.email}</p>
       <p>{accessToken}</p>
-      <Button variant="contained" color="warning" onClick={logoutSession}>
+      <Button
+        variant="contained"
+        color="warning"
+        onClick={() => {
+          logout({
+            logoutParams: { returnTo: window.location.origin + "/auth/login" },
+          });
+        }}
+      >
         Logout
       </Button>
     </div>
