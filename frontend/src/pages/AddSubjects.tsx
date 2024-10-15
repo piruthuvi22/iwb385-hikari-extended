@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Box,
   Button,
@@ -15,11 +16,15 @@ import Menubar from "../components/Menubar";
 import DialogBox from "../components/DialogBox";
 import Loader from "../components/Loader";
 import axios from "axios";
+import IconButton from "@mui/material/IconButton";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
 
 const ENDPOINT = "http://localhost:9094/central/api";
 
 const TOKEN =
-  "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IlNyQjE4ejFjRDB2QUticm1FamZ4diJ9.eyJpc3MiOiJodHRwczovL2hpa2FyaS51ay5hdXRoMC5jb20vIiwic3ViIjoiYXV0aDB8NjcwNjM5MmUyNTZhN2JkZWY3N2RhZmYyIiwiYXVkIjpbImNlbnRyYWxfYXBpIiwiaHR0cHM6Ly9oaWthcmkudWsuYXV0aDAuY29tL3VzZXJpbmZvIl0sImlhdCI6MTcyODg5MjA4OSwiZXhwIjoxNzI4OTc4NDg5LCJzY29wZSI6Im9wZW5pZCBwcm9maWxlIGVtYWlsIiwiYXpwIjoiRWRRRUVMd0tRWVhPS2I4V2htck0zZHpPNzN0MkxyTGYifQ.CQmr6tT3H81JFHDonTyvUMqCRLqoe1fmOm2u5gVlDdQbdXiEWyLB-bwGciPP3M6fPXtqhFCjG3FHFkHl1pBR6cGE-RZNyRFrfsMZU7lfi-XweVZINfy-1EWp2_gtMqVD4-sfVGnp89w4bDBvoSBUppR6YkCgjJVyLtnz81MybLs-pQEIBGV26IozWK8nAJL9d_9XXHiTjLy_peQO5ufD7NQNcnH0gPPYQLPr0xMwYXJwsix5XU7JTC_Ueg4Xu1pQOWvL_ODb_Ipm-LU_XS15morO_wNqRYKVv2w6qwlFlIVzKJyISJSCivsjt0HbXY8sfUqMucn5U1ZJY0H7lGNs7A";
+  "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IlNyQjE4ejFjRDB2QUticm1FamZ4diJ9.eyJpc3MiOiJodHRwczovL2hpa2FyaS51ay5hdXRoMC5jb20vIiwic3ViIjoiYXV0aDB8NjcwNjM5MmUyNTZhN2JkZWY3N2RhZmYyIiwiYXVkIjpbImNlbnRyYWxfYXBpIiwiaHR0cHM6Ly9oaWthcmkudWsuYXV0aDAuY29tL3VzZXJpbmZvIl0sImlhdCI6MTcyODk3OTM1NCwiZXhwIjoxNzI5MDY1NzU0LCJzY29wZSI6Im9wZW5pZCBwcm9maWxlIGVtYWlsIiwiYXpwIjoiRWRRRUVMd0tRWVhPS2I4V2htck0zZHpPNzN0MkxyTGYifQ.dEGd3FgmvhQ2GrcjNwIIwhBe5QCBBmXumVe7-gk4QmJHTgHU2sXf4A9u9qymSGouH_qSJ535wCj1s2fwejqtDsQzlICH4SgdBxVTMZ1Agu_pNWQgjs5IIhEawU_vI-nu9_s04JNY06QCCbvQu3fN2H4MX03Oqoj58srALDDNpMELa_SN8JPUVeirDMQi_d3e_u1teG9aiQ2zdZyw8wIRx82_pRqQqQcni9UtrNaEu4HlU9ICntefwMH7Ogqaq8mZEk1CElMLKxGV1afBhRH8Z0WfijNg_yIOqml3nrs5EmbYCOpztynfQMCEPXqek1gB5eK2mNj7GM9573_ge7l25w";
 
 interface SubjectResponse {
   id: string;
@@ -28,8 +33,10 @@ interface SubjectResponse {
 }
 
 export default function AddSubject() {
+  const navigate = useNavigate();
   const theme = useTheme();
   const [open, setOpen] = useState(false);
+  const [openGoal, setOpenGoal] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [filteredSubjects, setFilteredSubjects] = useState<SubjectResponse[]>(
     []
@@ -39,6 +46,11 @@ export default function AddSubject() {
     []
   );
   const [loading, setLoading] = useState(true);
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const openMenu = Boolean(anchorEl);
+  const [selectedSubject, setSelectedSubject] =
+    React.useState<SubjectResponse | null>(null);
+  const [studyMinutes, setStudyMinutes] = useState(0);
 
   useEffect(() => {
     getSubjects();
@@ -56,8 +68,7 @@ export default function AddSubject() {
         }
       );
       const availableSubjects = availableSubjectsResponse.data;
-      setSubjects(availableSubjects);
-      setFilteredSubjects(availableSubjects);
+      // setSubjects(availableSubjects);
 
       const enrolledSubjectsResponse = await axios.get(ENDPOINT + "/users", {
         headers: {
@@ -66,7 +77,6 @@ export default function AddSubject() {
       });
       const enrolledSubjects = await enrolledSubjectsResponse.data.subjects;
       setSelectedSubjects(enrolledSubjects);
-
       const filteredAvailableSubjects = availableSubjects.filter(
         (subject: SubjectResponse) =>
           !enrolledSubjects.some(
@@ -111,10 +121,12 @@ export default function AddSubject() {
   };
 
   const handleClickOpen = () => {
+    getSubjects();
     setOpen(true);
   };
 
   const handleClose = () => {
+    setOpenGoal(false);
     setOpen(false);
     setSearchText("");
     setFilteredSubjects(subjects);
@@ -129,6 +141,65 @@ export default function AddSubject() {
     );
     setFilteredSubjects(filtered);
   };
+
+  const handleClickMenu = (
+    event: React.MouseEvent<HTMLElement>,
+    subject: SubjectResponse
+  ) => {
+    setSelectedSubject(subject);
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleCloseMenu = () => {
+    setSelectedSubject(null);
+    setAnchorEl(null);
+  };
+
+  const handleDeleteSubject = async (subject: SubjectResponse) => {
+    setLoading(true);
+    try {
+      const response = await axios.delete(ENDPOINT + "/subjects", {
+        data: { id: subject.id },
+        headers: {
+          Authorization: "Bearer " + TOKEN,
+        },
+      });
+
+      if (response.status === 200) {
+        setSelectedSubjects((prevSubjects) =>
+          prevSubjects.filter((s) => s.id !== subject.id)
+        );
+      } else {
+        console.error("Error deleting the subject");
+      }
+    } catch (error) {
+      console.error("Error deleting the subject", error);
+    } finally {
+      setLoading(false);
+      handleCloseMenu();
+    }
+  };
+
+  const handleSetGoal = (subject: SubjectResponse) => {
+    setOpenGoal(true);
+    setStudyMinutes(0);
+    handleCloseMenu();
+  };
+
+  const handleDecrease = () => {
+    setStudyMinutes((prevMinutes) => Math.max(0, prevMinutes - 30));
+  };
+
+  const handleIncrease = () => {
+    setStudyMinutes((prevMinutes) => prevMinutes + 30);
+  };
+
+  const goToSubjectPage = (subject: SubjectResponse) => {
+    navigate(`/record-study-session`, { state: { subjectId: subject.id } });
+  };
+
+  const hours = Math.floor(studyMinutes / 60);
+  const minutes = studyMinutes % 60;
 
   return (
     <Box
@@ -192,17 +263,59 @@ export default function AddSubject() {
                   display: "flex",
                   justifyContent: "space-between",
                   alignItems: "center",
-                  padding: "1rem",
+                  paddingRight: "0.25rem",
+                  paddingLeft: "1rem",
+                  paddingTop: "0.25rem",
+                  paddingBottom: "0.25rem",
                   borderRadius: "1.5rem",
                   backgroundColor: "#F0F0FF",
                   boxShadow: 1,
                   width: "100%",
                 }}
+                onClick={() => goToSubjectPage(subject)}
               >
                 <Typography variant="body1">{subject.name}</Typography>
                 {/* <Typography variant="body2" color="text.secondary">
                   {subject.goalHours} hrs
                 </Typography> */}
+                <IconButton
+                  aria-label="more"
+                  id="long-button"
+                  aria-controls={open ? "long-menu" : undefined}
+                  aria-expanded={open ? "true" : undefined}
+                  aria-haspopup="true"
+                  onClick={(event) => handleClickMenu(event, subject)}
+                >
+                  <MoreVertIcon />
+                </IconButton>
+                <Menu
+                  id="long-menu"
+                  MenuListProps={{
+                    "aria-labelledby": "long-button",
+                  }}
+                  anchorEl={anchorEl}
+                  open={openMenu}
+                  onClose={handleCloseMenu}
+                  slotProps={{
+                    paper: {
+                      style: {
+                        width: "15ch",
+                        borderRadius: "1.5rem",
+                        boxShadow: "0px 4px 20px rgba(0, 0, 0, 0.1)",
+                      },
+                    },
+                  }}
+                >
+                  {/* <MenuItem onClick={() => handleSetGoal(selectedSubject!)}>
+                    Set Goal
+                  </MenuItem> */}
+
+                  <MenuItem
+                    onClick={() => handleDeleteSubject(selectedSubject!)}
+                  >
+                    Delete
+                  </MenuItem>
+                </Menu>
               </Box>
             ))}
           </Box>
@@ -286,6 +399,67 @@ export default function AddSubject() {
             No subjects available to add
           </Typography>
         )}
+      </DialogBox>
+
+      <DialogBox
+        open={openGoal}
+        title="Set a Goal"
+        handleClose={handleClose}
+        actions={
+          <>
+            <Button onClick={handleClose} color="secondary">
+              Cancel
+            </Button>
+            <Button color="primary">Set Goal</Button>
+          </>
+        }
+      >
+        <Box
+          display="flex"
+          alignItems="center"
+          justifyItems="center"
+          justifyContent="space-evenly"
+          gap="1rem"
+        >
+          <Button
+            variant="outlined"
+            sx={{
+              borderRadius: "50%",
+              width: "40px",
+              height: "40px",
+              minWidth: "0",
+              padding: "0",
+              fontSize: "1.5rem",
+              border: "2px solid",
+              alignItems: "flex-end",
+            }}
+            onClick={handleDecrease}
+          >
+            -
+          </Button>
+          <Typography
+            variant="body1"
+            sx={{ fontSize: "20px", width: "40%", textAlign: "center" }}
+          >
+            {hours}h {minutes}m
+          </Typography>
+          <Button
+            variant="outlined"
+            sx={{
+              borderRadius: "50%",
+              width: "40px",
+              height: "40px",
+              minWidth: "0",
+              padding: "0",
+              fontSize: "1.5rem",
+              border: "2px solid",
+              alignItems: "flex-end",
+            }}
+            onClick={handleIncrease}
+          >
+            +
+          </Button>
+        </Box>
       </DialogBox>
       {loading && <Loader />}
       <Menubar></Menubar>
