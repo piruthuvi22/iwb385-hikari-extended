@@ -1,52 +1,55 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Box, Typography, Card, Avatar, Grid, useTheme } from "@mui/material";
 import Banner from "../assets/friends.jpg";
 import Menubar from "../components/Menubar";
 import { buildStyles, CircularProgressbar } from "react-circular-progressbar";
 import GroupIcon from "@mui/icons-material/Group";
 import { Link } from "react-router-dom";
+import axios from "axios";
+import Loader from "../components/Loader";
 
-const friends = [
-  {
-    id: 1,
-    name: "Rashmi",
-    profilePicture: "https://via.placeholder.com/150",
-    focusRings: [
-      { subject: "Math", progress: 85 },
-      { subject: "Science", progress: 70 },
-    ],
-  },
-  {
-    id: 2,
-    name: "Haritha",
-    profilePicture: "https://via.placeholder.com/150",
-    focusRings: [
-      { subject: "Biology", progress: 65 },
-      { subject: "Chemistry", progress: 90 },
-    ],
-  },
-  {
-    id: 3,
-    name: "Sagini",
-    profilePicture: "https://via.placeholder.com/150",
-    focusRings: [
-      { subject: "Physics", progress: 50 },
-      { subject: "English", progress: 95 },
-    ],
-  },
-  {
-    id: 4,
-    name: "Piruthuvi",
-    profilePicture: "https://via.placeholder.com/150",
-    focusRings: [
-      { subject: "Art", progress: 40 },
-      { subject: "Music", progress: 75 },
-    ],
-  },
-];
+const ENDPOINT = "http://localhost:9094/central/api";
+
+const TOKEN =
+  "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IlNyQjE4ejFjRDB2QUticm1FamZ4diJ9.eyJpc3MiOiJodHRwczovL2hpa2FyaS51ay5hdXRoMC5jb20vIiwic3ViIjoiYXV0aDB8NjcwNjM5MmUyNTZhN2JkZWY3N2RhZmYyIiwiYXVkIjpbImNlbnRyYWxfYXBpIiwiaHR0cHM6Ly9oaWthcmkudWsuYXV0aDAuY29tL3VzZXJpbmZvIl0sImlhdCI6MTcyODkyNTkxNiwiZXhwIjoxNzI5MDEyMzE2LCJzY29wZSI6Im9wZW5pZCBwcm9maWxlIGVtYWlsIiwiYXpwIjoiRWRRRUVMd0tRWVhPS2I4V2htck0zZHpPNzN0MkxyTGYifQ.gQuzdVSptX8sODa2_wUYHr7FzdiS9AQzvHbcwR3BDgq8FODYFBAzsvb-IRnjFR_ehbOyC2mG8uD6dhEZsIZ5HrhyW-LDMbRBxlkDtxxJBHZ23WLTuM7lw3-Kg0x-dEzxMrLpChc4mxy1ccB92PtFhmcgq8fyTYmqW7N4_tD89D1HF5ZSKSALdSbcVvr_I9DQkeXCKh0CJ3kITrInUr_KFxixr9mHR54FbM4n4yk8GNOjXqwtbm5liUPpU3oH-hzx-N0dwIfMow1HyDG7M_bxfYIPY3Mt10s2-kPKxIglIAml7eNXnlAhCaaBsg_DxaobMVMOEUw547WG9kpmIxmEKw";
+
+interface Subject {
+  id: string;
+  name: string;
+  actualGoalHours: number;
+  goalHours: number;
+}
+interface FriendResponse {
+  id: string;
+  name: string;
+  subjects: Subject[];
+}
 
 export default function Friends() {
   const theme = useTheme();
+  const [loading, setLoading] = useState(true);
+  const [friends, setFriends] = useState<FriendResponse[]>([]);
+
+  useEffect(() => {
+    getFriends();
+  }, []);
+
+  async function getFriends() {
+    setLoading(true);
+    try {
+      const friends = await axios.get(ENDPOINT + "/users/friends", {
+        headers: {
+          Authorization: "Bearer " + TOKEN,
+        },
+      });
+
+      setFriends(friends.data.following);
+    } catch (error) {
+      console.error("Failed to fetch subjects", error);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
     <Box
@@ -123,7 +126,7 @@ export default function Friends() {
                 >
                   <Avatar
                     alt={friend.name}
-                    src={friend.profilePicture}
+                    // src={friend.profilePicture}
                     sx={{ width: 50, height: 50, marginRight: 2 }}
                   />
                   <Typography variant="h6" sx={{ marginTop: 0 }}>
@@ -138,8 +141,8 @@ export default function Friends() {
                     flexWrap="wrap"
                     sx={{ marginTop: 1, gap: 2 }}
                   >
-                    {/* Display focus rings for each subject */}
-                    {friend.focusRings.map((ring, index) => (
+                    {/* Display progress for each subject */}
+                    {friend.subjects.map((progress, index) => (
                       <Box
                         key={index}
                         display="flex"
@@ -148,9 +151,25 @@ export default function Friends() {
                       >
                         <Box sx={{ width: 50 }}>
                           <CircularProgressbar
-                            value={ring.progress}
+                            value={
+                              progress.goalHours > 0 &&
+                              progress.actualGoalHours > 0
+                                ? (progress.actualGoalHours /
+                                    progress.goalHours) *
+                                  100
+                                : 0
+                            }
                             strokeWidth={12}
-                            text={`${ring.progress}%`}
+                            text={
+                              progress.goalHours > 0 &&
+                              progress.actualGoalHours > 0
+                                ? `${Math.round(
+                                    (progress.actualGoalHours /
+                                      progress.goalHours) *
+                                      100
+                                  )}%`
+                                : `0%`
+                            }
                             styles={buildStyles({
                               strokeLinecap: "round",
                               textSize: "30px",
@@ -158,12 +177,12 @@ export default function Friends() {
                               // Colors
                               pathColor: theme.palette.primary.main,
                               textColor: theme.palette.primary.main,
-                              trailColor: theme.palette.grey[100],
+                              trailColor: theme.palette.grey[200],
                             })}
                           />
                         </Box>
                         <Typography variant="caption" sx={{ marginTop: 1 }}>
-                          {ring.subject}
+                          {progress.name}
                         </Typography>
                       </Box>
                     ))}
@@ -174,7 +193,7 @@ export default function Friends() {
           ))}
         </Grid>
       </Box>
-
+      {loading && <Loader />}
       <Menubar />
     </Box>
   );

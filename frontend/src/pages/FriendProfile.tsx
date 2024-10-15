@@ -14,8 +14,8 @@ const friendsData = [
     ],
   },
   {
-    id: 2,
-    name: "Peter Nick",
+    id: 3,
+    name: "Athma Nick",
     profilePicture: "https://via.placeholder.com/150",
     subjects: [
       { name: "History", focus: 70 },
