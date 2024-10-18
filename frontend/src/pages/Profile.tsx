@@ -13,9 +13,21 @@ import PhotoCamera from "@mui/icons-material/PhotoCamera";
 import ProfilePhoto from "../assets/avatar.jpg";
 import Fab from "@mui/material/Fab";
 import EditIcon from "@mui/icons-material/Edit";
+import { useAuth0 } from "@auth0/auth0-react";
 
 export default function Profile() {
   const theme = useTheme();
+  const { logout } = useAuth0();
+
+  const handleLogout = () => {
+    // Add logout logic here
+    logout({
+      logoutParams: {
+        returnTo: window.location.origin,
+        // federated: true,
+      },
+    });
+  };
 
   return (
     <Box
@@ -126,6 +138,21 @@ export default function Profile() {
             },
           }}
         />
+
+        <Button
+          variant="contained"
+          color="secondary"
+          fullWidth
+          sx={{
+            fontWeight: "600",
+            fontSize: "1.3rem",
+            px: 2,
+            borderRadius: "1.5rem",
+          }}
+          onClick={handleLogout}
+        >
+          Logout
+        </Button>
 
         {/* Edit Button */}
         <Fab

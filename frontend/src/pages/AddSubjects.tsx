@@ -1,9 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Box,
   Button,
   List,
   ListItem,
+  ListItemButton,
+  ListItemIcon,
   ListItemText,
   TextField,
   Typography,
@@ -13,28 +16,179 @@ import Banner from "../assets/addSubjectBg.jpg";
 import AddIcon from "@mui/icons-material/Add";
 import Menubar from "../components/Menubar";
 import DialogBox from "../components/DialogBox";
+import Loader from "../components/Loader";
+import axios from "axios";
+import IconButton from "@mui/material/IconButton";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
+import { useAuth0 } from "@auth0/auth0-react";
+import { Delete, Inbox } from "@mui/icons-material";
 
-const subjects = [
-  "Combined Maths",
-  "Physics",
-  "Chemistry",
-  "ICT",
-  "Accouting",
-  "Economics",
-];
+const ENDPOINT = "http://localhost:9094/central/api";
+
+interface Lesson {
+  id: string;
+  name: string;
+  no: number;
+}
+interface SubjectResponse {
+  id: string;
+  name: string;
+  lessons: Lesson[];
+}
 
 export default function AddSubject() {
+  const navigate = useNavigate();
   const theme = useTheme();
   const [open, setOpen] = useState(false);
+  const [openGoal, setOpenGoal] = useState(false);
   const [searchText, setSearchText] = useState("");
-  const [filteredSubjects, setFilteredSubjects] = useState(subjects);
-  const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
+  const [filteredSubjects, setFilteredSubjects] = useState<SubjectResponse[]>(
+    []
+  );
+  const [subjects, setSubjects] = useState<SubjectResponse[]>([]);
+  const [selectedSubjects, setSelectedSubjects] = useState<SubjectResponse[]>(
+    []
+  );
+  const [loading, setLoading] = useState(true);
+  const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const openMenu = Boolean(anchorEl);
+  const [selectedSubject, setSelectedSubject] =
+    React.useState<SubjectResponse | null>(null);
+  const [studyMinutes, setStudyMinutes] = useState(0);
+
+  const {
+    user,
+    isAuthenticated,
+    isLoading,
+    getAccessTokenSilently,
+    error,
+    getIdTokenClaims,
+    handleRedirectCallback,
+  } = useAuth0();
+
+  useEffect(() => {
+    // processAuth();
+    user?.sub && createUser();
+    getSubjects();
+  }, [user]);
+
+  const processAuth = async () => {
+    try {
+      let res = await handleRedirectCallback();
+      console.log("Response", res);
+
+      res.appState = { targetUrl: "/dashboard" };
+    } catch (error: any) {
+      console.error("Authorization error: ", error);
+      if (error.error === "access_denied") {
+        // Handle the case where user declined the authorization
+        alert("Authorization declined. Please try again.");
+      }
+    }
+  };
+
+  const createUser = async () => {
+    if (!user) {
+      return;
+    }
+    try {
+      const TOKEN = await getAccessTokenSilently({});
+
+      const response = await axios.post(
+        ENDPOINT + "/users",
+        {
+          id: user.sub?.split("|")[1],
+          name: user.name,
+          email: user.email,
+        },
+        {
+          headers: {
+            Authorization: "Bearer " + TOKEN,
+          },
+        }
+      );
+      console.log("User created successfully", response.data);
+    } catch (error) {
+      console.error("Error creating user", error);
+    }
+  };
+
+  async function getSubjects() {
+    setLoading(true);
+
+    try {
+      const TOKEN = await getAccessTokenSilently({});
+      const availableSubjectsResponse = await axios.get(
+        ENDPOINT + "/subjects",
+        {
+          headers: {
+            Authorization: "Bearer " + TOKEN,
+          },
+        }
+      );
+      const availableSubjects = availableSubjectsResponse.data;
+      // setSubjects(availableSubjects);
+
+      const enrolledSubjectsResponse = await axios.get(ENDPOINT + "/users", {
+        headers: {
+          Authorization: "Bearer " + TOKEN,
+        },
+      });
+      const enrolledSubjects = await enrolledSubjectsResponse.data.subjects;
+      setSelectedSubjects(enrolledSubjects);
+      const filteredAvailableSubjects = availableSubjects.filter(
+        (subject: SubjectResponse) =>
+          !enrolledSubjects.some(
+            (enrolled: SubjectResponse) => enrolled.id === subject.id
+          )
+      );
+      setSubjects(filteredAvailableSubjects);
+      setFilteredSubjects(filteredAvailableSubjects);
+    } catch (error) {
+      console.error("Failed to fetch subjects", error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const handleSubjectClick = async (subject: SubjectResponse) => {
+    setLoading(true);
+
+    try {
+      const TOKEN = await getAccessTokenSilently({});
+      const response = await axios.put(
+        ENDPOINT + "/subjects",
+        {
+          id: subject.id,
+        },
+        {
+          headers: {
+            Authorization: "Bearer " + TOKEN,
+          },
+        }
+      );
+    } catch (error) {
+      console.error("Error updating subject:", error);
+    } finally {
+      setLoading(false);
+      if (!selectedSubjects.includes(subject)) {
+        setSelectedSubjects([...selectedSubjects, subject]);
+        setFilteredSubjects(filteredSubjects.filter((s) => s !== subject));
+        setSearchText("");
+        setOpen(false);
+      }
+    }
+  };
 
   const handleClickOpen = () => {
+    getSubjects();
     setOpen(true);
   };
 
   const handleClose = () => {
+    setOpenGoal(false);
     setOpen(false);
     setSearchText("");
     setFilteredSubjects(subjects);
@@ -45,19 +199,75 @@ export default function AddSubject() {
     const value = event.target.value;
     setSearchText(value);
     const filtered = subjects.filter((subject) =>
-      subject.toLowerCase().includes(value.toLowerCase())
+      subject.name.toLowerCase().includes(value.toLowerCase())
     );
     setFilteredSubjects(filtered);
   };
 
-  const handleSubjectClick = (subject: string) => {
-    if (!selectedSubjects.includes(subject)) {
-      setSelectedSubjects([...selectedSubjects, subject]);
-      setFilteredSubjects(filteredSubjects.filter((s) => s !== subject));
-      setSearchText("");
-      setOpen(false);
+  const handleClickMenu = (
+    event: React.MouseEvent<HTMLElement>,
+    subject: SubjectResponse
+  ) => {
+    setSelectedSubject(subject);
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleCloseMenu = () => {
+    setSelectedSubject(null);
+    setAnchorEl(null);
+  };
+
+  const handleDeleteSubject = async (subject: SubjectResponse) => {
+    setLoading(true);
+
+    try {
+      const TOKEN = await getAccessTokenSilently({});
+      const response = await axios.delete(ENDPOINT + "/subjects", {
+        data: { id: subject.id },
+        headers: {
+          Authorization: "Bearer " + TOKEN,
+        },
+      });
+
+      if (response.status === 200) {
+        setSelectedSubjects((prevSubjects) =>
+          prevSubjects.filter((s) => s.id !== subject.id)
+        );
+      } else {
+        console.error("Error deleting the subject");
+      }
+    } catch (error) {
+      console.error("Error deleting the subject", error);
+    } finally {
+      setLoading(false);
+      handleCloseMenu();
     }
   };
+
+  const handleSetGoal = (subject: SubjectResponse) => {
+    setOpenGoal(true);
+    setStudyMinutes(0);
+    handleCloseMenu();
+  };
+
+  const handleDecrease = () => {
+    setStudyMinutes((prevMinutes) => Math.max(0, prevMinutes - 30));
+  };
+
+  const handleIncrease = () => {
+    setStudyMinutes((prevMinutes) => prevMinutes + 30);
+  };
+
+  const goToSubjectPage = (subject: SubjectResponse) => {
+    console.log("Subject=", subject);
+
+    navigate(`/record-study-session`, {
+      state: { subjectId: subject.id, subjectName: subject.name },
+    });
+  };
+
+  const hours = Math.floor(studyMinutes / 60);
+  const minutes = studyMinutes % 60;
 
   return (
     <Box
@@ -98,7 +308,6 @@ export default function AddSubject() {
           StRings
         </Typography>
       </Box>
-
       <Box width={"100%"} textAlign={"center"} mt={"22vh"}>
         <Typography variant="h5" color="text.primary">
           Let's select your subjects!
@@ -106,39 +315,52 @@ export default function AddSubject() {
       </Box>
       {/* Display selected subjects as tiles */}
       {selectedSubjects.length > 0 && (
-        <Box
-          mb={2}
-          mt={2}
-          width={"100%"}
-          display="flex"
-          justifyContent="center"
-          mr={3}
-        >
-          <Box display="flex" flexDirection="column" gap={1.5} width={"65%"}>
+        <>
+          <List sx={{ width: "100%" }}>
             {selectedSubjects.map((subject, index) => (
-              <Box
+              <ListItem
+                disablePadding
                 key={index}
-                sx={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  padding: "1rem",
-                  borderRadius: "1.5rem",
-                  backgroundColor: "#F0F0FF",
-                  boxShadow: 1,
-                  width: "100%",
-                }}
+                secondaryAction={
+                  <IconButton
+                    edge="start"
+                    aria-label="more"
+                    id="long-button"
+                    aria-controls={open ? "long-menu" : undefined}
+                    aria-expanded={open ? "true" : undefined}
+                    aria-haspopup="true"
+                    onClick={(event) => handleClickMenu(event, subject)}
+                  >
+                    <MoreVertIcon />
+                  </IconButton>
+                }
               >
-                <Typography variant="body1">{subject}</Typography>
-                <Typography variant="body2" color="text.secondary">
-                  0 hrs
-                </Typography>
-              </Box>
+                <ListItemButton onClick={() => goToSubjectPage(subject)}>
+                  <ListItemText primary={subject.name} />
+                </ListItemButton>
+              </ListItem>
             ))}
-          </Box>
-        </Box>
-      )}
+          </List>
 
+          <Menu
+            id="long-menu"
+            MenuListProps={{
+              "aria-labelledby": "long-button",
+            }}
+            anchorEl={anchorEl}
+            open={openMenu}
+            onClose={handleCloseMenu}
+          >
+            {/* <MenuItem onClick={() => handleSetGoal(selectedSubject!)}>
+                    Set Goal
+                  </MenuItem> */}
+
+            <MenuItem onClick={() => handleDeleteSubject(selectedSubject!)}>
+              Delete
+            </MenuItem>
+          </Menu>
+        </>
+      )}
       <Box
         width={"100%"}
         display={"flex"}
@@ -207,7 +429,7 @@ export default function AddSubject() {
                     },
                   }}
                 >
-                  <ListItemText primary={subject} />
+                  <ListItemText primary={subject.name} />
                 </ListItem>
               ))}
             </List>
@@ -218,6 +440,68 @@ export default function AddSubject() {
           </Typography>
         )}
       </DialogBox>
+
+      <DialogBox
+        open={openGoal}
+        title="Set a Goal"
+        handleClose={handleClose}
+        actions={
+          <>
+            <Button onClick={handleClose} color="secondary">
+              Cancel
+            </Button>
+            <Button color="primary">Set Goal</Button>
+          </>
+        }
+      >
+        <Box
+          display="flex"
+          alignItems="center"
+          justifyItems="center"
+          justifyContent="space-evenly"
+          gap="1rem"
+        >
+          <Button
+            variant="outlined"
+            sx={{
+              borderRadius: "50%",
+              width: "40px",
+              height: "40px",
+              minWidth: "0",
+              padding: "0",
+              fontSize: "1.5rem",
+              border: "2px solid",
+              alignItems: "flex-end",
+            }}
+            onClick={handleDecrease}
+          >
+            -
+          </Button>
+          <Typography
+            variant="body1"
+            sx={{ fontSize: "20px", width: "40%", textAlign: "center" }}
+          >
+            {hours}h {minutes}m
+          </Typography>
+          <Button
+            variant="outlined"
+            sx={{
+              borderRadius: "50%",
+              width: "40px",
+              height: "40px",
+              minWidth: "0",
+              padding: "0",
+              fontSize: "1.5rem",
+              border: "2px solid",
+              alignItems: "flex-end",
+            }}
+            onClick={handleIncrease}
+          >
+            +
+          </Button>
+        </Box>
+      </DialogBox>
+      {loading && <Loader />}
       <Menubar></Menubar>
     </Box>
   );
