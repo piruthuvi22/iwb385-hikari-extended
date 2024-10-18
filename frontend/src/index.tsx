@@ -13,21 +13,23 @@ const root = ReactDOM.createRoot(
 );
 
 root.render(
-  <React.StrictMode>
+  // <React.StrictMode>
     <Auth0Provider
       domain={process.env.REACT_APP_AUTH0_DOMAIN!}
       clientId={process.env.REACT_APP_AUTH0_CLIENT_ID!}
       authorizationParams={{
-        redirect_uri: window.location.origin + "/dashboard",
+        redirect_uri: window.location.origin + "/add-subject",
         display: "popup",
         prompt: "login",
+        audience: "central_api",
+        scope: "openid profile email",
       }}
     >
       <ThemeProvider theme={theme}>
         <RouterProvider router={router} />
       </ThemeProvider>
     </Auth0Provider>
-  </React.StrictMode>
+  // </React.StrictMode>
 );
 
 // If you want to start measuring performance in your app, pass a function

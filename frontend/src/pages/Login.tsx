@@ -35,9 +35,7 @@ export default function Login() {
   return (
     <div>
       <Typography>Login Page</Typography>
-      <Button variant="contained" onClick={() => loginWithRedirect()}>
-        Log In
-      </Button>
+      <Button variant="contained">Log In</Button>
     </div>
   );
 }
