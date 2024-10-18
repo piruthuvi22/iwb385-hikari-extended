@@ -106,7 +106,7 @@ service /api on new http:Listener(9092) {
                 subjectId: subjectId
             });
             if iWeek is models:Week {
-                foreach var studySession in iWeek.studySessions {
+                foreach var studySession in iWeek.studySessions.reverse() {
                     if lessonDates[studySession.lessonId] is () {
                         lessonDates[studySession.lessonId] = studySession.date;
                     }
