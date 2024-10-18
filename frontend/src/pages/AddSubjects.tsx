@@ -5,6 +5,8 @@ import {
   Button,
   List,
   ListItem,
+  ListItemButton,
+  ListItemIcon,
   ListItemText,
   TextField,
   Typography,
@@ -20,16 +22,20 @@ import IconButton from "@mui/material/IconButton";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
+import { useAuth0 } from "@auth0/auth0-react";
+import { Delete, Inbox } from "@mui/icons-material";
 
 const ENDPOINT = "http://localhost:9094/central/api";
 
-const TOKEN =
-  "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IlNyQjE4ejFjRDB2QUticm1FamZ4diJ9.eyJpc3MiOiJodHRwczovL2hpa2FyaS51ay5hdXRoMC5jb20vIiwic3ViIjoiYXV0aDB8NjcwNjM5MmUyNTZhN2JkZWY3N2RhZmYyIiwiYXVkIjpbImNlbnRyYWxfYXBpIiwiaHR0cHM6Ly9oaWthcmkudWsuYXV0aDAuY29tL3VzZXJpbmZvIl0sImlhdCI6MTcyODk3OTM1NCwiZXhwIjoxNzI5MDY1NzU0LCJzY29wZSI6Im9wZW5pZCBwcm9maWxlIGVtYWlsIiwiYXpwIjoiRWRRRUVMd0tRWVhPS2I4V2htck0zZHpPNzN0MkxyTGYifQ.dEGd3FgmvhQ2GrcjNwIIwhBe5QCBBmXumVe7-gk4QmJHTgHU2sXf4A9u9qymSGouH_qSJ535wCj1s2fwejqtDsQzlICH4SgdBxVTMZ1Agu_pNWQgjs5IIhEawU_vI-nu9_s04JNY06QCCbvQu3fN2H4MX03Oqoj58srALDDNpMELa_SN8JPUVeirDMQi_d3e_u1teG9aiQ2zdZyw8wIRx82_pRqQqQcni9UtrNaEu4HlU9ICntefwMH7Ogqaq8mZEk1CElMLKxGV1afBhRH8Z0WfijNg_yIOqml3nrs5EmbYCOpztynfQMCEPXqek1gB5eK2mNj7GM9573_ge7l25w";
-
+interface Lesson {
+  id: string;
+  name: string;
+  no: number;
+}
 interface SubjectResponse {
   id: string;
   name: string;
-  goalHours: number;
+  lessons: Lesson[];
 }
 
 export default function AddSubject() {
@@ -52,13 +58,68 @@ export default function AddSubject() {
     React.useState<SubjectResponse | null>(null);
   const [studyMinutes, setStudyMinutes] = useState(0);
 
+  const {
+    user,
+    isAuthenticated,
+    isLoading,
+    getAccessTokenSilently,
+    error,
+    getIdTokenClaims,
+    handleRedirectCallback,
+  } = useAuth0();
+
   useEffect(() => {
+    // processAuth();
+    user?.sub && createUser();
     getSubjects();
-  }, []);
+  }, [user]);
+
+  const processAuth = async () => {
+    try {
+      let res = await handleRedirectCallback();
+      console.log("Response", res);
+
+      res.appState = { targetUrl: "/dashboard" };
+    } catch (error: any) {
+      console.error("Authorization error: ", error);
+      if (error.error === "access_denied") {
+        // Handle the case where user declined the authorization
+        alert("Authorization declined. Please try again.");
+      }
+    }
+  };
+
+  const createUser = async () => {
+    if (!user) {
+      return;
+    }
+    try {
+      const TOKEN = await getAccessTokenSilently({});
+
+      const response = await axios.post(
+        ENDPOINT + "/users",
+        {
+          id: user.sub?.split("|")[1],
+          name: user.name,
+          email: user.email,
+        },
+        {
+          headers: {
+            Authorization: "Bearer " + TOKEN,
+          },
+        }
+      );
+      console.log("User created successfully", response.data);
+    } catch (error) {
+      console.error("Error creating user", error);
+    }
+  };
 
   async function getSubjects() {
     setLoading(true);
+
     try {
+      const TOKEN = await getAccessTokenSilently({});
       const availableSubjectsResponse = await axios.get(
         ENDPOINT + "/subjects",
         {
@@ -96,6 +157,7 @@ export default function AddSubject() {
     setLoading(true);
 
     try {
+      const TOKEN = await getAccessTokenSilently({});
       const response = await axios.put(
         ENDPOINT + "/subjects",
         {
@@ -157,7 +219,9 @@ export default function AddSubject() {
 
   const handleDeleteSubject = async (subject: SubjectResponse) => {
     setLoading(true);
+
     try {
+      const TOKEN = await getAccessTokenSilently({});
       const response = await axios.delete(ENDPOINT + "/subjects", {
         data: { id: subject.id },
         headers: {
@@ -195,7 +259,11 @@ export default function AddSubject() {
   };
 
   const goToSubjectPage = (subject: SubjectResponse) => {
-    navigate(`/record-study-session`, { state: { subjectId: subject.id } });
+    console.log("Subject=", subject);
+
+    navigate(`/record-study-session`, {
+      state: { subjectId: subject.id, subjectName: subject.name },
+    });
   };
 
   const hours = Math.floor(studyMinutes / 60);
@@ -247,79 +315,51 @@ export default function AddSubject() {
       </Box>
       {/* Display selected subjects as tiles */}
       {selectedSubjects.length > 0 && (
-        <Box
-          mb={2}
-          mt={2}
-          width={"100%"}
-          display="flex"
-          justifyContent="center"
-          mr={3}
-        >
-          <Box display="flex" flexDirection="column" gap={1.5} width={"65%"}>
+        <>
+          <List sx={{ width: "100%" }}>
             {selectedSubjects.map((subject, index) => (
-              <Box
+              <ListItem
+                disablePadding
                 key={index}
-                sx={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  paddingRight: "0.25rem",
-                  paddingLeft: "1rem",
-                  paddingTop: "0.25rem",
-                  paddingBottom: "0.25rem",
-                  borderRadius: "1.5rem",
-                  backgroundColor: "#F0F0FF",
-                  boxShadow: 1,
-                  width: "100%",
-                }}
-                onClick={() => goToSubjectPage(subject)}
+                secondaryAction={
+                  <IconButton
+                    edge="start"
+                    aria-label="more"
+                    id="long-button"
+                    aria-controls={open ? "long-menu" : undefined}
+                    aria-expanded={open ? "true" : undefined}
+                    aria-haspopup="true"
+                    onClick={(event) => handleClickMenu(event, subject)}
+                  >
+                    <MoreVertIcon />
+                  </IconButton>
+                }
               >
-                <Typography variant="body1">{subject.name}</Typography>
-                {/* <Typography variant="body2" color="text.secondary">
-                  {subject.goalHours} hrs
-                </Typography> */}
-                <IconButton
-                  aria-label="more"
-                  id="long-button"
-                  aria-controls={open ? "long-menu" : undefined}
-                  aria-expanded={open ? "true" : undefined}
-                  aria-haspopup="true"
-                  onClick={(event) => handleClickMenu(event, subject)}
-                >
-                  <MoreVertIcon />
-                </IconButton>
-                <Menu
-                  id="long-menu"
-                  MenuListProps={{
-                    "aria-labelledby": "long-button",
-                  }}
-                  anchorEl={anchorEl}
-                  open={openMenu}
-                  onClose={handleCloseMenu}
-                  slotProps={{
-                    paper: {
-                      style: {
-                        width: "15ch",
-                        borderRadius: "1.5rem",
-                        boxShadow: "0px 4px 20px rgba(0, 0, 0, 0.1)",
-                      },
-                    },
-                  }}
-                >
-                  {/* <MenuItem onClick={() => handleSetGoal(selectedSubject!)}>
+                <ListItemButton onClick={() => goToSubjectPage(subject)}>
+                  <ListItemText primary={subject.name} />
+                </ListItemButton>
+              </ListItem>
+            ))}
+          </List>
+
+          <Menu
+            id="long-menu"
+            MenuListProps={{
+              "aria-labelledby": "long-button",
+            }}
+            anchorEl={anchorEl}
+            open={openMenu}
+            onClose={handleCloseMenu}
+          >
+            {/* <MenuItem onClick={() => handleSetGoal(selectedSubject!)}>
                     Set Goal
                   </MenuItem> */}
 
-                  <MenuItem
-                    onClick={() => handleDeleteSubject(selectedSubject!)}
-                  >
-                    Delete
-                  </MenuItem>
-                </Menu>
-              </Box>
-            ))}
-          </Box>
-        </Box>
+            <MenuItem onClick={() => handleDeleteSubject(selectedSubject!)}>
+              Delete
+            </MenuItem>
+          </Menu>
+        </>
       )}
       <Box
         width={"100%"}
