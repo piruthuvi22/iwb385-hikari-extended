@@ -12,7 +12,7 @@ export default function Menubar() {
 
   // Set the active tab based on the current URL path
   useEffect(() => {
-    if (location.pathname === "/home") {
+    if (location.pathname === "/add-subject") {
       setValue(0);
     } else if (
       location.pathname === "/friends" ||
@@ -29,7 +29,7 @@ export default function Menubar() {
     setValue(newValue);
 
     if (newValue === 0) {
-      navigate("/home");
+      navigate("/add-subject");
     } else if (newValue === 1) {
       navigate("/friends");
     } else if (newValue === 2) {
