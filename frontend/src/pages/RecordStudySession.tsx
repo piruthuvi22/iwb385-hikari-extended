@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { buildStyles, CircularProgressbar } from "react-circular-progressbar";
+// import {Flat, Heat, Nested} from '@alptugidin/react-circular-progress-bar'
 import "react-circular-progressbar/dist/styles.css";
 import {
   alpha,
   Avatar,
+  Badge,
   Box,
   Button,
   Divider,
@@ -54,18 +56,18 @@ interface Lesson {
   name: string;
   no: number;
 }
-interface SubjectResponse {
+export interface SubjectRecordsResponse {
   studentId: string;
   subjectId: string;
   weekNo: number;
   year: number;
   actualHours: number;
   goalHours: number;
-  lessonDates: {
+  lastStudiedDates: {
     [key: string]: string;
   };
-  studiedLessons: string[];
-  lessons: Lesson[];
+  studiedWithinTheWeek: string[];
+  allLessons: Lesson[];
 }
 
 export default function RecordStudySession() {
@@ -80,7 +82,7 @@ export default function RecordStudySession() {
   const openMenu = Boolean(anchorEl);
 
   const [loading, setLoading] = useState(true);
-  const [subject, setSubject] = useState<SubjectResponse | null>(null);
+  const [subject, setSubject] = useState<SubjectRecordsResponse | null>(null);
 
   const getSubjectInfo = async () => {
     setLoading(true);
@@ -177,7 +179,9 @@ export default function RecordStudySession() {
 
   const formatLastStudied = (dateTime: string): string => {
     let duration = "";
-    let diff = moment().diff(dateTime, "day");
+    let diff = moment()
+      .startOf("day")
+      .diff(moment(dateTime).startOf("day"), "day");
     if (diff == 0) duration = "today";
     else if (diff == 1) duration = "yesterday";
     else duration = moment(dateTime).format("MMM DD");
@@ -302,7 +306,7 @@ export default function RecordStudySession() {
                     // Colors
                     pathColor: theme.palette.primary.main,
                     textColor: theme.palette.secondary.main,
-                    trailColor: theme.palette.grey[100],
+                    trailColor: theme.palette.grey[200],
                   })}
                 />
               </Box>
@@ -322,14 +326,20 @@ export default function RecordStudySession() {
                 </ListSubheader>
               }
             >
-              {subject?.lessons.map((lesson, index) => {
+              {subject?.allLessons.map((lesson, index) => {
                 let lessonId = lesson.id;
-                let key = Object.keys(subject?.lessonDates).filter(
+                let key = Object.keys(subject?.lastStudiedDates).filter(
                   (key) => key === lessonId
                 );
 
-                let dateTime = subject?.lessonDates[key[0]];
+                let dateTime = subject?.lastStudiedDates[key[0]];
                 let duration = formatLastStudied(dateTime);
+                let noOfWeeks = moment().diff(dateTime, "week");
+                let badgeColor = "default";
+                if (noOfWeeks === 0) badgeColor = "success";
+                else if (noOfWeeks === 1) badgeColor = "warning";
+                else badgeColor = "error";
+
                 return (
                   <ListItem
                     key={lesson.id}
@@ -351,17 +361,36 @@ export default function RecordStudySession() {
                       sx={{
                         "& .MuiListItemText-primary": {
                           fontWeight: "600",
-                          fontSize: "1.2rem",
+                          fontSize: "1.3rem",
                           color: theme.palette.grey[800],
+                        },
+                        "& .MuiListItemText-secondary": {
+                          fontSize: "1rem",
                         },
                       }}
                       primary={lesson.name}
                       {...(dateTime && {
-                        secondary:
-                          "Last studied " +
-                          duration +
-                          " at " +
-                          moment(dateTime).format("h:mm A"),
+                        secondary: (
+                          <Box
+                            display={"flex"}
+                            justifyContent={"space-between"}
+                            alignItems={"center"}
+                          >
+                            Last studied {duration} at{" "}
+                            {moment(dateTime).format("h:mm A")}
+                            <Badge
+                              color={badgeColor as any}
+                              variant="dot"
+                              sx={{
+                                "& .MuiBadge-badge": {
+                                  height: 10, // Adjust height
+                                  width: 10, // Adjust width
+                                  borderRadius: "50%",
+                                },
+                              }}
+                            />
+                          </Box>
+                        ),
                       })}
                     />
                   </ListItem>
@@ -389,7 +418,7 @@ export default function RecordStudySession() {
 
       <AddSession
         open={open}
-        lessons={subject?.lessons}
+        lessons={subject?.allLessons}
         goal={subject?.goalHours}
         onSave={onRecordStudySession}
         handleClose={() => setOpen(false)}
