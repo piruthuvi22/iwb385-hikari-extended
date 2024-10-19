@@ -133,8 +133,8 @@ service /api on new http:Listener(9092) {
                 weekNo: weekNo,
                 year: year,
                 actualHours: 0,
-                lessonDates: lessonDates,
-                studiedLessons: ()
+                lastStudiedDates: lessonDates,
+                studiedWithinTheWeek: ()
             };
         } else if week is models:Week {
             string[] studiedLessons = getStudiedLessons(week);
@@ -145,8 +145,8 @@ service /api on new http:Listener(9092) {
                 year: year,
                 actualHours: week.actualHours,
                 goalHours: week.goalHours,
-                lessonDates: lessonDates,
-                studiedLessons: studiedLessons
+                lastStudiedDates: lessonDates,
+                studiedWithinTheWeek: studiedLessons
             };
         }
 
@@ -179,8 +179,8 @@ service /api on new http:Listener(9092) {
                 weekNo: weekNo,
                 year: year,
                 actualHours: 0,
-                lessonDates: (),
-                studiedLessons: ()
+                lastStudiedDates: (),
+                studiedWithinTheWeek: ()
             };
         } else if week is models:Week {
             string[] studiedLessons = getStudiedLessons(week);
@@ -191,8 +191,8 @@ service /api on new http:Listener(9092) {
                 year: year,
                 actualHours: week.actualHours,
                 goalHours: week.goalHours,
-                lessonDates: (),
-                studiedLessons: studiedLessons
+                lastStudiedDates: (),
+                studiedWithinTheWeek: studiedLessons
             };
         }
 
@@ -225,7 +225,7 @@ service /api on new http:Listener(9092) {
                     actualHours: week.actualHours,
                     goalHours: week.goalHours
                 };
-            
+
             userSummaries[studentId] = {id: studentId, subjects: subSummary};
 
         }
