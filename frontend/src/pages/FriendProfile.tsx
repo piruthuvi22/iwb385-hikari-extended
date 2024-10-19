@@ -1,7 +1,7 @@
 import { useTheme, Typography, Box, Avatar, Grid } from "@mui/material";
 import { useParams } from "react-router-dom";
 import Menubar from "../components/Menubar";
-import { buildStyles, CircularProgressbar } from "react-circular-progressbar";
+import ProgressMeter from "../components/ProgressMeter";
 
 const friendsData = [
   {
@@ -105,18 +105,32 @@ export default function FriendProfile() {
                 {subject.name}
               </Typography>
               <Box sx={{ width: 50, height: 50 }}>
-                <CircularProgressbar
+                {/* <CircularProgressbar
                   value={subject.focus}
                   strokeWidth={13}
                   text={`${subject.focus}%`}
                   styles={buildStyles({
-                    strokeLinecap: "round",
-                    textSize: "25px",
-                    pathTransitionDuration: 0.5,
-                    pathColor: theme.palette.primary.main,
-                    textColor: theme.palette.primary.main,
+                   
                     trailColor: theme.palette.grey[100],
                   })}
+                /> */}
+
+                <ProgressMeter
+                  progress={parseFloat(subject.focus.toFixed(1))}
+                  showMiniCircle={false}
+                  sx={{
+                    strokeColor: theme.palette.primary.main,
+                    bgStrokeColor: theme.palette.grey[300],
+                    barWidth: 13,
+                    valueSize: 25,
+                    valueWeight: "bolder",
+                    valueColor: theme.palette.primary.main,
+                    textColor: theme.palette.primary.main,
+                    loadingTime: 1500,
+                    shape: "threequarters",
+                    textFamily: "Fredoka",
+                    valueFamily: "Fredoka",
+                  }}
                 />
               </Box>
             </Box>
