@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import HomeIcon from "@mui/icons-material/Home";
 import PersonIcon from "@mui/icons-material/Person";
 import GroupIcon from "@mui/icons-material/Group";
+import { MenuBook } from "@mui/icons-material";
 
 export default function Menubar() {
   const navigate = useNavigate();
@@ -51,7 +52,7 @@ export default function Menubar() {
           borderTopRightRadius: "1rem",
         }}
       >
-        <BottomNavigationAction label="Home" icon={<HomeIcon />} />
+        <BottomNavigationAction label="Subjects" icon={<MenuBook />} />
         <BottomNavigationAction label="Friends" icon={<GroupIcon />} />
         <BottomNavigationAction label="Profile" icon={<PersonIcon />} />
       </BottomNavigation>

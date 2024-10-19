@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { buildStyles, CircularProgressbar } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
 import {
+  alpha,
   Avatar,
   Box,
   Button,
@@ -44,6 +45,7 @@ import { useLocation } from "react-router-dom";
 import Loader from "../components/Loader";
 import Notification from "../components/Notification";
 import moment from "moment";
+import Menubar from "../components/Menubar";
 
 const ENDPOINT = "http://localhost:9094/central/api";
 
@@ -183,10 +185,6 @@ export default function RecordStudySession() {
     return duration;
   };
 
-  // if (loading) {
-  //   return <Loader />;
-  // }
-
   // Convert goal hours to hours and minutes
   let goalHours = 0;
   let goalMins = 0;
@@ -207,20 +205,27 @@ export default function RecordStudySession() {
     ((subject?.actualHours ?? 0) / (subject?.goalHours ?? 1)) * 100;
 
   return (
-    <Box height={"100vh"}>
+    <Box height={"100vh"} bgcolor={theme.palette.grey[100]}>
       <Box
         sx={{
           position: "relative",
           // height: 300,
         }}
       >
+        {loading && (
+          <Box position={"fixed"} top={0} left={0} right={0}>
+            <LinearProgress color="secondary" sx={{ height: 6 }} />
+          </Box>
+        )}
         <img
           src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRkOaTwJnmXUjkpj62We__JoTQ2liCX2fLcHQ&s"
           alt="cover"
           style={{
             width: "100%",
-            height: 300,
+            height: "20vh",
             objectFit: "cover",
+            borderBottomLeftRadius: "1.5rem",
+            borderBottomRightRadius: "1.5rem",
           }}
         />
         <Box
@@ -232,6 +237,9 @@ export default function RecordStudySession() {
             right: 0,
             // bgcolor: theme.palette.primary.main,
             boxShadow: "inset 0px -100px 50px 0px rgba(0,0,0,0.85)",
+
+            borderBottomLeftRadius: "1.5rem",
+            borderBottomRightRadius: "1.5rem",
           }}
         >
           <Box
@@ -269,8 +277,8 @@ export default function RecordStudySession() {
             </MenuItem>
           </Menu>
         </Box>
-        {loading && <LinearProgress color="secondary" />}
       </Box>
+
       {!loading && (
         <Box>
           {subject?.goalHours != 0 && (
@@ -281,38 +289,35 @@ export default function RecordStudySession() {
               alignItems={"center"}
               py={2}
             >
-              {/* <CircularWithValueLabel /> */}
-
               <Box sx={{ width: 150 }}>
                 <CircularProgressbar
                   value={progress}
                   strokeWidth={10}
                   text={progress.toFixed(2) + "%"}
+                  maxValue={100}
                   styles={buildStyles({
                     strokeLinecap: "round",
-                    textSize: "16px",
+                    textSize: "18px",
                     pathTransitionDuration: 0.5,
                     // Colors
                     pathColor: theme.palette.primary.main,
-                    textColor: theme.palette.primary.main,
+                    textColor: theme.palette.secondary.main,
                     trailColor: theme.palette.grey[100],
                   })}
                 />
               </Box>
 
               <Typography color="text.secondary">
-                {actualHours + "hrs " + actualMins + " mins"} /{" "}
-                {goalHours + "hrs " + goalMins + " mins"}
+                {actualHours + "hrs " + actualMins + "mins"} /{" "}
+                {goalHours + "hrs " + goalMins + "mins"}
               </Typography>
             </Box>
           )}
-          <Box padding={0}>
+          <Box px={2}>
             <List
-              sx={{ width: "100%", bgcolor: "background.paper" }}
-              component="nav"
-              aria-labelledby="nested-list-subheader"
+              sx={{ width: "100%" }}
               subheader={
-                <ListSubheader component="div" id="nested-list-subheader">
+                <ListSubheader sx={{ backgroundColor: "transparent" }}>
                   Lessons
                 </ListSubheader>
               }
@@ -326,30 +331,46 @@ export default function RecordStudySession() {
                 let dateTime = subject?.lessonDates[key[0]];
                 let duration = formatLastStudied(dateTime);
                 return (
-                  <div key={lesson.id}>
-                    <ListItem secondaryAction={<></>}>
-                      <ListItemIcon>
-                        <Description />
-                      </ListItemIcon>
-                      <ListItemText
-                        primary={lesson.name}
-                        {...(dateTime && {
-                          secondary:
-                            "Last studied " +
-                            duration +
-                            " at " +
-                            moment(dateTime).format("h:mm A"),
-                        })}
-                      />
-                    </ListItem>
-                    <Divider variant="middle" component="li" />
-                  </div>
+                  <ListItem
+                    key={lesson.id}
+                    sx={{
+                      background: `linear-gradient(45deg, ${alpha(
+                        theme.palette.secondary.light,
+                        0.5
+                      )} 20%, ${alpha(theme.palette.warning.light, 0.5)} 80%)`,
+                      mb: 2,
+                      borderRadius: "1.5rem",
+                      height: "80px",
+                    }}
+                    secondaryAction={<></>}
+                  >
+                    <ListItemIcon>
+                      <Description />
+                    </ListItemIcon>
+                    <ListItemText
+                      sx={{
+                        "& .MuiListItemText-primary": {
+                          fontWeight: "600",
+                          fontSize: "1.2rem",
+                          color: theme.palette.grey[800],
+                        },
+                      }}
+                      primary={lesson.name}
+                      {...(dateTime && {
+                        secondary:
+                          "Last studied " +
+                          duration +
+                          " at " +
+                          moment(dateTime).format("h:mm A"),
+                      })}
+                    />
+                  </ListItem>
                 );
               })}
             </List>
             <Fab
-              sx={{ position: "fixed", bottom: 25, right: 25 }}
-              color="primary"
+              sx={{ position: "fixed", bottom: 80, right: 30 }}
+              color="secondary"
               size="large"
               disabled={subject?.goalHours === 0}
               onClick={() => {
@@ -376,6 +397,7 @@ export default function RecordStudySession() {
       <AddGoalHrs
         open={openGoal}
         goalHours={subject?.goalHours}
+        actualGoal={subject?.actualHours}
         handleClose={() => setOpenGoal(false)}
         onSave={onUpdateGoalHours}
       />
@@ -387,6 +409,7 @@ export default function RecordStudySession() {
         text="Set goal hours before recording study session"
         handleClose={() => {}}
       />
+      <Menubar />
     </Box>
   );
 }
@@ -406,12 +429,17 @@ const AddSession = ({
 }) => {
   const [hour, setHour] = useState<number>(0);
   const [minutes, setMinutes] = useState<number>(0);
-  const [lessonId, setLessonId] = useState<string | undefined>(undefined);
+  const [lessonId, setLessonId] = useState<string>("");
+  const [error, setError] = useState<boolean>(false);
 
   const handleSave = () => {
-    if (!lessonId) return;
+    if (!lessonId) {
+      setError(true);
+      return;
+    }
     let totalMinutes = hour * 60 + minutes;
     onSave(lessonId, totalMinutes);
+    setLessonId("");
     handleClose();
   };
 
@@ -427,6 +455,7 @@ const AddSession = ({
   // useEffect(() => {
 
   // }, [hour, minutes]);
+  console.log("LessonID", lessonId);
 
   return (
     <DialogBox
@@ -435,10 +464,34 @@ const AddSession = ({
       title="How long did you study?"
       actions={
         <>
-          <Button variant="contained" onClick={handleSave}>
+          <Button
+            variant="contained"
+            sx={{
+              width: "50%",
+              fontWeight: "600",
+              fontSize: "1.3rem",
+              py: 2,
+              borderRadius: "100px",
+            }}
+            onClick={handleSave}
+          >
             Save
           </Button>
-          <Button variant="outlined" onClick={handleClose}>
+          <Button
+            variant="outlined"
+            sx={{
+              width: "50%",
+              fontWeight: "600",
+              fontSize: "1.3rem",
+              py: 2,
+              borderRadius: "100px",
+            }}
+            onClick={() => {
+              setLessonId("");
+              setError(false);
+              handleClose();
+            }}
+          >
             Close
           </Button>
         </>
@@ -452,8 +505,17 @@ const AddSession = ({
             fullWidth
             sx={{
               mb: 3,
+              "& .MuiOutlinedInput-root": {
+                borderRadius: "1.5rem",
+              },
             }}
-            onChange={(e) => setLessonId(e.target.value)}
+            helperText={error && "Choose the lesson"}
+            error={error}
+            value={lessonId}
+            onChange={(e) => {
+              setLessonId(e.target.value);
+              setError(false);
+            }}
           >
             {lessons?.map((lesson, index) => (
               <MenuItem key={lesson.id} value={lesson.id}>
@@ -477,6 +539,11 @@ const AddSession = ({
               type="number"
               size="small"
               value={hour}
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: "1.5rem",
+                },
+              }}
               slotProps={{
                 htmlInput: {
                   min: 0,
@@ -503,6 +570,11 @@ const AddSession = ({
               type="number"
               size="small"
               value={minutes}
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: "1.5rem",
+                },
+              }}
               slotProps={{
                 htmlInput: {
                   min: 0,
@@ -546,130 +618,180 @@ const AddSession = ({
 const AddGoalHrs = ({
   open,
   goalHours,
+  actualGoal,
   handleClose,
   onSave,
 }: {
   open: boolean;
   goalHours: number | undefined;
+  actualGoal: number | undefined;
   handleClose: () => void;
   onSave: (totalHr: number) => void;
 }) => {
   const [hour, setHour] = useState<number>(0);
   const [minutes, setMinutes] = useState<number>(0);
+  const [openNotification, setOpenNotification] = useState(false);
+
+  const totalGoalTime = (goalHours ?? 0) * 60;
+  const totalActualTime = (actualGoal ?? 0) * 60;
 
   useEffect(() => {
     // Edit goal hour
-    if (goalHours) {
-      let hours = Math.floor(goalHours);
-      let mins = Math.round((goalHours - hours) * 60);
-      setHour(hours);
-      setMinutes(mins);
-    }
+    if (!goalHours || !actualGoal) return;
+    let hours = Math.floor(goalHours);
+    let mins = Math.round((goalHours - hours) * 60);
+    setHour(hours);
+    setMinutes(mins);
   }, [open]);
 
   const handleSave = () => {
+    const selectedTime = hour * 60 + minutes;
+    if (selectedTime < totalActualTime) {
+      setOpenNotification(true);
+      return;
+    }
     let totalHr = hour + minutes / 60;
     onSave(totalHr);
     handleClose();
   };
   return (
-    <DialogBox
-      open={open}
-      handleClose={handleClose}
-      title="Add your goal hours"
-      actions={
+    <>
+      <DialogBox
+        open={open}
+        handleClose={handleClose}
+        title="Add your goal hours"
+        actions={
+          <>
+            <Button
+              variant="contained"
+              sx={{
+                width: "50%",
+                fontWeight: "600",
+                fontSize: "1.3rem",
+                py: 2,
+                borderRadius: "100px",
+              }}
+              onClick={handleSave}
+            >
+              Save
+            </Button>
+            <Button
+              variant="outlined"
+              sx={{
+                width: "50%",
+                fontWeight: "600",
+                fontSize: "1.3rem",
+                py: 2,
+                borderRadius: "100px",
+              }}
+              onClick={handleClose}
+            >
+              Close
+            </Button>
+          </>
+        }
+      >
         <>
-          <Button variant="contained" onClick={handleSave}>
-            Save
-          </Button>
-          <Button variant="outlined" onClick={handleClose}>
-            Close
-          </Button>
-        </>
-      }
-    >
-      <>
-        <Box py={4}>
-          <Typography>Hours</Typography>
-          <Box display={"flex"} justifyContent={"space-between"} gap={2}>
-            <Slider
-              defaultValue={12}
-              min={0}
-              max={24}
-              getAriaValueText={(value) => `${value}hrs`}
-              value={typeof hour === "number" ? hour : 0}
-              aria-label="Default"
-              valueLabelDisplay="auto"
-              onChange={(e, value) => setHour(Number(value))}
-            />
-            <TextField
-              onChange={(e) => setHour(Number(e.target.value))}
-              type="number"
-              size="small"
-              value={hour}
-              slotProps={{
-                htmlInput: {
-                  min: 0,
-                  max: 24,
-                },
-              }}
-            />
-          </Box>
+          <Box py={4}>
+            <Typography>Hours</Typography>
+            <Box display={"flex"} justifyContent={"space-between"} gap={2}>
+              <Slider
+                defaultValue={12}
+                min={0}
+                max={24}
+                getAriaValueText={(value) => `${value}hrs`}
+                value={typeof hour === "number" ? hour : 0}
+                aria-label="Default"
+                valueLabelDisplay="auto"
+                onChange={(e, value) => setHour(Number(value))}
+              />
+              <TextField
+                onChange={(e) => setHour(Number(e.target.value))}
+                type="number"
+                size="small"
+                value={hour}
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: "1.5rem",
+                  },
+                }}
+                slotProps={{
+                  htmlInput: {
+                    min: 0,
+                    max: 24,
+                  },
+                }}
+              />
+            </Box>
 
-          <Typography>Minutes</Typography>
-          <Box display={"flex"} justifyContent={"space-between"} gap={2}>
-            <Slider
-              defaultValue={12}
-              min={0}
-              step={5}
-              max={59}
-              getAriaValueText={(value) => `${value}mins`}
-              value={typeof minutes === "number" ? minutes : 0}
-              aria-label="Default"
-              valueLabelDisplay="auto"
-              onChange={(e, value) => setMinutes(Number(value))}
-            />
-            <TextField
-              onChange={(e) => setMinutes(Number(e.target.value))}
-              type="number"
-              size="small"
-              value={minutes}
-              slotProps={{
-                htmlInput: {
-                  min: 0,
-                  max: 59,
-                  minLength: 5,
-                },
-              }}
-            />
+            <Typography>Minutes</Typography>
+            <Box display={"flex"} justifyContent={"space-between"} gap={2}>
+              <Slider
+                defaultValue={12}
+                min={0}
+                step={5}
+                max={59}
+                getAriaValueText={(value) => `${value}mins`}
+                value={typeof minutes === "number" ? minutes : 0}
+                aria-label="Default"
+                valueLabelDisplay="auto"
+                onChange={(e, value) => setMinutes(Number(value))}
+              />
+              <TextField
+                onChange={(e) => setMinutes(Number(e.target.value))}
+                type="number"
+                size="small"
+                value={minutes}
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    borderRadius: "1.5rem",
+                  },
+                }}
+                slotProps={{
+                  htmlInput: {
+                    min: 0,
+                    max: 59,
+                    minLength: 5,
+                  },
+                }}
+              />
+            </Box>
+            <Typography
+              textAlign={"center"}
+              variant="h6"
+              mt={2}
+              color="secondary"
+            >
+              <span
+                style={{
+                  fontSize: "1.8rem",
+                  fontWeight: 700,
+                }}
+              >
+                {hour}
+              </span>
+              hrs
+              <span
+                style={{
+                  fontSize: "1.8rem",
+                  fontWeight: 700,
+                }}
+              >
+                {minutes}
+              </span>
+              mins
+            </Typography>
           </Box>
-          <Typography
-            textAlign={"center"}
-            variant="h6"
-            mt={2}
-            color="secondary"
-          >
-            <span
-              style={{
-                fontSize: "1.8rem",
-                fontWeight: 700,
-              }}
-            >
-              {hour}
-            </span>
-            hrs
-            <span
-              style={{
-                fontSize: "1.8rem",
-                fontWeight: 700,
-              }}
-            >
-              {minutes}
-            </span>
-            mins
-          </Typography>
-        </Box>
-      </>
-    </DialogBox>
+        </>
+      </DialogBox>
+
+      <Notification
+        open={openNotification}
+        text="Goal time should be greater than studied hours"
+        type="error"
+        variant="standard"
+        handleClose={() => setOpenNotification(false)}
+      />
+    </>
   );
 };

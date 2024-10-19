@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
+  alpha,
   Box,
   Button,
+  Divider,
+  LinearProgress,
   List,
   ListItem,
   ListItemButton,
@@ -23,16 +26,16 @@ import MoreVertIcon from "@mui/icons-material/MoreVert";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import { useAuth0 } from "@auth0/auth0-react";
-import { Delete, Inbox } from "@mui/icons-material";
+import { Delete, Inbox, MenuBook } from "@mui/icons-material";
 
 const ENDPOINT = "http://localhost:9094/central/api";
 
-interface Lesson {
+export interface Lesson {
   id: string;
   name: string;
   no: number;
 }
-interface SubjectResponse {
+export interface SubjectResponse {
   id: string;
   name: string;
   lessons: Lesson[];
@@ -270,75 +273,108 @@ export default function AddSubject() {
   const minutes = studyMinutes % 60;
 
   return (
-    <Box
-      minHeight={"100vh"}
-      bgcolor={theme.palette.grey[100]}
-      display={"flex"}
-      flexDirection={"column"}
-      alignItems={"center"}
-      paddingBottom={10}
-    >
+    <Box minHeight={"100vh"} bgcolor={theme.palette.grey[100]}>
       <Box
-        width={"100%"}
-        height={"20vh"}
-        position={"fixed"}
-        top={0}
-        zIndex={1000}
+        sx={{
+          position: "relative",
+          // height: 300,
+        }}
       >
+        {loading && (
+          <Box position={"fixed"} top={0} left={0} right={0}>
+            <LinearProgress color="secondary" sx={{ height: 6 }} />
+          </Box>
+        )}
         <img
           src={Banner}
           alt="Banner"
           style={{
             width: "100%",
-            height: "100%",
+            height: "20vh",
             objectFit: "cover",
             borderBottomLeftRadius: "1.5rem",
             borderBottomRightRadius: "1.5rem",
-            boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
           }}
         />
-
-        <Typography
-          variant="h4"
-          color="white"
-          position="absolute"
-          top={16}
-          left={16}
+        <Box
+          sx={{
+            position: "absolute",
+            bottom: 0,
+            top: 0,
+            left: 0,
+            right: 0,
+            boxShadow: "inset 0px -100px 50px 0px rgba(0,0,0,0.85)",
+            borderBottomLeftRadius: "1.5rem",
+            borderBottomRightRadius: "1.5rem",
+          }}
         >
-          StRings
-        </Typography>
+          <Box
+            display={"flex"}
+            width={"100%"}
+            justifyContent={"space-between"}
+            gap={2}
+            position={"absolute"}
+            bottom={0}
+          >
+            <Typography variant="h3" color="white" padding={2}>
+              {"StRings"}
+            </Typography>
+          </Box>
+        </Box>
       </Box>
-      <Box width={"100%"} textAlign={"center"} mt={"22vh"}>
+      <Box p={2}>
         <Typography variant="h5" color="text.primary">
           Let's select your subjects!
         </Typography>
       </Box>
       {/* Display selected subjects as tiles */}
       {selectedSubjects.length > 0 && (
-        <>
+        <Box px={2}>
           <List sx={{ width: "100%" }}>
             {selectedSubjects.map((subject, index) => (
-              <ListItem
-                disablePadding
-                key={index}
-                secondaryAction={
-                  <IconButton
-                    edge="start"
-                    aria-label="more"
-                    id="long-button"
-                    aria-controls={open ? "long-menu" : undefined}
-                    aria-expanded={open ? "true" : undefined}
-                    aria-haspopup="true"
-                    onClick={(event) => handleClickMenu(event, subject)}
+              <>
+                <ListItem
+                  sx={{
+                    background: `linear-gradient(45deg, ${alpha(
+                      theme.palette.secondary.light,
+                      0.5
+                    )} 20%, ${alpha(theme.palette.warning.light, 0.5)} 80%)`,
+                    mb: 2,
+                    borderRadius: "1.5rem",
+                    height: "80px",
+                  }}
+                  key={index}
+                  secondaryAction={
+                    <IconButton
+                      edge="end"
+                      onClick={(event) => handleClickMenu(event, subject)}
+                    >
+                      <MoreVertIcon />
+                    </IconButton>
+                  }
+                >
+                  <ListItemButton
+                    sx={{
+                      height: "80px",
+                    }}
+                    onClick={() => goToSubjectPage(subject)}
                   >
-                    <MoreVertIcon />
-                  </IconButton>
-                }
-              >
-                <ListItemButton onClick={() => goToSubjectPage(subject)}>
-                  <ListItemText primary={subject.name} />
-                </ListItemButton>
-              </ListItem>
+                    <ListItemIcon>
+                      <MenuBook />
+                    </ListItemIcon>
+                    <ListItemText
+                      sx={{
+                        "& .MuiListItemText-primary": {
+                          fontWeight: "600",
+                          fontSize: "1.5rem",
+                          color: theme.palette.grey[800],
+                        },
+                      }}
+                      primary={subject.name}
+                    />
+                  </ListItemButton>
+                </ListItem>
+              </>
             ))}
           </List>
 
@@ -351,15 +387,11 @@ export default function AddSubject() {
             open={openMenu}
             onClose={handleCloseMenu}
           >
-            {/* <MenuItem onClick={() => handleSetGoal(selectedSubject!)}>
-                    Set Goal
-                  </MenuItem> */}
-
             <MenuItem onClick={() => handleDeleteSubject(selectedSubject!)}>
               Delete
             </MenuItem>
           </Menu>
-        </>
+        </Box>
       )}
       <Box
         width={"100%"}
@@ -370,17 +402,18 @@ export default function AddSubject() {
       >
         <Button
           variant="contained"
-          color="primary"
+          color="secondary"
+          disabled={loading}
+          startIcon={<AddIcon sx={{ fontSize: 28, color: "white" }} />}
           onClick={handleClickOpen}
           sx={{
             width: "80%",
             fontWeight: "600",
             fontSize: "1.3rem",
             py: 2,
-            borderRadius: "50px",
+            borderRadius: "100px",
           }}
         >
-          <AddIcon style={{ color: "white", marginRight: "8px" }} />
           Add Subject
         </Button>
       </Box>
@@ -501,8 +534,7 @@ export default function AddSubject() {
           </Button>
         </Box>
       </DialogBox>
-      {loading && <Loader />}
-      <Menubar></Menubar>
+      <Menubar />
     </Box>
   );
 }
