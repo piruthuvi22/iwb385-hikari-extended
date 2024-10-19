@@ -43,6 +43,7 @@ import axios from "axios";
 import { useLocation } from "react-router-dom";
 import Loader from "../components/Loader";
 import Notification from "../components/Notification";
+import moment from "moment";
 
 const ENDPOINT = "http://localhost:9094/central/api";
 
@@ -58,8 +59,10 @@ interface SubjectResponse {
   year: number;
   actualHours: number;
   goalHours: number;
-  lessonDates: {};
-  studiedLessons: [];
+  lessonDates: {
+    [key: string]: string;
+  };
+  studiedLessons: string[];
   lessons: Lesson[];
 }
 
@@ -132,15 +135,28 @@ export default function RecordStudySession() {
     }
   };
 
-  const onRecordStudySession = async (
-    lessonId: string,
-    totalMinutes: number
-  ) => {
+  const onRecordStudySession = async (lessonId: string, totalMins: number) => {
     try {
-      const response = await axios.post(ENDPOINT + "/study", {});
+      setLoading(true);
+      const TOKEN = await getAccessTokenSilently({});
+
+      const response = await axios.post(
+        ENDPOINT + "/study",
+        {
+          subjectId: subjectId,
+          lessonId: lessonId,
+          noMins: totalMins,
+        },
+        {
+          headers: {
+            Authorization: "Bearer " + TOKEN,
+          },
+        }
+      );
     } catch (error) {
       console.error("Error recording study session", error);
     } finally {
+      getSubjectInfo();
       setLoading(false);
     }
   };
@@ -157,27 +173,38 @@ export default function RecordStudySession() {
     setAnchorEl(null);
   };
 
+  const formatLastStudied = (dateTime: string): string => {
+    let duration = "";
+    let diff = moment().diff(dateTime, "day");
+    if (diff == 0) duration = "today";
+    else if (diff == 1) duration = "yesterday";
+    else duration = moment(dateTime).format("MMM DD");
+
+    return duration;
+  };
+
   // if (loading) {
   //   return <Loader />;
   // }
 
-  // Convert goal total minutes to hours and minutes
+  // Convert goal hours to hours and minutes
   let goalHours = 0;
   let goalMins = 0;
   if (subject?.goalHours) {
-    goalHours = Math.floor(subject?.goalHours / 60);
-    goalMins = subject?.goalHours % 60;
+    goalHours = Math.floor(subject?.goalHours);
+    goalMins = Math.round((subject?.goalHours - goalHours) * 60);
   }
 
-  // Convert goal total minutes to hours and minutes
+  // Convert actual hours to hours and minutes
   let actualHours = 0;
   let actualMins = 0;
   if (subject?.actualHours) {
-    actualHours = Math.floor(subject?.actualHours / 60);
-    actualMins = subject?.actualHours % 60;
+    actualHours = Math.floor(subject?.actualHours);
+    actualMins = Math.round((subject?.actualHours - actualHours) * 60);
   }
 
-  let progress = (subject?.actualHours ?? 0 / (subject?.goalHours ?? 1)) * 100;
+  let progress =
+    ((subject?.actualHours ?? 0) / (subject?.goalHours ?? 1)) * 100;
 
   return (
     <Box height={"100vh"}>
@@ -259,7 +286,7 @@ export default function RecordStudySession() {
               <Box sx={{ width: 150 }}>
                 <CircularProgressbar
                   value={progress}
-                  strokeWidth={5}
+                  strokeWidth={10}
                   text={progress.toFixed(2) + "%"}
                   styles={buildStyles({
                     strokeLinecap: "round",
@@ -290,20 +317,35 @@ export default function RecordStudySession() {
                 </ListSubheader>
               }
             >
-              {subject?.lessons.map((lesson, index) => (
-                <div key={lesson.id}>
-                  <ListItem secondaryAction={<></>}>
-                    <ListItemIcon>
-                      <Description />
-                    </ListItemIcon>
-                    <ListItemText
-                      primary={lesson.name}
-                      secondary="Last studies 2 days ago"
-                    />
-                  </ListItem>
-                  <Divider variant="middle" component="li" />
-                </div>
-              ))}
+              {subject?.lessons.map((lesson, index) => {
+                let lessonId = lesson.id;
+                let key = Object.keys(subject?.lessonDates).filter(
+                  (key) => key === lessonId
+                );
+
+                let dateTime = subject?.lessonDates[key[0]];
+                let duration = formatLastStudied(dateTime);
+                return (
+                  <div key={lesson.id}>
+                    <ListItem secondaryAction={<></>}>
+                      <ListItemIcon>
+                        <Description />
+                      </ListItemIcon>
+                      <ListItemText
+                        primary={lesson.name}
+                        {...(dateTime && {
+                          secondary:
+                            "Last studied " +
+                            duration +
+                            " at " +
+                            moment(dateTime).format("h:mm A"),
+                        })}
+                      />
+                    </ListItem>
+                    <Divider variant="middle" component="li" />
+                  </div>
+                );
+              })}
             </List>
             <Fab
               sx={{ position: "fixed", bottom: 25, right: 25 }}
@@ -327,6 +369,7 @@ export default function RecordStudySession() {
       <AddSession
         open={open}
         lessons={subject?.lessons}
+        goal={subject?.goalHours}
         onSave={onRecordStudySession}
         handleClose={() => setOpen(false)}
       />
@@ -351,13 +394,15 @@ export default function RecordStudySession() {
 const AddSession = ({
   open,
   lessons,
+  goal,
   handleClose,
   onSave,
 }: {
   open: boolean;
   lessons: Lesson[] | undefined;
+  goal: number | undefined;
   handleClose: () => void;
-  onSave: (lessonId: string, totalMinutes: number) => void;
+  onSave: (lessonId: string, totalMins: number) => void;
 }) => {
   const [hour, setHour] = useState<number>(0);
   const [minutes, setMinutes] = useState<number>(0);
@@ -369,6 +414,19 @@ const AddSession = ({
     onSave(lessonId, totalMinutes);
     handleClose();
   };
+
+  // useEffect(() => {
+  //   console.log("Study record");
+  //   if (!goal) return;
+  //   let hours = Math.floor(goal / 60);
+  //   let mins = goal % 60;
+  //   setHour(hours);
+  //   setMinutes(mins);
+  // }, [open]);
+
+  // useEffect(() => {
+
+  // }, [hour, minutes]);
 
   return (
     <DialogBox
@@ -406,7 +464,6 @@ const AddSession = ({
           <Typography gutterBottom>Hours</Typography>
           <Box display={"flex"} justifyContent={"space-between"} gap={2}>
             <Slider
-              defaultValue={12}
               min={0}
               max={24}
               getAriaValueText={(value) => `${value}hrs`}
@@ -432,9 +489,9 @@ const AddSession = ({
           <Typography gutterBottom>Minutes</Typography>
           <Box display={"flex"} justifyContent={"space-between"} gap={2}>
             <Slider
-              defaultValue={12}
               min={0}
               max={59}
+              step={5}
               getAriaValueText={(value) => `${value}mins`}
               value={typeof minutes === "number" ? minutes : 0}
               aria-label="Default"
@@ -495,24 +552,24 @@ const AddGoalHrs = ({
   open: boolean;
   goalHours: number | undefined;
   handleClose: () => void;
-  onSave: (totalMinutes: number) => void;
+  onSave: (totalHr: number) => void;
 }) => {
   const [hour, setHour] = useState<number>(0);
   const [minutes, setMinutes] = useState<number>(0);
 
-  console.log("Goal Hours", goalHours);
   useEffect(() => {
+    // Edit goal hour
     if (goalHours) {
-      let hours = Math.floor(goalHours / 60);
-      let mins = goalHours % 60;
+      let hours = Math.floor(goalHours);
+      let mins = Math.round((goalHours - hours) * 60);
       setHour(hours);
       setMinutes(mins);
     }
   }, [open]);
 
   const handleSave = () => {
-    let totalMinutes = hour * 60 + minutes;
-    onSave(totalMinutes);
+    let totalHr = hour + minutes / 60;
+    onSave(totalHr);
     handleClose();
   };
   return (
@@ -564,6 +621,7 @@ const AddGoalHrs = ({
             <Slider
               defaultValue={12}
               min={0}
+              step={5}
               max={59}
               getAriaValueText={(value) => `${value}mins`}
               value={typeof minutes === "number" ? minutes : 0}
