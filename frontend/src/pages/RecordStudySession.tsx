@@ -1,7 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { buildStyles, CircularProgressbar } from "react-circular-progressbar";
-// import {Flat, Heat, Nested} from '@alptugidin/react-circular-progress-bar'
-import "react-circular-progressbar/dist/styles.css";
 import {
   alpha,
   Avatar,
@@ -49,6 +46,7 @@ import Notification from "../components/Notification";
 import moment from "moment";
 import Menubar from "../components/Menubar";
 import { theme } from "../theme/theme";
+import ProgressMeter from "../components/ProgressMeter";
 
 const ENDPOINT = process.env.REACT_APP_API_URI;
 
@@ -295,20 +293,21 @@ export default function RecordStudySession() {
               py={2}
             >
               <Box sx={{ width: 150 }}>
-                <CircularProgressbar
-                  value={progress}
-                  strokeWidth={10}
-                  text={progress.toFixed(2) + "%"}
-                  maxValue={100}
-                  styles={buildStyles({
-                    strokeLinecap: "round",
-                    textSize: "18px",
-                    pathTransitionDuration: 0.5,
-                    // Colors
-                    pathColor: theme.palette.primary.main,
+                <ProgressMeter
+                  progress={progress}
+                  showMiniCircle={false}
+                  sx={{
+                    strokeColor: theme.palette.primary.main,
+                    barWidth: 9,
+                    valueSize: 25,
+                    valueWeight: "bolder",
+                    valueColor: theme.palette.secondary.main,
                     textColor: theme.palette.secondary.main,
-                    trailColor: theme.palette.grey[200],
-                  })}
+                    loadingTime: 1500,
+                    shape: "threequarters",
+                    textFamily: "Fredoka",
+                    valueFamily: "Fredoka",
+                  }}
                 />
               </Box>
 

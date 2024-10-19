@@ -2,12 +2,12 @@ import React, { useState, useEffect } from "react";
 import { Box, Typography, Card, Avatar, Grid, useTheme } from "@mui/material";
 import Banner from "../assets/friends.jpg";
 import Menubar from "../components/Menubar";
-import { buildStyles, CircularProgressbar } from "react-circular-progressbar";
 import GroupIcon from "@mui/icons-material/Group";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import Loader from "../components/Loader";
 import { useAuth0 } from "@auth0/auth0-react";
+import ProgressMeter from "../components/ProgressMeter";
 
 const ENDPOINT = process.env.REACT_APP_API_URI;
 
@@ -136,7 +136,7 @@ export default function Friends() {
                     <Typography variant="h6" sx={{ marginTop: 0 }}>
                       {friend.name}
                     </Typography>
-                    <Typography sx={{fontSize:'12px' }}>
+                    <Typography sx={{ fontSize: "12px" }}>
                       {friend.email}
                     </Typography>
                   </div>
@@ -158,35 +158,45 @@ export default function Friends() {
                         alignItems="center"
                       >
                         <Box sx={{ width: 50 }}>
-                          <CircularProgressbar
-                            value={
-                              progress.goalHours > 0 &&
-                              progress.actualHours > 0
-                                ? (progress.actualHours /
-                                    progress.goalHours) *
+                          <ProgressMeter
+                            progress={
+                              progress.goalHours > 0 && progress.actualHours > 0
+                                ? (progress.actualHours / progress.goalHours) *
                                   100
                                 : 0
                             }
-                            strokeWidth={12}
-                            text={
-                              progress.goalHours > 0 &&
-                              progress.actualHours > 0
-                                ? `${Math.round(
-                                    (progress.actualHours /
-                                      progress.goalHours) *
-                                      100
-                                  )}%`
-                                : `0%`
-                            }
-                            styles={buildStyles({
-                              strokeLinecap: "round",
-                              textSize: "30px",
-                              pathTransitionDuration: 0.5,
-                              // Colors
-                              pathColor: theme.palette.primary.main,
+                            showMiniCircle={false}
+                            sx={{
+                              strokeColor: theme.palette.primary.main,
+                              barWidth: 12,
+                              valueSize: 30,
+                              valueWeight: "bolder",
+                              valueColor: theme.palette.primary.main,
                               textColor: theme.palette.primary.main,
-                              trailColor: theme.palette.grey[200],
-                            })}
+                              loadingTime: 1500,
+                              shape: "threequarters",
+                              textFamily: "Fredoka",
+                              valueFamily: "Fredoka",
+                            }}
+                            // strokeWidth={12}
+                            // text={
+                            //   progress.goalHours > 0 && progress.actualHours > 0
+                            //     ? `${Math.round(
+                            //         (progress.actualHours /
+                            //           progress.goalHours) *
+                            //           100
+                            //       )}%`
+                            //     : `0%`
+                            // }
+                            // styles={buildStyles({
+                            //   strokeLinecap: "round",
+                            //   textSize: "30px",
+                            //   pathTransitionDuration: 0.5,
+                            //   // Colors
+                            //   pathColor: theme.palette.primary.main,
+                            //   textColor: theme.palette.primary.main,
+                            //   trailColor: theme.palette.grey[200],
+                            // })}
                           />
                         </Box>
                         <Typography variant="caption" sx={{ marginTop: 1 }}>
