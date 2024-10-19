@@ -14,6 +14,10 @@ paths:
     get:
       operationId: get
       responses:
+        "400":
+          description: BadRequest
+        "401":
+          description: Unauthorized
         "500":
           description: InternalServerError
         "200":
@@ -33,12 +37,14 @@ paths:
               $ref: '#/components/schemas/ID'
         required: true
       responses:
+        "400":
+          description: BadRequest
+        "401":
+          description: Unauthorized
         "500":
           description: InternalServerError
         "200":
           description: Ok
-        "401":
-          description: Unauthorized
     delete:
       operationId: delete
       requestBody:
@@ -48,12 +54,14 @@ paths:
               $ref: '#/components/schemas/ID'
         required: true
       responses:
+        "400":
+          description: BadRequest
+        "401":
+          description: Unauthorized
         "500":
           description: InternalServerError
         "200":
           description: Ok
-        "401":
-          description: Unauthorized
   /goals:
     put:
       operationId: putGoals
@@ -64,12 +72,14 @@ paths:
               $ref: '#/components/schemas/GoalAdjust'
         required: true
       responses:
+        "400":
+          description: BadRequest
+        "401":
+          description: Unauthorized
         "500":
           description: InternalServerError
         "200":
           description: Ok
-        "401":
-          description: Unauthorized
   /{subjectId}:
     get:
       operationId: getSubjectid
@@ -80,6 +90,10 @@ paths:
         schema:
           type: string
       responses:
+        "400":
+          description: BadRequest
+        "401":
+          description: Unauthorized
         "500":
           description: InternalServerError
         "200":
@@ -88,8 +102,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/StudyStatus'
-        "401":
-          description: Unauthorized
         "404":
           description: NotFound
   /{subjectId}/{year}/{weekNo}:
@@ -114,6 +126,10 @@ paths:
           type: integer
           format: int64
       responses:
+        "400":
+          description: BadRequest
+        "401":
+          description: Unauthorized
         "500":
           description: InternalServerError
         "200":
@@ -122,8 +138,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/StudyStatus'
-        "401":
-          description: Unauthorized
         "404":
           description: NotFound
 components:
@@ -166,11 +180,11 @@ components:
     StudyStatus:
       required:
       - actualHours
+      - allLessons
       - goalHours
-      - lessonDates
-      - lessons
+      - lastStudiedDates
       - studentId
-      - studiedLessons
+      - studiedWithinTheWeek
       - subjectId
       - weekNo
       - year
@@ -193,17 +207,17 @@ components:
           type: number
           format: double
           nullable: true
-        lessonDates:
+        lastStudiedDates:
           type: object
           additionalProperties:
             type: string
           nullable: true
-        studiedLessons:
+        studiedWithinTheWeek:
           type: array
           nullable: true
           items:
             type: string
-        lessons:
+        allLessons:
           type: array
           nullable: true
           items:

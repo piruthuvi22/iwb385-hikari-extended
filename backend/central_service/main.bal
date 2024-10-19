@@ -3,7 +3,6 @@ import central_service.response;
 
 import ballerina/http;
 import ballerina/jwt;
-import ballerina/io;
 
 configurable string OAUTH2 = ?;
 configurable string USER_SERVICE = ?;
@@ -45,7 +44,7 @@ service class ResponseErrorInterceptor {
 
     remote function interceptResponseError(error err) returns http:Unauthorized|http:InternalServerError|http:BadRequest {
 
-        if err.toString() ==  string `error InternalListenerAuthnError ("")` {
+        if err.toString() == string `error InternalListenerAuthnError ("")` {
             http:Unauthorized unauthorizedError = {body: {message: "Authentication Failed"}};
             return unauthorizedError;
         }
@@ -54,8 +53,6 @@ service class ResponseErrorInterceptor {
             response:BadRequestError badRequestError = {body: {message: "Bad Request", details: err.message()}};
             return badRequestError;
         }
-
-        io:println(err.toBalString());
 
         response:InternalServerError internalServerError = {body: {message: "Oops! Something went wrong :(", details: err.message()}};
 
@@ -112,7 +109,7 @@ service http:InterceptableService /central/api/users on central {
         return userDto;
     }
 
-    isolated resource function get search/[string search] () returns response:User[]|error {
+    isolated resource function get search/[string search]() returns response:User[]|error {
 
         response:User[]|error users;
         lock {
@@ -120,7 +117,7 @@ service http:InterceptableService /central/api/users on central {
         }
         return users;
 
-    } 
+    }
 
     isolated resource function post .(dto:UserInsert userDto) returns response:UserDetails|http:Unauthorized|http:BadRequest|error {
 
@@ -517,9 +514,9 @@ isolated function getStudyDetails(string userId, string subjectId, int? year = (
         year: studyStatus.year,
         actualHours: studyStatus.actualHours,
         goalHours: goalHours,
-        lessonDates: studyStatus.lessonDates,
-        studiedLessons: studyStatus.studiedLessons,
-        lessons: subject.lessons
+        lastStudiedDates: studyStatus.lastStudiedDates,
+        studiedWithinTheWeek: studyStatus.studiedWithinTheWeek,
+        allLessons: subject.lessons
     };
     return studyStatusDto;
 }
