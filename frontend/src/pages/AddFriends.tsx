@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useAuth0 } from "@auth0/auth0-react";
 import {
   Box,
   Typography,
@@ -24,8 +25,8 @@ import PersonAddIcon from "@mui/icons-material/PersonAdd";
 
 const ENDPOINT = "http://localhost:9094/central/api";
 
-const TOKEN =
-  "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IlNyQjE4ejFjRDB2QUticm1FamZ4diJ9.eyJpc3MiOiJodHRwczovL2hpa2FyaS51ay5hdXRoMC5jb20vIiwic3ViIjoiYXV0aDB8NjcwNjM5MmUyNTZhN2JkZWY3N2RhZmYyIiwiYXVkIjpbImNlbnRyYWxfYXBpIiwiaHR0cHM6Ly9oaWthcmkudWsuYXV0aDAuY29tL3VzZXJpbmZvIl0sImlhdCI6MTcyODkyNTkxNiwiZXhwIjoxNzI5MDEyMzE2LCJzY29wZSI6Im9wZW5pZCBwcm9maWxlIGVtYWlsIiwiYXpwIjoiRWRRRUVMd0tRWVhPS2I4V2htck0zZHpPNzN0MkxyTGYifQ.gQuzdVSptX8sODa2_wUYHr7FzdiS9AQzvHbcwR3BDgq8FODYFBAzsvb-IRnjFR_ehbOyC2mG8uD6dhEZsIZ5HrhyW-LDMbRBxlkDtxxJBHZ23WLTuM7lw3-Kg0x-dEzxMrLpChc4mxy1ccB92PtFhmcgq8fyTYmqW7N4_tD89D1HF5ZSKSALdSbcVvr_I9DQkeXCKh0CJ3kITrInUr_KFxixr9mHR54FbM4n4yk8GNOjXqwtbm5liUPpU3oH-hzx-N0dwIfMow1HyDG7M_bxfYIPY3Mt10s2-kPKxIglIAml7eNXnlAhCaaBsg_DxaobMVMOEUw547WG9kpmIxmEKw";
+// const TOKEN =
+//   "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IlNyQjE4ejFjRDB2QUticm1FamZ4diJ9.eyJpc3MiOiJodHRwczovL2hpa2FyaS51ay5hdXRoMC5jb20vIiwic3ViIjoiYXV0aDB8NjcwNjM5MmUyNTZhN2JkZWY3N2RhZmYyIiwiYXVkIjpbImNlbnRyYWxfYXBpIiwiaHR0cHM6Ly9oaWthcmkudWsuYXV0aDAuY29tL3VzZXJpbmZvIl0sImlhdCI6MTcyODkyNTkxNiwiZXhwIjoxNzI5MDEyMzE2LCJzY29wZSI6Im9wZW5pZCBwcm9maWxlIGVtYWlsIiwiYXpwIjoiRWRRRUVMd0tRWVhPS2I4V2htck0zZHpPNzN0MkxyTGYifQ.gQuzdVSptX8sODa2_wUYHr7FzdiS9AQzvHbcwR3BDgq8FODYFBAzsvb-IRnjFR_ehbOyC2mG8uD6dhEZsIZ5HrhyW-LDMbRBxlkDtxxJBHZ23WLTuM7lw3-Kg0x-dEzxMrLpChc4mxy1ccB92PtFhmcgq8fyTYmqW7N4_tD89D1HF5ZSKSALdSbcVvr_I9DQkeXCKh0CJ3kITrInUr_KFxixr9mHR54FbM4n4yk8GNOjXqwtbm5liUPpU3oH-hzx-N0dwIfMow1HyDG7M_bxfYIPY3Mt10s2-kPKxIglIAml7eNXnlAhCaaBsg_DxaobMVMOEUw547WG9kpmIxmEKw";
 
 interface FriendRequestResponse {
   id: string;
@@ -55,6 +56,7 @@ export default function AddFriends() {
   // );
   const [loading, setLoading] = useState(true);
   const [hasSearched, setHasSearched] = useState(false);
+  const { getAccessTokenSilently } = useAuth0();
 
   useEffect(() => {
     getFriends();
@@ -63,6 +65,7 @@ export default function AddFriends() {
   async function getFriends() {
     setLoading(true);
     try {
+      const TOKEN = await getAccessTokenSilently({});
       const friends = await axios.get(ENDPOINT + "/users/friends", {
         headers: {
           Authorization: "Bearer " + TOKEN,
@@ -94,6 +97,7 @@ export default function AddFriends() {
 
   const fetchFriends = async (query: string) => {
     try {
+      const TOKEN = await getAccessTokenSilently({});
       const response = await axios.get(ENDPOINT + "/users/search/" + query, {
         headers: {
           Authorization: `Bearer ${TOKEN}`,
@@ -132,6 +136,7 @@ export default function AddFriends() {
     event.stopPropagation();
     event.preventDefault();
     try {
+      const TOKEN = await getAccessTokenSilently({});
       const response = await axios.put(
         ENDPOINT + "/users/accept-friend-request",
         {
@@ -161,6 +166,7 @@ export default function AddFriends() {
     event.preventDefault();
 
     try {
+      const TOKEN = await getAccessTokenSilently({});
       const response = await axios.delete(
         ENDPOINT + "/users/reject-friend-request",
         {
@@ -186,6 +192,7 @@ export default function AddFriends() {
   };
   const handleAddFriend = async (id: any) => {
     try {
+      const TOKEN = await getAccessTokenSilently({});
       const response = await axios.put(
         ENDPOINT + "/users/friend-request",
         {
