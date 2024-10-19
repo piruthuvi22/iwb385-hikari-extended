@@ -116,10 +116,11 @@ export default function FriendProfile() {
                 /> */}
 
                 <ProgressMeter
-                  progress={subject.focus}
+                  progress={parseFloat(subject.focus.toFixed(1))}
                   showMiniCircle={false}
                   sx={{
                     strokeColor: theme.palette.primary.main,
+                    bgStrokeColor: theme.palette.grey[300],
                     barWidth: 13,
                     valueSize: 25,
                     valueWeight: "bolder",

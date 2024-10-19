@@ -1,4 +1,4 @@
-import { Box, Button, Typography, useTheme } from "@mui/material";
+import { Box, Button, Divider, Typography, useTheme } from "@mui/material";
 import mathematics from "../assets/mathematics.svg";
 import { Link } from "react-router-dom";
 import { useAuth0 } from "@auth0/auth0-react";
@@ -10,7 +10,6 @@ export default function GetStarted() {
   const handleLogin = async () => {
     // Add login logic here
     let res = await loginWithRedirect();
-    console.log("Login Response", res);
   };
   return (
     <Box
@@ -28,11 +27,11 @@ export default function GetStarted() {
         justifyContent={"center"}
       >
         <Typography variant="h2" fontWeight={"500"} color="primary">
-          StRing
+          Studify
         </Typography>
 
-        <Typography variant="h4" color="text.secondary">
-          Welcome Piruthuvi
+        <Typography variant="h6" textAlign={"center"} color="text.secondary">
+          Study Smarter, Not Longer!
         </Typography>
       </Box>
       <Box flexGrow={"1"} textAlign={"center"}>

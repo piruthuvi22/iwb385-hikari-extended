@@ -358,6 +358,7 @@ export default function AddSubject() {
               return (
                 <>
                   <ListItem
+                    disablePadding
                     sx={{
                       background: `linear-gradient(45deg, ${alpha(
                         theme.palette.secondary.light,

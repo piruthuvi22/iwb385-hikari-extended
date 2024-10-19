@@ -97,7 +97,6 @@ export default function RecordStudySession() {
           Authorization: "Bearer " + TOKEN,
         },
       });
-      console.log("Subject Info", response.data);
       setSubject(response.data);
       setOpenGoal(response.data.goalHours === 0);
     } catch (error) {
@@ -294,10 +293,11 @@ export default function RecordStudySession() {
             >
               <Box sx={{ width: 150 }}>
                 <ProgressMeter
-                  progress={progress}
+                  progress={parseFloat(progress.toFixed(1))}
                   showMiniCircle={false}
                   sx={{
                     strokeColor: theme.palette.primary.main,
+                    bgStrokeColor: theme.palette.grey[300],
                     barWidth: 9,
                     valueSize: 25,
                     valueWeight: "bolder",
@@ -484,7 +484,6 @@ const AddSession = ({
   // useEffect(() => {
 
   // }, [hour, minutes]);
-  console.log("LessonID", lessonId);
 
   return (
     <DialogBox

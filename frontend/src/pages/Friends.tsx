@@ -161,42 +161,29 @@ export default function Friends() {
                           <ProgressMeter
                             progress={
                               progress.goalHours > 0 && progress.actualHours > 0
-                                ? (progress.actualHours / progress.goalHours) *
-                                  100
+                                ? parseFloat(
+                                    (
+                                      (progress.actualHours /
+                                        progress.goalHours) *
+                                      100
+                                    ).toFixed(1)
+                                  )
                                 : 0
                             }
                             showMiniCircle={false}
                             sx={{
                               strokeColor: theme.palette.primary.main,
+                              bgStrokeColor: theme.palette.grey[300],
                               barWidth: 12,
                               valueSize: 30,
-                              valueWeight: "bolder",
-                              valueColor: theme.palette.primary.main,
-                              textColor: theme.palette.primary.main,
+                              valueWeight: "normal",
+                              valueColor: theme.palette.secondary.main,
+                              textColor: theme.palette.secondary.main,
                               loadingTime: 1500,
                               shape: "threequarters",
                               textFamily: "Fredoka",
                               valueFamily: "Fredoka",
                             }}
-                            // strokeWidth={12}
-                            // text={
-                            //   progress.goalHours > 0 && progress.actualHours > 0
-                            //     ? `${Math.round(
-                            //         (progress.actualHours /
-                            //           progress.goalHours) *
-                            //           100
-                            //       )}%`
-                            //     : `0%`
-                            // }
-                            // styles={buildStyles({
-                            //   strokeLinecap: "round",
-                            //   textSize: "30px",
-                            //   pathTransitionDuration: 0.5,
-                            //   // Colors
-                            //   pathColor: theme.palette.primary.main,
-                            //   textColor: theme.palette.primary.main,
-                            //   trailColor: theme.palette.grey[200],
-                            // })}
                           />
                         </Box>
                         <Typography variant="caption" sx={{ marginTop: 1 }}>
