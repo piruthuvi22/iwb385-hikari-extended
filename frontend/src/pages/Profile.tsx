@@ -19,7 +19,7 @@ import { Logout } from "@mui/icons-material";
 import axios from "axios";
 import { SubjectResponse } from "./AddSubjects";
 
-const ENDPOINT = "http://localhost:9094/central/api";
+const ENDPOINT = process.env.REACT_APP_API_URI
 
 interface CurrentUser {
   id: string;

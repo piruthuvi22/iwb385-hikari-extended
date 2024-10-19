@@ -48,8 +48,9 @@ import Loader from "../components/Loader";
 import Notification from "../components/Notification";
 import moment from "moment";
 import Menubar from "../components/Menubar";
+import { theme } from "../theme/theme";
 
-const ENDPOINT = "http://localhost:9094/central/api";
+const ENDPOINT = process.env.REACT_APP_API_URI;
 
 interface Lesson {
   id: string;
@@ -557,6 +558,24 @@ const AddSession = ({
             <Slider
               min={0}
               max={24}
+              sx={{
+                "& .MuiSlider-track": {
+                  background: "transparent",
+                  height: 15,
+                },
+                "& .MuiSlider-rail": {
+                  background: `linear-gradient(90deg, ${theme.palette.primary.main} 40%, ${theme.palette.secondary.main} 60%)`,
+                  height: 15,
+                },
+                "& .MuiSlider-thumb": {
+                  backgroundColor: theme.palette.secondary.main,
+                  height: 24,
+                  width: 24,
+                  "&:hover": {
+                    boxShadow: "0px 0px 0px 8px rgba(0,0,0,0.16)",
+                  },
+                },
+              }}
               getAriaValueText={(value) => `${value}hrs`}
               value={typeof hour === "number" ? hour : 0}
               aria-label="Default"
@@ -588,6 +607,24 @@ const AddSession = ({
               min={0}
               max={59}
               step={5}
+              sx={{
+                "& .MuiSlider-track": {
+                  background: "transparent",
+                  height: 15,
+                },
+                "& .MuiSlider-rail": {
+                  background: `linear-gradient(90deg, ${theme.palette.primary.main} 40%, ${theme.palette.secondary.main} 60%)`,
+                  height: 15,
+                },
+                "& .MuiSlider-thumb": {
+                  backgroundColor: theme.palette.secondary.main,
+                  height: 24,
+                  width: 24,
+                  "&:hover": {
+                    boxShadow: "0px 0px 0px 8px rgba(0,0,0,0.16)",
+                  },
+                },
+              }}
               getAriaValueText={(value) => `${value}mins`}
               value={typeof minutes === "number" ? minutes : 0}
               aria-label="Default"
@@ -729,6 +766,24 @@ const AddGoalHrs = ({
                 min={0}
                 max={24}
                 getAriaValueText={(value) => `${value}hrs`}
+                sx={{
+                  "& .MuiSlider-track": {
+                    background: "transparent",
+                    height: 15,
+                  },
+                  "& .MuiSlider-rail": {
+                    background: `linear-gradient(90deg, ${theme.palette.primary.main} 40%, ${theme.palette.secondary.main} 60%)`,
+                    height: 15,
+                  },
+                  "& .MuiSlider-thumb": {
+                    backgroundColor: theme.palette.secondary.main,
+                    height: 24,
+                    width: 24,
+                    "&:hover": {
+                      boxShadow: "0px 0px 0px 8px rgba(0,0,0,0.16)",
+                    },
+                  },
+                }}
                 value={typeof hour === "number" ? hour : 0}
                 aria-label="Default"
                 valueLabelDisplay="auto"
@@ -760,6 +815,24 @@ const AddGoalHrs = ({
                 min={0}
                 step={5}
                 max={59}
+                sx={{
+                  "& .MuiSlider-track": {
+                    background: "transparent",
+                    height: 15,
+                  },
+                  "& .MuiSlider-rail": {
+                    background: `linear-gradient(90deg, ${theme.palette.primary.main} 40%, ${theme.palette.secondary.main} 60%)`,
+                    height: 15,
+                  },
+                  "& .MuiSlider-thumb": {
+                    backgroundColor: theme.palette.secondary.main,
+                    height: 24,
+                    width: 24,
+                    "&:hover": {
+                      boxShadow: "0px 0px 0px 8px rgba(0,0,0,0.16)",
+                    },
+                  },
+                }}
                 getAriaValueText={(value) => `${value}mins`}
                 value={typeof minutes === "number" ? minutes : 0}
                 aria-label="Default"
