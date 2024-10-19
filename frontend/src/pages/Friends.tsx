@@ -14,13 +14,14 @@ const ENDPOINT = process.env.REACT_APP_API_URI;
 interface Subject {
   id: string;
   name: string;
-  actualGoalHours: number;
+  actualHours: number;
   goalHours: number;
 }
 interface FriendResponse {
   id: string;
   name: string;
   subjects: Subject[];
+  email: string;
 }
 
 export default function Friends() {
@@ -28,6 +29,7 @@ export default function Friends() {
   const [loading, setLoading] = useState(true);
   const [friends, setFriends] = useState<FriendResponse[]>([]);
   const { getAccessTokenSilently } = useAuth0();
+  console.log(friends);
 
   useEffect(() => {
     getFriends();
@@ -130,9 +132,14 @@ export default function Friends() {
                     // src={friend.profilePicture}
                     sx={{ width: 50, height: 50, marginRight: 2 }}
                   />
-                  <Typography variant="h6" sx={{ marginTop: 0 }}>
-                    {friend.name}
-                  </Typography>
+                  <div>
+                    <Typography variant="h6" sx={{ marginTop: 0 }}>
+                      {friend.name}
+                    </Typography>
+                    <Typography sx={{fontSize:'12px' }}>
+                      {friend.email}
+                    </Typography>
+                  </div>
                 </Box>
 
                 {/* Additional content below the name */}
@@ -154,8 +161,8 @@ export default function Friends() {
                           <CircularProgressbar
                             value={
                               progress.goalHours > 0 &&
-                              progress.actualGoalHours > 0
-                                ? (progress.actualGoalHours /
+                              progress.actualHours > 0
+                                ? (progress.actualHours /
                                     progress.goalHours) *
                                   100
                                 : 0
@@ -163,9 +170,9 @@ export default function Friends() {
                             strokeWidth={12}
                             text={
                               progress.goalHours > 0 &&
-                              progress.actualGoalHours > 0
+                              progress.actualHours > 0
                                 ? `${Math.round(
-                                    (progress.actualGoalHours /
+                                    (progress.actualHours /
                                       progress.goalHours) *
                                       100
                                   )}%`
