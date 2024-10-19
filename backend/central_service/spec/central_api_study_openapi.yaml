@@ -20,6 +20,10 @@ paths:
               $ref: '#/components/schemas/StudySession'
         required: true
       responses:
+        "400":
+          description: BadRequest
+        "401":
+          description: Unauthorized
         "500":
           description: InternalServerError
         "201":
@@ -28,8 +32,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/StudyStatus'
-        "401":
-          description: Unauthorized
         "404":
           description: NotFound
 components:
@@ -67,11 +69,11 @@ components:
     StudyStatus:
       required:
       - actualHours
+      - allLessons
       - goalHours
-      - lessonDates
-      - lessons
+      - lastStudiedDates
       - studentId
-      - studiedLessons
+      - studiedWithinTheWeek
       - subjectId
       - weekNo
       - year
@@ -94,17 +96,17 @@ components:
           type: number
           format: double
           nullable: true
-        lessonDates:
+        lastStudiedDates:
           type: object
           additionalProperties:
             type: string
           nullable: true
-        studiedLessons:
+        studiedWithinTheWeek:
           type: array
           nullable: true
           items:
             type: string
-        lessons:
+        allLessons:
           type: array
           nullable: true
           items:

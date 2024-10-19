@@ -8,7 +8,7 @@ public type User record {|
 
 public type UserDetails record {|
     *User;
-    Subject[]|SubjectGoal[] subjects = <Subject[]> [];
+    Subject[]|SubjectGoal[] subjects = <Subject[]>[];
 |};
 
 public type Friends record {|
@@ -25,9 +25,9 @@ public type StudyStatus record {|
     int year;
     decimal actualHours;
     decimal? goalHours;
-    map<string>? lessonDates;
-    string[]? studiedLessons;
-    Lesson[]? lessons;
+    map<string>? lastStudiedDates;
+    string[]? studiedWithinTheWeek;
+    Lesson[]? allLessons;
 |};
 
 public type Subject record {|
