@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@alptugidin/react-circular-progress-bar": "^1.1.2",
     "@auth0/auth0-react": "^2.2.4",
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",

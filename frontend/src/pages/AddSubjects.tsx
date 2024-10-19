@@ -27,6 +27,7 @@ import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import { useAuth0 } from "@auth0/auth0-react";
 import { Delete, Inbox, MenuBook } from "@mui/icons-material";
+import { SubjectRecordsResponse } from "./RecordStudySession";
 
 const ENDPOINT = "http://localhost:9094/central/api";
 
@@ -72,25 +73,23 @@ export default function AddSubject() {
   } = useAuth0();
 
   useEffect(() => {
-    // processAuth();
     user?.sub && createUser();
     getSubjects();
   }, [user]);
 
-  const processAuth = async () => {
-    try {
-      let res = await handleRedirectCallback();
-      console.log("Response", res);
-
-      res.appState = { targetUrl: "/dashboard" };
-    } catch (error: any) {
-      console.error("Authorization error: ", error);
-      if (error.error === "access_denied") {
-        // Handle the case where user declined the authorization
-        alert("Authorization declined. Please try again.");
-      }
-    }
-  };
+  // useEffect(() => {
+  //   if (selectedSubjects.length > 0) {
+  //     const subjects = selectedSubjects.map((subject) => subject.id);
+  //     for (const subjectId of subjects) {
+  //       getSubjectInfo(subjectId).then((subject) => {
+  //         setSelectedSubjects((prevSubjects) => ({
+  //           ...prevSubjects,
+  //           progress: 55,
+  //         }));
+  //       });
+  //     }
+  //   }
+  // }, [selectedSubjects]);
 
   const createUser = async () => {
     if (!user) {
@@ -185,16 +184,30 @@ export default function AddSubject() {
     }
   };
 
-  const handleClickOpen = () => {
-    getSubjects();
-    setOpen(true);
-  };
+  const getSubjectInfo = async (
+    subjectId: string
+  ): Promise<SubjectRecordsResponse | undefined> => {
+    // setLoading(true);
+    try {
+      const TOKEN = await getAccessTokenSilently({});
 
-  const handleClose = () => {
-    setOpenGoal(false);
-    setOpen(false);
-    setSearchText("");
-    setFilteredSubjects(subjects);
+      if (!subjectId) {
+        console.error("Subject ID not found");
+        return;
+      }
+      const response = await axios.get(ENDPOINT + "/subjects/" + subjectId, {
+        headers: {
+          Authorization: "Bearer " + TOKEN,
+        },
+      });
+
+      return response.data;
+    } catch (error) {
+      console.error("Error fetching subject info", error);
+      return undefined;
+    } finally {
+      // setLoading(false);
+    }
   };
 
   // Filter subjects based on search text
@@ -205,19 +218,6 @@ export default function AddSubject() {
       subject.name.toLowerCase().includes(value.toLowerCase())
     );
     setFilteredSubjects(filtered);
-  };
-
-  const handleClickMenu = (
-    event: React.MouseEvent<HTMLElement>,
-    subject: SubjectResponse
-  ) => {
-    setSelectedSubject(subject);
-    setAnchorEl(event.currentTarget);
-  };
-
-  const handleCloseMenu = () => {
-    setSelectedSubject(null);
-    setAnchorEl(null);
   };
 
   const handleDeleteSubject = async (subject: SubjectResponse) => {
@@ -247,6 +247,30 @@ export default function AddSubject() {
     }
   };
 
+  const handleClickOpen = () => {
+    getSubjects();
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpenGoal(false);
+    setOpen(false);
+    setSearchText("");
+    setFilteredSubjects(subjects);
+  };
+
+  const handleClickMenu = (
+    event: React.MouseEvent<HTMLElement>,
+    subject: SubjectResponse
+  ) => {
+    setSelectedSubject(subject);
+    setAnchorEl(event.currentTarget);
+  };
+  const handleCloseMenu = () => {
+    setSelectedSubject(null);
+    setAnchorEl(null);
+  };
+
   const handleSetGoal = (subject: SubjectResponse) => {
     setOpenGoal(true);
     setStudyMinutes(0);
@@ -262,8 +286,6 @@ export default function AddSubject() {
   };
 
   const goToSubjectPage = (subject: SubjectResponse) => {
-    console.log("Subject=", subject);
-
     navigate(`/record-study-session`, {
       state: { subjectId: subject.id, subjectName: subject.name },
     });
@@ -331,51 +353,57 @@ export default function AddSubject() {
       {selectedSubjects.length > 0 && (
         <Box px={2}>
           <List sx={{ width: "100%" }}>
-            {selectedSubjects.map((subject, index) => (
-              <>
-                <ListItem
-                  sx={{
-                    background: `linear-gradient(45deg, ${alpha(
-                      theme.palette.secondary.light,
-                      0.5
-                    )} 20%, ${alpha(theme.palette.warning.light, 0.5)} 80%)`,
-                    mb: 2,
-                    borderRadius: "1.5rem",
-                    height: "80px",
-                  }}
-                  key={index}
-                  secondaryAction={
-                    <IconButton
-                      edge="end"
-                      onClick={(event) => handleClickMenu(event, subject)}
-                    >
-                      <MoreVertIcon />
-                    </IconButton>
-                  }
-                >
-                  <ListItemButton
+            {selectedSubjects.map((subject, index) => {
+              return (
+                <>
+                  <ListItem
                     sx={{
+                      background: `linear-gradient(45deg, ${alpha(
+                        theme.palette.secondary.light,
+                        0.5
+                      )} 20%, ${alpha(theme.palette.warning.light, 0.5)} 80%)`,
+                      mb: 2,
+                      borderRadius: "1.5rem",
                       height: "80px",
                     }}
-                    onClick={() => goToSubjectPage(subject)}
+                    key={index}
+                    secondaryAction={
+                      <IconButton
+                        edge="end"
+                        onClick={(event) => handleClickMenu(event, subject)}
+                      >
+                        <MoreVertIcon />
+                      </IconButton>
+                    }
                   >
-                    <ListItemIcon>
-                      <MenuBook />
-                    </ListItemIcon>
-                    <ListItemText
+                    <ListItemButton
                       sx={{
-                        "& .MuiListItemText-primary": {
-                          fontWeight: "600",
-                          fontSize: "1.5rem",
-                          color: theme.palette.grey[800],
-                        },
+                        height: "80px",
                       }}
-                      primary={subject.name}
-                    />
-                  </ListItemButton>
-                </ListItem>
-              </>
-            ))}
+                      onClick={() => goToSubjectPage(subject)}
+                    >
+                      <ListItemIcon>
+                        <MenuBook />
+                      </ListItemIcon>
+                      <ListItemText
+                        sx={{
+                          "& .MuiListItemText-primary": {
+                            fontWeight: "600",
+                            fontSize: "1.5rem",
+                            color: theme.palette.grey[800],
+                          },
+                          "& .MuiListItemText-secondary": {
+                            fontSize: "1rem",
+                          },
+                        }}
+                        primary={subject.name}
+                        secondary={`${subject.lessons.length} lessons`}
+                      />
+                    </ListItemButton>
+                  </ListItem>
+                </>
+              );
+            })}
           </List>
 
           <Menu
