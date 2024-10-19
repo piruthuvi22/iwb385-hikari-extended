@@ -9,7 +9,7 @@ import axios from "axios";
 import Loader from "../components/Loader";
 import { useAuth0 } from "@auth0/auth0-react";
 
-const ENDPOINT = "http://localhost:9094/central/api";
+const ENDPOINT = process.env.REACT_APP_API_URI;
 
 interface Subject {
   id: string;

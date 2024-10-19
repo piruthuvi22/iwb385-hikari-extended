@@ -41,11 +41,14 @@ export default function Dashboard() {
         //   audience: "central_api",
         // }
       });
-      const response = await fetch("http://localhost:9094/central/api/users/friends", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        process.env.REACT_APP_API_URI + "/users/friends",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
       const responseData = await response.json();
       console.log("ResponseData", responseData);
     } catch (error) {
