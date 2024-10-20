@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import { useAuth0 } from '@auth0/auth0-react';
 import {
   Box,
@@ -8,27 +7,21 @@ import {
   Avatar,
   Grid,
   Button,
-  useTheme,
   TextField,
   List,
   ListItem,
   ListItemText,
 } from '@mui/material';
-import Banner from '../assets/addFriends.jpg';
 import Menubar from '../components/Menubar';
-import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Loader from '../components/Loader';
 import SearchIcon from '@mui/icons-material/Search';
 import DialogBox from '../components/DialogBox';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
-import Logo from '../assets/studifyLogo.svg';
+import Header from '../components/Header';
+import multiavatar from '@multiavatar/multiavatar';
 
 const ENDPOINT = process.env.REACT_APP_API_URI;
-
-// const TOKEN =
-//   "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IlNyQjE4ejFjRDB2QUticm1FamZ4diJ9.eyJpc3MiOiJodHRwczovL2hpa2FyaS51ay5hdXRoMC5jb20vIiwic3ViIjoiYXV0aDB8NjcwNjM5MmUyNTZhN2JkZWY3N2RhZmYyIiwiYXVkIjpbImNlbnRyYWxfYXBpIiwiaHR0cHM6Ly9oaWthcmkudWsuYXV0aDAuY29tL3VzZXJpbmZvIl0sImlhdCI6MTcyODkyNTkxNiwiZXhwIjoxNzI5MDEyMzE2LCJzY29wZSI6Im9wZW5pZCBwcm9maWxlIGVtYWlsIiwiYXpwIjoiRWRRRUVMd0tRWVhPS2I4V2htck0zZHpPNzN0MkxyTGYifQ.gQuzdVSptX8sODa2_wUYHr7FzdiS9AQzvHbcwR3BDgq8FODYFBAzsvb-IRnjFR_ehbOyC2mG8uD6dhEZsIZ5HrhyW-LDMbRBxlkDtxxJBHZ23WLTuM7lw3-Kg0x-dEzxMrLpChc4mxy1ccB92PtFhmcgq8fyTYmqW7N4_tD89D1HF5ZSKSALdSbcVvr_I9DQkeXCKh0CJ3kITrInUr_KFxixr9mHR54FbM4n4yk8GNOjXqwtbm5liUPpU3oH-hzx-N0dwIfMow1HyDG7M_bxfYIPY3Mt10s2-kPKxIglIAml7eNXnlAhCaaBsg_DxaobMVMOEUw547WG9kpmIxmEKw";
-
 interface FriendRequestResponse {
   id: string;
   name: string;
@@ -36,7 +29,6 @@ interface FriendRequestResponse {
 }
 
 export default function AddFriends() {
-  const theme = useTheme();
   const [open, setOpen] = useState(false);
   const [searchText, setSearchText] = useState('');
   const [filteredFriends, setFilteredFriends] = useState<
@@ -52,9 +44,7 @@ export default function AddFriends() {
   const [requestedFriends, setRequestedFriends] = useState<
     FriendRequestResponse[]
   >([]);
-  const [followers, setFollowers] = useState<
-    FriendRequestResponse[]
-  >([]);
+  const [followers, setFollowers] = useState<FriendRequestResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [hasSearched, setHasSearched] = useState(false);
   const { getAccessTokenSilently } = useAuth0();
@@ -82,7 +72,6 @@ export default function AddFriends() {
       setLoading(false);
     }
   }
-
 
   useEffect(() => {
     const fetchFriends = async (query: string) => {
@@ -115,8 +104,6 @@ export default function AddFriends() {
     }, 500);
     return () => clearTimeout(delayDebounceFn);
   }, [followingFriends, getAccessTokenSilently, searchText]);
-
- 
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchText(event.target.value);
@@ -169,10 +156,7 @@ export default function AddFriends() {
     getFriends();
   };
 
-  const handleRemoveFollower = async (
-    event: React.MouseEvent,
-    id: string
-  ) => {
+  const handleRemoveFollower = async (event: React.MouseEvent, id: string) => {
     event.stopPropagation();
     event.preventDefault();
     try {
@@ -188,7 +172,6 @@ export default function AddFriends() {
     }
     getFriends();
   };
-
 
   const handleCancelRequest = async (event: React.MouseEvent, id: string) => {
     event.stopPropagation();
@@ -236,203 +219,174 @@ export default function AddFriends() {
   };
 
   return (
-    <Box
-      minHeight={'100vh'}
-      bgcolor={theme.palette.grey[100]}
-      display={'flex'}
-      flexDirection={'column'}
-      alignItems={'center'}
-      paddingBottom={10}
-    >
-      <Box
-        width={'100%'}
-        height={'20vh'}
-        position={'fixed'}
-        top={0}
-        zIndex={1000}
-      >
-        <img
-          src={Banner}
-          alt='Banner'
-          style={{
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-            borderBottomLeftRadius: '1.5rem',
-            borderBottomRightRadius: '1.5rem',
-            boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.2)',
-          }}
-        />
-        <Typography
-          variant='h4'
-          color='white'
-          position='absolute'
-          top={16}
-          left={16}
-        >
-          Studify
-        </Typography>
-      
-
-        <Box position='absolute' top={16} right={16}>
+    <Box minHeight={'100vh'} paddingBottom={10}>
+      <Header
+        loading={loading}
+        title='Friends'
+        buttonComponent={
           <SearchIcon
             sx={{ color: 'white', cursor: 'pointer', fontSize: '30px' }}
             onClick={() => setOpen(true)}
           />
-        </Box>
-      </Box>
-      {friendRequests.length > 0 && (
-        <Box mt={'22vh'} width={'90%'}>
-          <Typography
-            variant='h5'
-            color='text.primary'
-            mb={2}
-            textAlign={'center'}
-          >
-            Friend Requests
-          </Typography>
-          <Grid container spacing={2}>
-            {friendRequests.map((friend) => (
-              <Grid item xs={12} sm={6} md={4} key={friend.id}>
-                <Card
-                  sx={{
-                    padding: '1rem',
-                    borderRadius: '1.5rem',
-                    backgroundColor: '#F8F7FF',
-                    display: 'flex',
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                  }}
-                >
-                  <Avatar
-                    alt={friend.name}
-                    // src={friend.profilePicture}
-                    sx={{ width: 60, height: 60, marginRight: 2 }}
-                  />
-
-                  <Box
+        }
+      />
+      <Box
+        display={'flex'}
+        flexDirection={'column'}
+        alignItems={'center'}
+        mt={2}
+        gap={2}
+      >
+        {friendRequests.length > 0 && (
+          <Box width={'90%'}>
+            <Typography
+              variant='h5'
+              color='text.primary'
+              mb={2}
+              textAlign={'center'}
+            >
+              Friend Requests
+            </Typography>
+            <Grid container spacing={2}>
+              {friendRequests.map((friend) => (
+                <Grid item xs={12} sm={6} md={4} key={friend.id}>
+                  <Card
                     sx={{
+                      padding: '1rem',
+                      borderRadius: '1.5rem',
+                      backgroundColor: '#F8F7FF',
                       display: 'flex',
-                      flexDirection: 'column',
-                      justifyContent: 'space-between',
-                      flexGrow: 1,
+                      flexDirection: 'row',
+                      alignItems: 'center',
                     }}
                   >
-                    <Typography variant='h6'>
-                      {friend.name}
-                    </Typography>
-                    <Typography sx={{ marginBottom: '0.5rem', fontSize:'12px' }}>
-                      {friend.email}
-                    </Typography>
+                    <Avatar
+                      alt={friend.name}
+                      src={`data:image/svg+xml;base64,${btoa(multiavatar(friend.name.split(' ')[0]))}`}
+                      sx={{ width: 60, height: 60, marginRight: 2 }}
+                    />
                     <Box
-                      display='flex'
-                      justifyContent='space-between'
-                      width='80%'
+                      sx={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'space-between',
+                        flexGrow: 1,
+                      }}
                     >
-                      <Button
-                        variant='contained'
-                        color='primary'
-                        sx={{
-                          borderRadius: '1.5rem',
-                          flex: 1,
-                        }}
-                        onClick={(event) => handleAccept(event, friend.id)}
+                      <Typography variant='h6'>{friend.name}</Typography>
+                      <Typography
+                        sx={{ marginBottom: '0.5rem', fontSize: '12px' }}
                       >
-                        Accept
-                      </Button>
-                      <Button
-                        variant='outlined'
-                        color='secondary'
-                        sx={{
-                          borderRadius: '1.5rem',
-                          marginLeft: 1,
-                          flex: 1,
-                        }}
-                        onClick={(event) =>
-                          handleRejectFriendRequest(event, friend.id)
-                        }
+                        {friend.email}
+                      </Typography>
+                      <Box
+                        display='flex'
+                        justifyContent='space-between'
+                        width='80%'
                       >
-                        Delete
-                      </Button>
+                        <Button
+                          variant='contained'
+                          color='primary'
+                          sx={{
+                            borderRadius: '1.5rem',
+                            flex: 1,
+                          }}
+                          onClick={(event) => handleAccept(event, friend.id)}
+                        >
+                          Accept
+                        </Button>
+                        <Button
+                          variant='outlined'
+                          color='secondary'
+                          sx={{
+                            borderRadius: '1.5rem',
+                            marginLeft: 1,
+                            flex: 1,
+                          }}
+                          onClick={(event) =>
+                            handleRejectFriendRequest(event, friend.id)
+                          }
+                        >
+                          Delete
+                        </Button>
+                      </Box>
                     </Box>
-                  </Box>
-                </Card>
-              </Grid>
-            ))}
-          </Grid>
-        </Box>
-      )}
-      {requestedFriends.length > 0 && (
-        <Box mt={'22vh'} width={'90%'}>
-          <Typography
-            variant='h5'
-            color='text.primary'
-            mb={2}
-            textAlign={'center'}
-          >
-            Pending Requests
-          </Typography>
-          <Grid container spacing={2}>
-            {requestedFriends.map((friend) => (
-              <Grid item xs={12} sm={6} md={4} key={friend.id}>
-                <Card
-                  sx={{
-                    padding: '1rem',
-                    borderRadius: '1.5rem',
-                    backgroundColor: '#F8F7FF',
-                    display: 'flex',
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                  }}
-                >
-                  <Avatar
-                    alt={friend.name}
-                    // src={friend.profilePicture}
-                    sx={{ width: 60, height: 60, marginRight: 2 }}
-                  />
-
-                  <Box
+                  </Card>
+                </Grid>
+              ))}
+            </Grid>
+          </Box>
+        )}
+        {requestedFriends.length > 0 && (
+          <Box width={'90%'}>
+            <Typography
+              variant='h5'
+              color='text.primary'
+              mb={2}
+              textAlign={'center'}
+            >
+              Pending Requests
+            </Typography>
+            <Grid container spacing={2}>
+              {requestedFriends.map((friend) => (
+                <Grid item xs={12} sm={6} md={4} key={friend.id}>
+                  <Card
                     sx={{
+                      padding: '1rem',
+                      borderRadius: '1.5rem',
+                      backgroundColor: '#F8F7FF',
                       display: 'flex',
-                      flexDirection: 'column',
-                      justifyContent: 'space-between',
-                      flexGrow: 1,
+                      flexDirection: 'row',
+                      alignItems: 'center',
                     }}
                   >
-                    <Typography variant='h6'>
-                      {friend.name}
-                    </Typography>
-                    <Typography sx={{ marginBottom: '0.5rem', fontSize:'12px' }}>
-                      {friend.email}
-                    </Typography>
+                    <Avatar
+                      alt={friend.name}
+                      src={`data:image/svg+xml;base64,${btoa(multiavatar(friend.name.split(' ')[0]))}`} // src={friend.profilePicture}
+                      sx={{ width: 60, height: 60, marginRight: 2 }}
+                    />
                     <Box
-                      display='flex'
-                      justifyContent='space-between'
-                      width='80%'
+                      sx={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'space-between',
+                        flexGrow: 1,
+                      }}
                     >
-                      <Button
-                        variant='outlined'
-                        color='secondary'
-                        sx={{
-                          borderRadius: '1.5rem',
-                          marginLeft: 1,
-                          flex: 1,
-                        }}
-                        onClick={(event) =>
-                          handleCancelRequest(event, friend.id)
-                        }
+                      <Typography variant='h6'>{friend.name}</Typography>
+                      <Typography
+                        sx={{ marginBottom: '0.5rem', fontSize: '12px' }}
                       >
-                        Cancel
-                      </Button>
+                        {friend.email}
+                      </Typography>
+                      <Box
+                        display='flex'
+                        justifyContent='space-between'
+                        width='80%'
+                      >
+                        <Button
+                          variant='outlined'
+                          color='secondary'
+                          sx={{
+                            borderRadius: '1.5rem',
+                            marginLeft: 1,
+                            flex: 1,
+                          }}
+                          onClick={(event) =>
+                            handleCancelRequest(event, friend.id)
+                          }
+                        >
+                          Cancel
+                        </Button>
+                      </Box>
                     </Box>
-                  </Box>
-                </Card>
-              </Grid>
-            ))}
-          </Grid>
-        </Box>
-      )}
-        <Box mt={'22vh'} width={'90%'}>
+                  </Card>
+                </Grid>
+              ))}
+            </Grid>
+          </Box>
+        )}
+        <Box width={'90%'}>
           <Typography
             variant='h5'
             color='text.primary'
@@ -442,70 +396,75 @@ export default function AddFriends() {
             Your Followers
           </Typography>
           {followers.length > 0 ? (
-          <Grid container spacing={2}>
-            {followers.map((friend) => (
-              <Grid item xs={12} sm={6} md={4} key={friend.id}>
-                <Card
-                  sx={{
-                    padding: '1rem',
-                    borderRadius: '1.5rem',
-                    backgroundColor: '#F8F7FF',
-                    display: 'flex',
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                  }}
-                >
-                  <Avatar
-                    alt={friend.name}
-                    // src={friend.profilePicture}
-                    sx={{ width: 60, height: 60, marginRight: 2 }}
-                  />
-
-                  <Box
+            <Grid container spacing={2}>
+              {followers.map((friend) => (
+                <Grid item xs={12} sm={6} md={4} key={friend.id}>
+                  <Card
                     sx={{
+                      padding: '1rem',
+                      borderRadius: '1.5rem',
+                      backgroundColor: '#F8F7FF',
                       display: 'flex',
-                      flexDirection: 'column',
-                      justifyContent: 'space-between',
-                      flexGrow: 1,
+                      flexDirection: 'row',
+                      alignItems: 'center',
                     }}
                   >
-                    <Typography variant='h6'>
-                      {friend.name}
-                    </Typography>
-                    <Typography sx={{ marginBottom: '0.5rem', fontSize:'12px' }}>
-                      {friend.email}
-                    </Typography>
+                    <Avatar
+                      alt={friend.name}
+                      src={`data:image/svg+xml;base64,${btoa(multiavatar(friend.name.split(' ')[0]))}`}
+                      sx={{ width: 60, height: 60, marginRight: 2 }}
+                    />
                     <Box
-                      display='flex'
-                      justifyContent='space-between'
-                      width='80%'
+                      sx={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        justifyContent: 'space-between',
+                        flexGrow: 1,
+                      }}
                     >
-                      <Button
-                        variant='outlined'
-                        color='secondary'
-                        sx={{
-                          borderRadius: '1.5rem',
-                          marginLeft: 1,
-                          flex: 1,
-                        }}
-                        onClick={(event) =>
-                          handleRemoveFollower(event, friend.id)
-                        }
+                      <Typography variant='h6'>{friend.name}</Typography>
+                      <Typography
+                        sx={{ marginBottom: '0.5rem', fontSize: '12px' }}
                       >
-                        Remove
-                      </Button>
+                        {friend.email}
+                      </Typography>
+                      <Box
+                        display='flex'
+                        justifyContent='space-between'
+                        width='80%'
+                      >
+                        <Button
+                          variant='outlined'
+                          color='secondary'
+                          sx={{
+                            borderRadius: '1.5rem',
+                            marginLeft: 1,
+                            flex: 1,
+                          }}
+                          onClick={(event) =>
+                            handleRemoveFollower(event, friend.id)
+                          }
+                        >
+                          Remove
+                        </Button>
+                      </Box>
                     </Box>
-                  </Box>
-                </Card>
-              </Grid>
-            ))}
-          </Grid>
-          ): (
-            <Typography variant='body2' color='text.secondary' align='center' sx={{ mt: 2 }}>
+                  </Card>
+                </Grid>
+              ))}
+            </Grid>
+          ) : (
+            <Typography
+              variant='body2'
+              color='text.secondary'
+              align='center'
+              sx={{ mt: 2 }}
+            >
               You have no followers yet
             </Typography>
           )}
         </Box>
+      </Box>
 
       <DialogBox
         open={open}
@@ -549,7 +508,10 @@ export default function AddFriends() {
                     },
                   }}
                 >
-                  <ListItemText primary={friend.name} secondary={friend.email} />
+                  <ListItemText
+                    primary={friend.name}
+                    secondary={friend.email}
+                  />
                   <PersonAddIcon
                     sx={{ cursor: 'pointer' }}
                     onClick={(event) => {

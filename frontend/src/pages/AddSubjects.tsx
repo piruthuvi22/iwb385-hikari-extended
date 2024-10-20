@@ -1,12 +1,10 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   alpha,
   Box,
   Button,
-  Divider,
   Fab,
-  LinearProgress,
   List,
   ListItem,
   ListItemButton,
@@ -15,22 +13,17 @@ import {
   TextField,
   Typography,
   useTheme,
-} from "@mui/material";
-import Banner from "../assets/addSubjectBg.jpg";
-import AddIcon from "@mui/icons-material/Add";
-import Menubar from "../components/Menubar";
-import DialogBox from "../components/DialogBox";
-import Loader from "../components/Loader";
-import axios from "axios";
-import IconButton from "@mui/material/IconButton";
-import MoreVertIcon from "@mui/icons-material/MoreVert";
-import Menu from "@mui/material/Menu";
-import MenuItem from "@mui/material/MenuItem";
-import { useAuth0 } from "@auth0/auth0-react";
-import { Add, Delete, Inbox, MenuBook } from "@mui/icons-material";
-import { SubjectRecordsResponse } from "./RecordStudySession";
-import Logo from "../assets/studifyLogo.svg";
-import LogoHorz from "../assets/studify-logo-horz.svg";
+} from '@mui/material';
+import Menubar from '../components/Menubar';
+import DialogBox from '../components/DialogBox';
+import axios from 'axios';
+import IconButton from '@mui/material/IconButton';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import { useAuth0 } from '@auth0/auth0-react';
+import { Add, MenuBook } from '@mui/icons-material';
+import Header from '../components/Header';
 
 const ENDPOINT = process.env.REACT_APP_API_URI;
 
@@ -50,7 +43,7 @@ export default function AddSubject() {
   const theme = useTheme();
   const [open, setOpen] = useState(false);
   const [openGoal, setOpenGoal] = useState(false);
-  const [searchText, setSearchText] = useState("");
+  const [searchText, setSearchText] = useState('');
   const [filteredSubjects, setFilteredSubjects] = useState<SubjectResponse[]>(
     []
   );
@@ -65,34 +58,12 @@ export default function AddSubject() {
     React.useState<SubjectResponse | null>(null);
   const [studyMinutes, setStudyMinutes] = useState(0);
 
-  const {
-    user,
-    isAuthenticated,
-    isLoading,
-    getAccessTokenSilently,
-    error,
-    getIdTokenClaims,
-    handleRedirectCallback,
-  } = useAuth0();
+  const { user, getAccessTokenSilently } = useAuth0();
 
   useEffect(() => {
     user?.sub && createUser();
     getSubjects();
   }, [user]);
-
-  // useEffect(() => {
-  //   if (selectedSubjects.length > 0) {
-  //     const subjects = selectedSubjects.map((subject) => subject.id);
-  //     for (const subjectId of subjects) {
-  //       getSubjectInfo(subjectId).then((subject) => {
-  //         setSelectedSubjects((prevSubjects) => ({
-  //           ...prevSubjects,
-  //           progress: 55,
-  //         }));
-  //       });
-  //     }
-  //   }
-  // }, [selectedSubjects]);
 
   const createUser = async () => {
     if (!user) {
@@ -102,21 +73,21 @@ export default function AddSubject() {
       const TOKEN = await getAccessTokenSilently({});
 
       const response = await axios.post(
-        ENDPOINT + "/users",
+        ENDPOINT + '/users',
         {
-          id: user.sub?.split("|")[1],
+          id: user.sub?.split('|')[1],
           name: user.name,
           email: user.email,
         },
         {
           headers: {
-            Authorization: "Bearer " + TOKEN,
+            Authorization: 'Bearer ' + TOKEN,
           },
         }
       );
-      console.log("User created successfully", response.data);
+      console.log('User created successfully', response.data);
     } catch (error) {
-      console.error("Error creating user", error);
+      console.error('Error creating user', error);
     }
   };
 
@@ -126,19 +97,19 @@ export default function AddSubject() {
     try {
       const TOKEN = await getAccessTokenSilently({});
       const availableSubjectsResponse = await axios.get(
-        ENDPOINT + "/subjects",
+        ENDPOINT + '/subjects',
         {
           headers: {
-            Authorization: "Bearer " + TOKEN,
+            Authorization: 'Bearer ' + TOKEN,
           },
         }
       );
       const availableSubjects = availableSubjectsResponse.data;
       // setSubjects(availableSubjects);
 
-      const enrolledSubjectsResponse = await axios.get(ENDPOINT + "/users", {
+      const enrolledSubjectsResponse = await axios.get(ENDPOINT + '/users', {
         headers: {
-          Authorization: "Bearer " + TOKEN,
+          Authorization: 'Bearer ' + TOKEN,
         },
       });
       const enrolledSubjects = await enrolledSubjectsResponse.data.subjects;
@@ -152,7 +123,7 @@ export default function AddSubject() {
       setSubjects(filteredAvailableSubjects);
       setFilteredSubjects(filteredAvailableSubjects);
     } catch (error) {
-      console.error("Failed to fetch subjects", error);
+      console.error('Failed to fetch subjects', error);
     } finally {
       setLoading(false);
     }
@@ -163,53 +134,27 @@ export default function AddSubject() {
 
     try {
       const TOKEN = await getAccessTokenSilently({});
-      const response = await axios.put(
-        ENDPOINT + "/subjects",
+      await axios.put(
+        ENDPOINT + '/subjects',
         {
           id: subject.id,
         },
         {
           headers: {
-            Authorization: "Bearer " + TOKEN,
+            Authorization: 'Bearer ' + TOKEN,
           },
         }
       );
     } catch (error) {
-      console.error("Error updating subject:", error);
+      console.error('Error updating subject:', error);
     } finally {
       setLoading(false);
       if (!selectedSubjects.includes(subject)) {
         setSelectedSubjects([...selectedSubjects, subject]);
         setFilteredSubjects(filteredSubjects.filter((s) => s !== subject));
-        setSearchText("");
+        setSearchText('');
         setOpen(false);
       }
-    }
-  };
-
-  const getSubjectInfo = async (
-    subjectId: string
-  ): Promise<SubjectRecordsResponse | undefined> => {
-    // setLoading(true);
-    try {
-      const TOKEN = await getAccessTokenSilently({});
-
-      if (!subjectId) {
-        console.error("Subject ID not found");
-        return;
-      }
-      const response = await axios.get(ENDPOINT + "/subjects/" + subjectId, {
-        headers: {
-          Authorization: "Bearer " + TOKEN,
-        },
-      });
-
-      return response.data;
-    } catch (error) {
-      console.error("Error fetching subject info", error);
-      return undefined;
-    } finally {
-      // setLoading(false);
     }
   };
 
@@ -228,10 +173,10 @@ export default function AddSubject() {
 
     try {
       const TOKEN = await getAccessTokenSilently({});
-      const response = await axios.delete(ENDPOINT + "/subjects", {
+      const response = await axios.delete(ENDPOINT + '/subjects', {
         data: { id: subject.id },
         headers: {
-          Authorization: "Bearer " + TOKEN,
+          Authorization: 'Bearer ' + TOKEN,
         },
       });
 
@@ -240,10 +185,10 @@ export default function AddSubject() {
           prevSubjects.filter((s) => s.id !== subject.id)
         );
       } else {
-        console.error("Error deleting the subject");
+        console.error('Error deleting the subject');
       }
     } catch (error) {
-      console.error("Error deleting the subject", error);
+      console.error('Error deleting the subject', error);
     } finally {
       setLoading(false);
       handleCloseMenu();
@@ -258,7 +203,7 @@ export default function AddSubject() {
   const handleClose = () => {
     setOpenGoal(false);
     setOpen(false);
-    setSearchText("");
+    setSearchText('');
     setFilteredSubjects(subjects);
   };
 
@@ -272,12 +217,6 @@ export default function AddSubject() {
   const handleCloseMenu = () => {
     setSelectedSubject(null);
     setAnchorEl(null);
-  };
-
-  const handleSetGoal = (subject: SubjectResponse) => {
-    setOpenGoal(true);
-    setStudyMinutes(0);
-    handleCloseMenu();
   };
 
   const handleDecrease = () => {
@@ -298,69 +237,17 @@ export default function AddSubject() {
   const minutes = studyMinutes % 60;
 
   return (
-    <Box minHeight={"100vh"} bgcolor={theme.palette.grey[100]}>
-      <Box sx={{ position: "relative" }}>
-        {loading && (
-          <Box position={"fixed"} top={0} left={0} right={0}>
-            <LinearProgress color="secondary" sx={{ height: 6 }} />
-          </Box>
-        )}
-        <img
-          src={Banner}
-          alt="Banner"
-          style={{
-            width: "100%",
-            height: "20vh",
-            objectFit: "cover",
-            borderBottomLeftRadius: "1.5rem",
-            borderBottomRightRadius: "1.5rem",
-          }}
-        />
-        <Box
-          sx={{
-            position: "absolute",
-            bottom: 0,
-            top: 0,
-            left: 0,
-            right: 0,
-            boxShadow: "inset 0px -100px 50px 0px rgba(0,0,0,0.85)",
-            borderBottomLeftRadius: "1.5rem",
-            borderBottomRightRadius: "1.5rem",
-          }}
-        >
-          <Box
-            display={"flex"}
-            width={"100%"}
-            justifyContent={"space-between"}
-            alignItems={"center"}
-            gap={2}
-            position={"absolute"}
-            bottom={0}
-          >
-            <Typography variant="h3" color="white" padding={2}>
-              Studify
-            </Typography>
-            <img
-              src={Logo}
-              alt="Banner"
-              style={{
-                width: 80,
-                height: 80,
-                paddingRight: 20,
-              }}
-            />
-          </Box>
-        </Box>
-      </Box>
+    <Box minHeight={'100vh'}>
+      <Header loading={loading} title='Subjects' />
       <Box p={2}>
-        <Typography variant="h5" color="text.primary">
-          Let's select your subjects!
+        <Typography variant='h5' color='text.primary'>
+          Pick a subject!
         </Typography>
       </Box>
       {/* Display selected subjects as tiles */}
       {selectedSubjects.length > 0 && (
         <Box px={2}>
-          <List sx={{ width: "100%" }}>
+          <List sx={{ width: '100%' }}>
             {selectedSubjects.map((subject, index) => {
               return (
                 <>
@@ -372,13 +259,13 @@ export default function AddSubject() {
                         0.5
                       )} 20%, ${alpha(theme.palette.warning.light, 0.5)} 80%)`,
                       mb: 2,
-                      borderRadius: "1.5rem",
-                      height: "80px",
+                      borderRadius: '1.5rem',
+                      height: '80px',
                     }}
                     key={index}
                     secondaryAction={
                       <IconButton
-                        edge="end"
+                        edge='end'
                         onClick={(event) => handleClickMenu(event, subject)}
                       >
                         <MoreVertIcon />
@@ -387,7 +274,7 @@ export default function AddSubject() {
                   >
                     <ListItemButton
                       sx={{
-                        height: "80px",
+                        height: '80px',
                       }}
                       onClick={() => goToSubjectPage(subject)}
                     >
@@ -396,13 +283,13 @@ export default function AddSubject() {
                       </ListItemIcon>
                       <ListItemText
                         sx={{
-                          "& .MuiListItemText-primary": {
-                            fontWeight: "600",
-                            fontSize: "1.5rem",
+                          '& .MuiListItemText-primary': {
+                            fontWeight: '600',
+                            fontSize: '1.5rem',
                             color: theme.palette.grey[800],
                           },
-                          "& .MuiListItemText-secondary": {
-                            fontSize: "1rem",
+                          '& .MuiListItemText-secondary': {
+                            fontSize: '1rem',
                           },
                         }}
                         primary={subject.name}
@@ -416,9 +303,9 @@ export default function AddSubject() {
           </List>
 
           <Menu
-            id="long-menu"
+            id='long-menu'
             MenuListProps={{
-              "aria-labelledby": "long-button",
+              'aria-labelledby': 'long-button',
             }}
             anchorEl={anchorEl}
             open={openMenu}
@@ -431,16 +318,16 @@ export default function AddSubject() {
         </Box>
       )}
       <Box
-        width={"100%"}
-        display={"flex"}
-        justifyContent={"center"}
+        width={'100%'}
+        display={'flex'}
+        justifyContent={'center'}
         mb={3}
         mt={6}
       >
         <Fab
-          sx={{ position: "fixed", bottom: 80, right: 30 }}
-          color="secondary"
-          size="large"
+          sx={{ position: 'fixed', bottom: 80, right: 30 }}
+          color='secondary'
+          size='large'
           disabled={loading}
           onClick={handleClickOpen}
         >
@@ -451,10 +338,10 @@ export default function AddSubject() {
       {/* Dialog for Selecting a Subject */}
       <DialogBox
         open={open}
-        title="Select a Subject"
+        title='Select a Subject'
         handleClose={handleClose}
         actions={
-          <Button onClick={handleClose} color="secondary">
+          <Button onClick={handleClose} color='secondary'>
             Cancel
           </Button>
         }
@@ -462,18 +349,18 @@ export default function AddSubject() {
         {filteredSubjects.length > 0 ? (
           <>
             <TextField
-              label="Search Subject"
+              label='Search Subject'
               value={searchText}
               onChange={handleSearchChange}
               fullWidth
-              margin="dense"
-              variant="outlined"
+              margin='dense'
+              variant='outlined'
               sx={{
-                "& .MuiOutlinedInput-root": {
-                  borderRadius: "1.5rem",
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: '1.5rem',
                 },
-                "& .MuiOutlinedInput-notchedOutline": {
-                  borderRadius: "1.5rem",
+                '& .MuiOutlinedInput-notchedOutline': {
+                  borderRadius: '1.5rem',
                 },
               }}
             />
@@ -482,13 +369,13 @@ export default function AddSubject() {
               {filteredSubjects.map((subject, index) => (
                 <ListItem
                   key={index}
-                  component="div"
+                  component='div'
                   onClick={() => handleSubjectClick(subject)}
                   sx={{
-                    borderRadius: "1.5rem",
-                    "&:hover": {
-                      backgroundColor: "#D8D8FF",
-                      cursor: "pointer",
+                    borderRadius: '1.5rem',
+                    '&:hover': {
+                      backgroundColor: '#D8D8FF',
+                      cursor: 'pointer',
                     },
                   }}
                 >
@@ -498,7 +385,7 @@ export default function AddSubject() {
             </List>
           </>
         ) : (
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant='body2' color='text.secondary'>
             No subjects available to add
           </Typography>
         )}
@@ -506,57 +393,57 @@ export default function AddSubject() {
 
       <DialogBox
         open={openGoal}
-        title="Set a Goal"
+        title='Set a Goal'
         handleClose={handleClose}
         actions={
           <>
-            <Button onClick={handleClose} color="secondary">
+            <Button onClick={handleClose} color='secondary'>
               Cancel
             </Button>
-            <Button color="primary">Set Goal</Button>
+            <Button color='primary'>Set Goal</Button>
           </>
         }
       >
         <Box
-          display="flex"
-          alignItems="center"
-          justifyItems="center"
-          justifyContent="space-evenly"
-          gap="1rem"
+          display='flex'
+          alignItems='center'
+          justifyItems='center'
+          justifyContent='space-evenly'
+          gap='1rem'
         >
           <Button
-            variant="outlined"
+            variant='outlined'
             sx={{
-              borderRadius: "50%",
-              width: "40px",
-              height: "40px",
-              minWidth: "0",
-              padding: "0",
-              fontSize: "1.5rem",
-              border: "2px solid",
-              alignItems: "flex-end",
+              borderRadius: '50%',
+              width: '40px',
+              height: '40px',
+              minWidth: '0',
+              padding: '0',
+              fontSize: '1.5rem',
+              border: '2px solid',
+              alignItems: 'flex-end',
             }}
             onClick={handleDecrease}
           >
             -
           </Button>
           <Typography
-            variant="body1"
-            sx={{ fontSize: "20px", width: "40%", textAlign: "center" }}
+            variant='body1'
+            sx={{ fontSize: '20px', width: '40%', textAlign: 'center' }}
           >
             {hours}h {minutes}m
           </Typography>
           <Button
-            variant="outlined"
+            variant='outlined'
             sx={{
-              borderRadius: "50%",
-              width: "40px",
-              height: "40px",
-              minWidth: "0",
-              padding: "0",
-              fontSize: "1.5rem",
-              border: "2px solid",
-              alignItems: "flex-end",
+              borderRadius: '50%',
+              width: '40px',
+              height: '40px',
+              minWidth: '0',
+              padding: '0',
+              fontSize: '1.5rem',
+              border: '2px solid',
+              alignItems: 'flex-end',
             }}
             onClick={handleIncrease}
           >

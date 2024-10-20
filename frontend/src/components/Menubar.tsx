@@ -1,13 +1,11 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
-  alpha,
   BottomNavigation,
   BottomNavigationAction,
   Box,
   Divider,
 } from "@mui/material";
 import { useNavigate, useLocation } from "react-router-dom";
-import HomeIcon from "@mui/icons-material/Home";
 import PersonIcon from "@mui/icons-material/Person";
 import GroupIcon from "@mui/icons-material/Group";
 import { MenuBook } from "@mui/icons-material";
@@ -47,7 +45,6 @@ export default function Menubar() {
 
   return (
     <Box sx={{ width: "100%", position: "fixed", bottom: 0 }}>
-      <Divider />
       <BottomNavigation
         value={value}
         onChange={(event, newValue) => {

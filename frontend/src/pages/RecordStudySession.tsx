@@ -1,18 +1,13 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from 'react';
 import {
   alpha,
-  Avatar,
   Badge,
   Box,
   Button,
-  Divider,
   Fab,
   IconButton,
-  LinearProgress,
   List,
   ListItem,
-  ListItemAvatar,
-  ListItemButton,
   ListItemIcon,
   ListItemText,
   ListSubheader,
@@ -22,33 +17,18 @@ import {
   TextField,
   Typography,
   useTheme,
-} from "@mui/material";
-import {
-  Add,
-  Article,
-  Description,
-  Image,
-  LibraryBooks,
-  MenuBook,
-  MoreVert,
-  Send,
-  StickyNote2,
-} from "@mui/icons-material";
-import CircularWithValueLabel, {
-  CircularProgressWithLabel,
-} from "../components/CircularProgress";
-import DialogBox from "../components/DialogBox";
-import { useAuth0 } from "@auth0/auth0-react";
-import axios from "axios";
-import { useLocation } from "react-router-dom";
-import Loader from "../components/Loader";
-import Notification from "../components/Notification";
-import moment from "moment";
-import Menubar from "../components/Menubar";
-import { theme } from "../theme/theme";
-import ProgressMeter from "../components/ProgressMeter";
-
-import Banner from "../assets/study.jpg";
+} from '@mui/material';
+import { Add, Description, MoreVert } from '@mui/icons-material';
+import DialogBox from '../components/DialogBox';
+import { useAuth0 } from '@auth0/auth0-react';
+import axios from 'axios';
+import { useLocation } from 'react-router-dom';
+import Notification from '../components/Notification';
+import moment from 'moment';
+import Menubar from '../components/Menubar';
+import { theme } from '../theme/theme';
+import ProgressMeter from '../components/ProgressMeter';
+import Header from '../components/Header';
 
 const ENDPOINT = process.env.REACT_APP_API_URI;
 
@@ -91,18 +71,18 @@ export default function RecordStudySession() {
       const TOKEN = await getAccessTokenSilently({});
 
       if (!subjectId) {
-        console.error("Subject ID not found");
+        console.error('Subject ID not found');
         return;
       }
-      const response = await axios.get(ENDPOINT + "/subjects/" + subjectId, {
+      const response = await axios.get(ENDPOINT + '/subjects/' + subjectId, {
         headers: {
-          Authorization: "Bearer " + TOKEN,
+          Authorization: 'Bearer ' + TOKEN,
         },
       });
       setSubject(response.data);
       setOpenGoal(response.data.goalHours === 0);
     } catch (error) {
-      console.error("Error fetching subject info", error);
+      console.error('Error fetching subject info', error);
     } finally {
       setLoading(false);
     }
@@ -114,26 +94,26 @@ export default function RecordStudySession() {
       const TOKEN = await getAccessTokenSilently({});
 
       if (!subjectId) {
-        console.error("Subject ID not found");
+        console.error('Subject ID not found');
         return;
       }
       const response = await axios.put(
-        ENDPOINT + "/subjects/goals",
+        ENDPOINT + '/subjects/goals',
         {
           subjectId: subjectId,
           goalHours: goalHours,
         },
         {
           headers: {
-            Authorization: "Bearer " + TOKEN,
+            Authorization: 'Bearer ' + TOKEN,
           },
         }
       );
-      console.log("Subject Info", response.data);
+      console.log('Subject Info', response.data);
       getSubjectInfo();
       setOpenGoal(response.data.goalHours === 0);
     } catch (error) {
-      console.error("Error update goal hrs", error);
+      console.error('Error update goal hrs', error);
     } finally {
       setLoading(false);
     }
@@ -144,8 +124,8 @@ export default function RecordStudySession() {
       setLoading(true);
       const TOKEN = await getAccessTokenSilently({});
 
-      const response = await axios.post(
-        ENDPOINT + "/study",
+      await axios.post(
+        ENDPOINT + '/study',
         {
           subjectId: subjectId,
           lessonId: lessonId,
@@ -153,12 +133,12 @@ export default function RecordStudySession() {
         },
         {
           headers: {
-            Authorization: "Bearer " + TOKEN,
+            Authorization: 'Bearer ' + TOKEN,
           },
         }
       );
     } catch (error) {
-      console.error("Error recording study session", error);
+      console.error('Error recording study session', error);
     } finally {
       getSubjectInfo();
       setLoading(false);
@@ -178,13 +158,13 @@ export default function RecordStudySession() {
   };
 
   const formatLastStudied = (dateTime: string): string => {
-    let duration = "";
+    let duration = '';
     let diff = moment()
-      .startOf("day")
-      .diff(moment(dateTime).startOf("day"), "day");
-    if (diff == 0) duration = "today";
-    else if (diff == 1) duration = "yesterday";
-    else duration = moment(dateTime).format("MMM DD");
+      .startOf('day')
+      .diff(moment(dateTime).startOf('day'), 'day');
+    if (diff === 0) duration = 'today';
+    else if (diff === 1) duration = 'yesterday';
+    else duration = moment(dateTime).format('MMM DD');
 
     return duration;
   };
@@ -209,122 +189,77 @@ export default function RecordStudySession() {
     ((subject?.actualHours ?? 0) / (subject?.goalHours ?? 1)) * 100;
 
   return (
-    <Box height={"100vh"} bgcolor={theme.palette.grey[100]}>
-      <Box
-        sx={{
-          position: "relative",
-          // height: 300,
-        }}
-      >
-        {loading && (
-          <Box position={"fixed"} top={0} left={0} right={0}>
-            <LinearProgress color="secondary" sx={{ height: 6 }} />
-          </Box>
-        )}
-        <img
-          src={Banner}
-          alt="cover"
-          style={{
-            width: "100%",
-            height: "20vh",
-            objectFit: "cover",
-            borderBottomLeftRadius: "1.5rem",
-            borderBottomRightRadius: "1.5rem",
-          }}
-        />
-        <Box
-          sx={{
-            position: "absolute",
-            bottom: 0,
-            top: 0,
-            left: 0,
-            right: 0,
-            // bgcolor: theme.palette.primary.main,
-            boxShadow: "inset 0px -100px 50px 0px rgba(0,0,0,0.85)",
-
-            borderBottomLeftRadius: "1.5rem",
-            borderBottomRightRadius: "1.5rem",
-          }}
-        >
-          <Box
-            display={"flex"}
-            width={"100%"}
-            justifyContent={"space-between"}
-            gap={2}
-            position={"absolute"}
-            bottom={0}
-          >
-            <Typography variant="h3" color="white" padding={2}>
-              {subjectName}
-            </Typography>
-            <Box sx={{ alignSelf: "center" }}>
-              <IconButton
-                title="Add goal hours"
-                size="large"
-                edge="start"
-                color="secondary"
-                disabled={loading}
-                onClick={(event) => handleClickMenu(event)}
-              >
-                <MoreVert />
-              </IconButton>
-            </Box>
-          </Box>
-          <Menu anchorEl={anchorEl} open={openMenu} onClose={handleCloseMenu}>
-            <MenuItem
-              onClick={() => {
-                setOpenGoal(true);
-                handleCloseMenu();
-              }}
+    <Box>
+      <Header
+        loading={loading}
+        title={subjectName}
+        buttonComponent={
+          <Box sx={{ alignSelf: 'center' }}>
+            <IconButton
+              title='Add goal hours'
+              size='large'
+              edge='start'
+              disabled={loading}
+              onClick={(event) => handleClickMenu(event)}
             >
-              {subject?.goalHours === 0 ? "Add Goal Hours" : "Edit Goal Hours"}
-            </MenuItem>
-          </Menu>
-        </Box>
-      </Box>
-
+              <MoreVert sx={{ color: 'white' }} />
+            </IconButton>
+            <Menu anchorEl={anchorEl} open={openMenu} onClose={handleCloseMenu}>
+              <MenuItem
+                onClick={() => {
+                  setOpenGoal(true);
+                  handleCloseMenu();
+                }}
+              >
+                {subject?.goalHours === 0
+                  ? 'Add Goal Hours'
+                  : 'Edit Goal Hours'}
+              </MenuItem>
+            </Menu>
+          </Box>
+        }
+      />
       {!loading && (
         <Box>
           {subject?.goalHours != 0 && (
             <Box
-              display={"flex"}
-              flexDirection={"column"}
-              justifyContent={"center"}
-              alignItems={"center"}
+              display={'flex'}
+              flexDirection={'column'}
+              justifyContent={'center'}
+              alignItems={'center'}
               py={2}
             >
               <Box sx={{ width: 150 }}>
                 <ProgressMeter
-                  // progress={64.8945168468541}
-                  progress={parseFloat(progress.toFixed(1))}
+                  progress={Math.min(100, parseFloat(progress.toFixed(1)))}
                   showMiniCircle={false}
                   sx={{
                     strokeColor: theme.palette.primary.main,
                     bgStrokeColor: theme.palette.grey[300],
                     barWidth: 9,
                     valueSize: 25,
-                    valueWeight: "bolder",
+                    valueWeight: 'bolder',
                     valueColor: theme.palette.secondary.main,
                     textColor: theme.palette.secondary.main,
                     loadingTime: 1500,
-                    shape: "threequarters",
-                    textFamily: "Fredoka",
-                    valueFamily: "Fredoka",
+                    shape: 'threequarters',
+                    textFamily: 'Fredoka',
+                    valueFamily: 'Fredoka',
                   }}
                 />
               </Box>
 
-              <Typography color="text.secondary">
-                {actualHours + "hrs " + actualMins + "mins"} /{" "}
-                {goalHours + "hrs " + goalMins + "mins"}
+              <Typography color='text.secondary'>
+                {actualHours + 'h ' + actualMins + 'm'} /{' '}
+                {goalHours + 'h ' + goalMins + 'm'}
               </Typography>
             </Box>
           )}
           <Box px={2}>
             <List
-              sx={{ width: "100%" }}
+              sx={{ width: '100%' }}
               subheader={
-                <ListSubheader sx={{ backgroundColor: "transparent" }}>
+                <ListSubheader sx={{ backgroundColor: 'transparent' }}>
                   Lessons
                 </ListSubheader>
               }
@@ -337,23 +272,23 @@ export default function RecordStudySession() {
 
                 let dateTime = subject?.lastStudiedDates[key[0]];
                 let duration = formatLastStudied(dateTime);
-                let noOfWeeks = moment().diff(dateTime, "week");
-                let badgeColor = "default";
-                if (noOfWeeks === 0) badgeColor = "success";
-                else if (noOfWeeks === 1) badgeColor = "warning";
-                else badgeColor = "error";
+                let noOfWeeks = moment().diff(dateTime, 'week');
+                let badgeColor = 'default';
+                if (noOfWeeks === 0) badgeColor = 'success';
+                else if (noOfWeeks === 1) badgeColor = 'warning';
+                else badgeColor = 'error';
 
                 return (
                   <ListItem
                     key={lesson.id}
                     sx={{
                       background: `linear-gradient(45deg, ${alpha(
-                        theme.palette.secondary.light,
+                        theme.palette.warning.main,
                         0.5
-                      )} 20%, ${alpha(theme.palette.warning.light, 0.5)} 80%)`,
+                      )} 20%, ${alpha(theme.palette.warning.light, 0.3)} 80%)`,
                       mb: 2,
-                      borderRadius: "1.5rem",
-                      height: "80px",
+                      borderRadius: '1.5rem',
+                      height: '80px',
                     }}
                     secondaryAction={<></>}
                   >
@@ -362,33 +297,55 @@ export default function RecordStudySession() {
                     </ListItemIcon>
                     <ListItemText
                       sx={{
-                        "& .MuiListItemText-primary": {
-                          fontWeight: "600",
-                          fontSize: "1.3rem",
+                        '& .MuiListItemText-primary': {
+                          fontWeight: '600',
+                          fontSize: '1.3rem',
                           color: theme.palette.grey[800],
                         },
-                        "& .MuiListItemText-secondary": {
-                          fontSize: "1rem",
+                        '& .MuiListItemText-secondary': {
+                          fontSize: '1rem',
                         },
                       }}
                       primary={lesson.name}
                       {...(dateTime && {
                         secondary: (
                           <Box
-                            display={"flex"}
-                            justifyContent={"space-between"}
-                            alignItems={"center"}
+                            display={'flex'}
+                            justifyContent={'space-between'}
+                            alignItems={'center'}
                           >
-                            Last studied {duration} at{" "}
-                            {moment(dateTime).format("h:mm A")}
+                            Last studied {duration} at{' '}
+                            {moment(dateTime).format('h:mm A')}
                             <Badge
                               color={badgeColor as any}
-                              variant="dot"
+                              variant='dot'
                               sx={{
-                                "& .MuiBadge-badge": {
+                                '& .MuiBadge-badge': {
                                   height: 10, // Adjust height
                                   width: 10, // Adjust width
-                                  borderRadius: "50%",
+                                  borderRadius: '50%',
+                                },
+                              }}
+                            />
+                          </Box>
+                        ),
+                      })}
+                      {...(dateTime == null && {
+                        secondary: (
+                          <Box
+                            display={'flex'}
+                            justifyContent={'space-between'}
+                            alignItems={'center'}
+                          >
+                            Haven't studied in a long time
+                            <Badge
+                              color='error'
+                              variant='dot'
+                              sx={{
+                                '& .MuiBadge-badge': {
+                                  height: 10, // Adjust height
+                                  width: 10, // Adjust width
+                                  borderRadius: '50%',
                                 },
                               }}
                             />
@@ -400,10 +357,11 @@ export default function RecordStudySession() {
                 );
               })}
             </List>
+            <Box height={150}></Box>
             <Fab
-              sx={{ position: "fixed", bottom: 80, right: 30 }}
-              color="secondary"
-              size="large"
+              sx={{ position: 'fixed', bottom: 80, right: 30 }}
+              color='secondary'
+              size='large'
               disabled={subject?.goalHours === 0}
               onClick={() => {
                 if (subject?.goalHours === 0) {
@@ -435,10 +393,10 @@ export default function RecordStudySession() {
       />
 
       <Notification
-        type="info"
-        variant="standard"
+        type='info'
+        variant='standard'
         open={subject?.goalHours === 0}
-        text="Set goal hours before recording study session"
+        text='Set goal hours before recording study session'
         handleClose={() => {}}
       />
       <Menubar />
@@ -461,7 +419,7 @@ const AddSession = ({
 }) => {
   const [hour, setHour] = useState<number>(0);
   const [minutes, setMinutes] = useState<number>(0);
-  const [lessonId, setLessonId] = useState<string>("");
+  const [lessonId, setLessonId] = useState<string>('');
   const [error, setError] = useState<boolean>(false);
 
   const handleSave = () => {
@@ -471,7 +429,7 @@ const AddSession = ({
     }
     let totalMinutes = hour * 60 + minutes;
     onSave(lessonId, totalMinutes);
-    setLessonId("");
+    setLessonId('');
     handleClose();
   };
 
@@ -492,33 +450,33 @@ const AddSession = ({
     <DialogBox
       open={open}
       handleClose={handleClose}
-      title="How long did you study?"
+      title='How long did you study?'
       actions={
         <>
           <Button
-            variant="contained"
+            variant='contained'
             sx={{
-              width: "50%",
-              fontWeight: "600",
-              fontSize: "1.3rem",
+              width: '50%',
+              fontWeight: '600',
+              fontSize: '1.3rem',
               py: 2,
-              borderRadius: "100px",
+              borderRadius: '100px',
             }}
             onClick={handleSave}
           >
             Save
           </Button>
           <Button
-            variant="outlined"
+            variant='outlined'
             sx={{
-              width: "50%",
-              fontWeight: "600",
-              fontSize: "1.3rem",
+              width: '50%',
+              fontWeight: '600',
+              fontSize: '1.3rem',
               py: 2,
-              borderRadius: "100px",
+              borderRadius: '100px',
             }}
             onClick={() => {
-              setLessonId("");
+              setLessonId('');
               setError(false);
               handleClose();
             }}
@@ -532,15 +490,15 @@ const AddSession = ({
         <Box py={4}>
           <TextField
             select
-            label="Lesson"
+            label='Lesson'
             fullWidth
             sx={{
               mb: 3,
-              "& .MuiOutlinedInput-root": {
-                borderRadius: "1.5rem",
+              '& .MuiOutlinedInput-root': {
+                borderRadius: '1.5rem',
               },
             }}
-            helperText={error && "Choose the lesson"}
+            helperText={error && 'Choose the lesson'}
             error={error}
             value={lessonId}
             onChange={(e) => {
@@ -555,42 +513,42 @@ const AddSession = ({
             ))}
           </TextField>
           <Typography gutterBottom>Hours</Typography>
-          <Box display={"flex"} justifyContent={"space-between"} gap={2}>
+          <Box display={'flex'} justifyContent={'space-between'} gap={2}>
             <Slider
               min={0}
               max={24}
               sx={{
-                "& .MuiSlider-track": {
-                  background: "transparent",
+                '& .MuiSlider-track': {
+                  background: 'transparent',
                   height: 15,
                 },
-                "& .MuiSlider-rail": {
+                '& .MuiSlider-rail': {
                   background: `linear-gradient(90deg, ${theme.palette.primary.main} 40%, ${theme.palette.secondary.main} 60%)`,
                   height: 15,
                 },
-                "& .MuiSlider-thumb": {
+                '& .MuiSlider-thumb': {
                   backgroundColor: theme.palette.secondary.main,
                   height: 24,
                   width: 24,
-                  "&:hover": {
-                    boxShadow: "0px 0px 0px 8px rgba(0,0,0,0.16)",
+                  '&:hover': {
+                    boxShadow: '0px 0px 0px 8px rgba(0,0,0,0.16)',
                   },
                 },
               }}
               getAriaValueText={(value) => `${value}hrs`}
-              value={typeof hour === "number" ? hour : 0}
-              aria-label="Default"
-              valueLabelDisplay="auto"
+              value={typeof hour === 'number' ? hour : 0}
+              aria-label='Default'
+              valueLabelDisplay='auto'
               onChange={(e, value) => setHour(Number(value))}
             />
             <TextField
               onChange={(e) => setHour(Number(e.target.value))}
-              type="number"
-              size="small"
+              type='number'
+              size='small'
               value={hour}
               sx={{
-                "& .MuiOutlinedInput-root": {
-                  borderRadius: "1.5rem",
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: '1.5rem',
                 },
               }}
               slotProps={{
@@ -603,43 +561,43 @@ const AddSession = ({
           </Box>
 
           <Typography gutterBottom>Minutes</Typography>
-          <Box display={"flex"} justifyContent={"space-between"} gap={2}>
+          <Box display={'flex'} justifyContent={'space-between'} gap={2}>
             <Slider
               min={0}
               max={59}
               step={5}
               sx={{
-                "& .MuiSlider-track": {
-                  background: "transparent",
+                '& .MuiSlider-track': {
+                  background: 'transparent',
                   height: 15,
                 },
-                "& .MuiSlider-rail": {
+                '& .MuiSlider-rail': {
                   background: `linear-gradient(90deg, ${theme.palette.primary.main} 40%, ${theme.palette.secondary.main} 60%)`,
                   height: 15,
                 },
-                "& .MuiSlider-thumb": {
+                '& .MuiSlider-thumb': {
                   backgroundColor: theme.palette.secondary.main,
                   height: 24,
                   width: 24,
-                  "&:hover": {
-                    boxShadow: "0px 0px 0px 8px rgba(0,0,0,0.16)",
+                  '&:hover': {
+                    boxShadow: '0px 0px 0px 8px rgba(0,0,0,0.16)',
                   },
                 },
               }}
               getAriaValueText={(value) => `${value}mins`}
-              value={typeof minutes === "number" ? minutes : 0}
-              aria-label="Default"
-              valueLabelDisplay="auto"
+              value={typeof minutes === 'number' ? minutes : 0}
+              aria-label='Default'
+              valueLabelDisplay='auto'
               onChange={(e, value) => setMinutes(Number(value))}
             />
             <TextField
               onChange={(e) => setMinutes(Number(e.target.value))}
-              type="number"
-              size="small"
+              type='number'
+              size='small'
               value={minutes}
               sx={{
-                "& .MuiOutlinedInput-root": {
-                  borderRadius: "1.5rem",
+                '& .MuiOutlinedInput-root': {
+                  borderRadius: '1.5rem',
                 },
               }}
               slotProps={{
@@ -652,14 +610,14 @@ const AddSession = ({
             />
           </Box>
           <Typography
-            textAlign={"center"}
-            variant="h6"
+            textAlign={'center'}
+            variant='h6'
             mt={2}
-            color="secondary"
+            color='secondary'
           >
             <span
               style={{
-                fontSize: "1.8rem",
+                fontSize: '1.8rem',
                 fontWeight: 700,
               }}
             >
@@ -668,7 +626,7 @@ const AddSession = ({
             hrs
             <span
               style={{
-                fontSize: "1.8rem",
+                fontSize: '1.8rem',
                 fontWeight: 700,
               }}
             >
@@ -726,30 +684,30 @@ const AddGoalHrs = ({
       <DialogBox
         open={open}
         handleClose={handleClose}
-        title="Add your goal hours"
+        title='Add your goal hours'
         actions={
           <>
             <Button
-              variant="contained"
+              variant='contained'
               sx={{
-                width: "50%",
-                fontWeight: "600",
-                fontSize: "1.3rem",
+                width: '50%',
+                fontWeight: '600',
+                fontSize: '1.3rem',
                 py: 2,
-                borderRadius: "100px",
+                borderRadius: '100px',
               }}
               onClick={handleSave}
             >
               Save
             </Button>
             <Button
-              variant="outlined"
+              variant='outlined'
               sx={{
-                width: "50%",
-                fontWeight: "600",
-                fontSize: "1.3rem",
+                width: '50%',
+                fontWeight: '600',
+                fontSize: '1.3rem',
                 py: 2,
-                borderRadius: "100px",
+                borderRadius: '100px',
               }}
               onClick={handleClose}
             >
@@ -761,43 +719,43 @@ const AddGoalHrs = ({
         <>
           <Box py={4}>
             <Typography>Hours</Typography>
-            <Box display={"flex"} justifyContent={"space-between"} gap={2}>
+            <Box display={'flex'} justifyContent={'space-between'} gap={2}>
               <Slider
                 defaultValue={12}
                 min={0}
                 max={24}
                 getAriaValueText={(value) => `${value}hrs`}
                 sx={{
-                  "& .MuiSlider-track": {
-                    background: "transparent",
+                  '& .MuiSlider-track': {
+                    background: 'transparent',
                     height: 15,
                   },
-                  "& .MuiSlider-rail": {
+                  '& .MuiSlider-rail': {
                     background: `linear-gradient(90deg, ${theme.palette.primary.main} 40%, ${theme.palette.secondary.main} 60%)`,
                     height: 15,
                   },
-                  "& .MuiSlider-thumb": {
+                  '& .MuiSlider-thumb': {
                     backgroundColor: theme.palette.secondary.main,
                     height: 24,
                     width: 24,
-                    "&:hover": {
-                      boxShadow: "0px 0px 0px 8px rgba(0,0,0,0.16)",
+                    '&:hover': {
+                      boxShadow: '0px 0px 0px 8px rgba(0,0,0,0.16)',
                     },
                   },
                 }}
-                value={typeof hour === "number" ? hour : 0}
-                aria-label="Default"
-                valueLabelDisplay="auto"
+                value={typeof hour === 'number' ? hour : 0}
+                aria-label='Default'
+                valueLabelDisplay='auto'
                 onChange={(e, value) => setHour(Number(value))}
               />
               <TextField
                 onChange={(e) => setHour(Number(e.target.value))}
-                type="number"
-                size="small"
+                type='number'
+                size='small'
                 value={hour}
                 sx={{
-                  "& .MuiOutlinedInput-root": {
-                    borderRadius: "1.5rem",
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: '1.5rem',
                   },
                 }}
                 slotProps={{
@@ -810,44 +768,44 @@ const AddGoalHrs = ({
             </Box>
 
             <Typography>Minutes</Typography>
-            <Box display={"flex"} justifyContent={"space-between"} gap={2}>
+            <Box display={'flex'} justifyContent={'space-between'} gap={2}>
               <Slider
                 defaultValue={12}
                 min={0}
                 step={5}
                 max={59}
                 sx={{
-                  "& .MuiSlider-track": {
-                    background: "transparent",
+                  '& .MuiSlider-track': {
+                    background: 'transparent',
                     height: 15,
                   },
-                  "& .MuiSlider-rail": {
+                  '& .MuiSlider-rail': {
                     background: `linear-gradient(90deg, ${theme.palette.primary.main} 40%, ${theme.palette.secondary.main} 60%)`,
                     height: 15,
                   },
-                  "& .MuiSlider-thumb": {
+                  '& .MuiSlider-thumb': {
                     backgroundColor: theme.palette.secondary.main,
                     height: 24,
                     width: 24,
-                    "&:hover": {
-                      boxShadow: "0px 0px 0px 8px rgba(0,0,0,0.16)",
+                    '&:hover': {
+                      boxShadow: '0px 0px 0px 8px rgba(0,0,0,0.16)',
                     },
                   },
                 }}
                 getAriaValueText={(value) => `${value}mins`}
-                value={typeof minutes === "number" ? minutes : 0}
-                aria-label="Default"
-                valueLabelDisplay="auto"
+                value={typeof minutes === 'number' ? minutes : 0}
+                aria-label='Default'
+                valueLabelDisplay='auto'
                 onChange={(e, value) => setMinutes(Number(value))}
               />
               <TextField
                 onChange={(e) => setMinutes(Number(e.target.value))}
-                type="number"
-                size="small"
+                type='number'
+                size='small'
                 value={minutes}
                 sx={{
-                  "& .MuiOutlinedInput-root": {
-                    borderRadius: "1.5rem",
+                  '& .MuiOutlinedInput-root': {
+                    borderRadius: '1.5rem',
                   },
                 }}
                 slotProps={{
@@ -860,14 +818,14 @@ const AddGoalHrs = ({
               />
             </Box>
             <Typography
-              textAlign={"center"}
-              variant="h6"
+              textAlign={'center'}
+              variant='h6'
               mt={2}
-              color="secondary"
+              color='secondary'
             >
               <span
                 style={{
-                  fontSize: "1.8rem",
+                  fontSize: '1.8rem',
                   fontWeight: 700,
                 }}
               >
@@ -876,7 +834,7 @@ const AddGoalHrs = ({
               hrs
               <span
                 style={{
-                  fontSize: "1.8rem",
+                  fontSize: '1.8rem',
                   fontWeight: 700,
                 }}
               >
@@ -890,9 +848,9 @@ const AddGoalHrs = ({
 
       <Notification
         open={openNotification}
-        text="Goal time should be greater than studied hours"
-        type="error"
-        variant="standard"
+        text='Goal time should be greater than studied hours'
+        type='error'
+        variant='standard'
         handleClose={() => setOpenNotification(false)}
       />
     </>

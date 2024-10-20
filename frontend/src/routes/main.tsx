@@ -1,60 +1,60 @@
-import { createBrowserRouter } from "react-router-dom";
-import App from "../App";
-import Login from "../pages/Login";
-import Signup from "../pages/Signup";
-import Dashboard from "../pages/Dashboard";
-import Lessons from "../pages/Lessons";
-import RecordStudySession from "../pages/RecordStudySession";
-import AddSubject from "../pages/AddSubjects";
-import Profile from "../pages/Profile";
-import Friends from "../pages/Friends";
-import AddFriends from "../pages/AddFriends";
-import FriendProfile from "../pages/FriendProfile";
+import { createBrowserRouter } from 'react-router-dom';
+import App from '../App';
+import Login from '../pages/Login';
+import Signup from '../pages/Signup';
+import Dashboard from '../pages/Dashboard';
+import Lessons from '../pages/Lessons';
+import RecordStudySession from '../pages/RecordStudySession';
+import AddSubject from '../pages/AddSubjects';
+import Profile from '../pages/Profile';
+import Friends from '../pages/Friends';
+import AddFriends from '../pages/AddFriends';
+import FriendProfile from '../pages/FriendProfile';
 
 export const router = createBrowserRouter([
   {
-    path: "/",
+    path: '/',
     element: <App />,
     errorElement: <div>404 Not Found</div>,
   },
   {
-    path: "/auth/login",
+    path: '/auth/login',
     element: <Login />,
   },
   {
-    path: "/auth/signup",
+    path: '/auth/signup',
     element: <Signup />,
   },
   {
-    path: "/dashboard",
+    path: '/dashboard',
     element: <Dashboard />,
   },
   {
-    path: "/lessons",
+    path: '/lessons',
     element: <Lessons />,
   },
   {
-    path: "/record-study-session",
+    path: '/record-study-session',
     element: <RecordStudySession />,
   },
   {
-    path: "/add-subject",
+    path: '/add-subject',
     element: <AddSubject />,
   },
   {
-    path: "/profile",
+    path: '/profile',
     element: <Profile />,
   },
   {
-    path: "/friends",
+    path: '/friends',
     element: <Friends />,
   },
   {
-    path: "/add-friends",
+    path: '/add-friends',
     element: <AddFriends />,
   },
   {
-    path: "/friend/:id",
+    path: '/friend/:id',
     element: <FriendProfile />,
   },
 ]);
