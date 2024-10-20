@@ -19,7 +19,7 @@ import { Logout } from "@mui/icons-material";
 import axios from "axios";
 import { SubjectResponse } from "./AddSubjects";
 
-const ENDPOINT = process.env.REACT_APP_API_URI
+const ENDPOINT = process.env.REACT_APP_API_URI;
 
 interface CurrentUser {
   id: string;
@@ -78,11 +78,7 @@ export default function Profile() {
   return (
     <Box height={"100vh"} bgcolor={theme.palette.grey[100]}>
       {/* Cover Section */}
-      <Box
-        sx={{
-          position: "relative",
-        }}
-      >
+      <Box sx={{ position: "relative" }}>
         {loading && (
           <Box position={"fixed"} top={0} left={0} right={0}>
             <LinearProgress color="secondary" sx={{ height: 6 }} />
@@ -107,7 +103,13 @@ export default function Profile() {
             bottom={0}
           >
             {currentUser && (
-              <Typography variant="h3" color="white" padding={2}>
+              <Typography
+                sx={{
+                  fontSize: "2.5rem",
+                }}
+                color="white"
+                padding={2}
+              >
                 <span
                   style={{
                     fontWeight: "600",
