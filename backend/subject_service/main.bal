@@ -12,20 +12,8 @@ mongodb:Client mongoDb = check new ({
     connection: CONNECTION_URL
 });
 
-@http:ServiceConfig {
-    cors: {
-        allowOrigins: ["*"]
-    }
-}
-
 service /api on new http:Listener(9091) {
     private final mongodb:Database db;
-
-    @http:ResourceConfig {
-        cors: {
-            allowOrigins: ["*"]
-        }
-    }
 
     function init() returns error? {
         self.db = check mongoDb->getDatabase(DATABASE_NAME);
