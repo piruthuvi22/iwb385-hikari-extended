@@ -1,9 +1,17 @@
 import React, { useState, useEffect } from "react";
-import { BottomNavigation, BottomNavigationAction, Box } from "@mui/material";
+import {
+  alpha,
+  BottomNavigation,
+  BottomNavigationAction,
+  Box,
+  Divider,
+} from "@mui/material";
 import { useNavigate, useLocation } from "react-router-dom";
 import HomeIcon from "@mui/icons-material/Home";
 import PersonIcon from "@mui/icons-material/Person";
 import GroupIcon from "@mui/icons-material/Group";
+import { MenuBook } from "@mui/icons-material";
+import { theme } from "../theme/theme";
 
 export default function Menubar() {
   const navigate = useNavigate();
@@ -12,7 +20,7 @@ export default function Menubar() {
 
   // Set the active tab based on the current URL path
   useEffect(() => {
-    if (location.pathname === "/home") {
+    if (location.pathname === "/add-subject") {
       setValue(0);
     } else if (
       location.pathname === "/friends" ||
@@ -29,7 +37,7 @@ export default function Menubar() {
     setValue(newValue);
 
     if (newValue === 0) {
-      navigate("/home");
+      navigate("/add-subject");
     } else if (newValue === 1) {
       navigate("/friends");
     } else if (newValue === 2) {
@@ -39,6 +47,7 @@ export default function Menubar() {
 
   return (
     <Box sx={{ width: "100%", position: "fixed", bottom: 0 }}>
+      <Divider />
       <BottomNavigation
         value={value}
         onChange={(event, newValue) => {
@@ -46,12 +55,15 @@ export default function Menubar() {
         }}
         showLabels
         sx={{
-          backgroundColor: "white",
+          backgroundColor: theme.palette.grey[100],
           borderTopLeftRadius: "1rem",
           borderTopRightRadius: "1rem",
+          "& .Mui-selected": {
+            color: theme.palette.primary.main,
+          },
         }}
       >
-        <BottomNavigationAction label="Home" icon={<HomeIcon />} />
+        <BottomNavigationAction label="Subjects" icon={<MenuBook />} />
         <BottomNavigationAction label="Friends" icon={<GroupIcon />} />
         <BottomNavigationAction label="Profile" icon={<PersonIcon />} />
       </BottomNavigation>

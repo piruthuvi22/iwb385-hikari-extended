@@ -1,9 +1,16 @@
-import { Box, Button, Typography, useTheme } from "@mui/material";
+import { Box, Button, Divider, Typography, useTheme } from "@mui/material";
 import mathematics from "../assets/mathematics.svg";
 import { Link } from "react-router-dom";
+import { useAuth0 } from "@auth0/auth0-react";
 
 export default function GetStarted() {
   const theme = useTheme();
+  const { loginWithRedirect } = useAuth0();
+
+  const handleLogin = async () => {
+    // Add login logic here
+    let res = await loginWithRedirect();
+  };
   return (
     <Box
       height={"100vh"}
@@ -20,11 +27,11 @@ export default function GetStarted() {
         justifyContent={"center"}
       >
         <Typography variant="h2" fontWeight={"500"} color="primary">
-          StRing
+          Studify
         </Typography>
 
-        <Typography variant="h4" color="text.secondary">
-          Welcome Piruthuvi
+        <Typography variant="h6" textAlign={"center"} color="text.secondary">
+          Study Smarter, Not Longer!
         </Typography>
       </Box>
       <Box flexGrow={"1"} textAlign={"center"}>
@@ -39,25 +46,26 @@ export default function GetStarted() {
         />
       </Box>
       <Box flexGrow={"1"} textAlign={"center"}>
-        <Link
-          to="/dashboard"
+        {/* <Link
+          to="/auth/login"
           style={{ textDecoration: "none", color: "white" }}
+        > */}
+        <Button
+          variant="contained"
+          color="primary"
+          sx={{
+            width: "80%",
+            fontWeight: "600",
+            fontSize: "1.3rem",
+            px: 2,
+            py: 3,
+            borderRadius: "100px",
+          }}
+          onClick={handleLogin}
         >
-          <Button
-            variant="contained"
-            color="primary"
-            sx={{
-              width: "80%",
-              fontWeight: "600",
-              fontSize: "1.3rem",
-              px: 2,
-              py: 3,
-              borderRadius: "100px",
-            }}
-          >
-            Let's Get Started
-          </Button>
-        </Link>
+          Let's Get Started
+        </Button>
+        {/* </Link> */}
       </Box>
     </Box>
   );

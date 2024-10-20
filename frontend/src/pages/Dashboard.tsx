@@ -1,5 +1,5 @@
 import { useAuth0 } from "@auth0/auth0-react";
-import { Button, Typography } from "@mui/material";
+import { Button, Divider, Typography } from "@mui/material";
 import React, { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -19,7 +19,7 @@ export default function Dashboard() {
   } = useAuth0();
 
   useEffect(() => {
-    getAccessToken();
+    // getAccessToken();
   }, []);
 
   async function getAccessToken() {
@@ -32,6 +32,29 @@ export default function Dashboard() {
       navigate("/dashboard");
     }
   }
+
+  const sendReq = async () => {
+    try {
+      const token = await getAccessTokenSilently({
+        // authorizationParams:{
+        //   scope: "openid profile email",
+        //   audience: "central_api",
+        // }
+      });
+      const response = await fetch(
+        process.env.REACT_APP_API_URI + "/users/friends",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      const responseData = await response.json();
+      console.log("ResponseData", responseData);
+    } catch (error) {
+      console.error("Error", error);
+    }
+  };
 
   if (isLoading) {
     return <div>Loading ...</div>;
@@ -54,6 +77,9 @@ export default function Dashboard() {
       >
         Logout
       </Button>
+      <Divider />
+
+      <Button onClick={sendReq}>Send</Button>
     </div>
   ) : (
     <div>

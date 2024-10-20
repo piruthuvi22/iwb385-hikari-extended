@@ -14,8 +14,8 @@ public type StudyStatus record {|
     int year;
     decimal actualHours;
     decimal goalHours = 0;
-    map<string>? lessonDates;
-    string[]? studiedLessons;
+    map<string>? lastStudiedDates;
+    string[]? studiedWithinTheWeek;
 |};
 
 public type GoalAdjust record {|

@@ -1,0 +1,2 @@
+DATABASE_NAME = "HikariExtended"
+CONNECTION_URL = "mongodb+srv://hikari:5xFBLSnVxWnftrbf@cluster0.h9y2t.mongodb.net/"
