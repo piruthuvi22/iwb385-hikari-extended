@@ -1,7 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { buildStyles, CircularProgressbar } from "react-circular-progressbar";
-// import {Flat, Heat, Nested} from '@alptugidin/react-circular-progress-bar'
-import "react-circular-progressbar/dist/styles.css";
 import {
   alpha,
   Avatar,
@@ -48,8 +45,10 @@ import Loader from "../components/Loader";
 import Notification from "../components/Notification";
 import moment from "moment";
 import Menubar from "../components/Menubar";
+import { theme } from "../theme/theme";
+import ProgressMeter from "../components/ProgressMeter";
 
-const ENDPOINT = "http://localhost:9094/central/api";
+const ENDPOINT = process.env.REACT_APP_API_URI;
 
 interface Lesson {
   id: string;
@@ -98,7 +97,6 @@ export default function RecordStudySession() {
           Authorization: "Bearer " + TOKEN,
         },
       });
-      console.log("Subject Info", response.data);
       setSubject(response.data);
       setOpenGoal(response.data.goalHours === 0);
     } catch (error) {
@@ -294,20 +292,22 @@ export default function RecordStudySession() {
               py={2}
             >
               <Box sx={{ width: 150 }}>
-                <CircularProgressbar
-                  value={progress}
-                  strokeWidth={10}
-                  text={progress.toFixed(2) + "%"}
-                  maxValue={100}
-                  styles={buildStyles({
-                    strokeLinecap: "round",
-                    textSize: "18px",
-                    pathTransitionDuration: 0.5,
-                    // Colors
-                    pathColor: theme.palette.primary.main,
+                <ProgressMeter
+                  progress={parseFloat(progress.toFixed(1))}
+                  showMiniCircle={false}
+                  sx={{
+                    strokeColor: theme.palette.primary.main,
+                    bgStrokeColor: theme.palette.grey[300],
+                    barWidth: 9,
+                    valueSize: 25,
+                    valueWeight: "bolder",
+                    valueColor: theme.palette.secondary.main,
                     textColor: theme.palette.secondary.main,
-                    trailColor: theme.palette.grey[200],
-                  })}
+                    loadingTime: 1500,
+                    shape: "threequarters",
+                    textFamily: "Fredoka",
+                    valueFamily: "Fredoka",
+                  }}
                 />
               </Box>
 
@@ -484,7 +484,6 @@ const AddSession = ({
   // useEffect(() => {
 
   // }, [hour, minutes]);
-  console.log("LessonID", lessonId);
 
   return (
     <DialogBox
@@ -557,6 +556,24 @@ const AddSession = ({
             <Slider
               min={0}
               max={24}
+              sx={{
+                "& .MuiSlider-track": {
+                  background: "transparent",
+                  height: 15,
+                },
+                "& .MuiSlider-rail": {
+                  background: `linear-gradient(90deg, ${theme.palette.primary.main} 40%, ${theme.palette.secondary.main} 60%)`,
+                  height: 15,
+                },
+                "& .MuiSlider-thumb": {
+                  backgroundColor: theme.palette.secondary.main,
+                  height: 24,
+                  width: 24,
+                  "&:hover": {
+                    boxShadow: "0px 0px 0px 8px rgba(0,0,0,0.16)",
+                  },
+                },
+              }}
               getAriaValueText={(value) => `${value}hrs`}
               value={typeof hour === "number" ? hour : 0}
               aria-label="Default"
@@ -588,6 +605,24 @@ const AddSession = ({
               min={0}
               max={59}
               step={5}
+              sx={{
+                "& .MuiSlider-track": {
+                  background: "transparent",
+                  height: 15,
+                },
+                "& .MuiSlider-rail": {
+                  background: `linear-gradient(90deg, ${theme.palette.primary.main} 40%, ${theme.palette.secondary.main} 60%)`,
+                  height: 15,
+                },
+                "& .MuiSlider-thumb": {
+                  backgroundColor: theme.palette.secondary.main,
+                  height: 24,
+                  width: 24,
+                  "&:hover": {
+                    boxShadow: "0px 0px 0px 8px rgba(0,0,0,0.16)",
+                  },
+                },
+              }}
               getAriaValueText={(value) => `${value}mins`}
               value={typeof minutes === "number" ? minutes : 0}
               aria-label="Default"
@@ -729,6 +764,24 @@ const AddGoalHrs = ({
                 min={0}
                 max={24}
                 getAriaValueText={(value) => `${value}hrs`}
+                sx={{
+                  "& .MuiSlider-track": {
+                    background: "transparent",
+                    height: 15,
+                  },
+                  "& .MuiSlider-rail": {
+                    background: `linear-gradient(90deg, ${theme.palette.primary.main} 40%, ${theme.palette.secondary.main} 60%)`,
+                    height: 15,
+                  },
+                  "& .MuiSlider-thumb": {
+                    backgroundColor: theme.palette.secondary.main,
+                    height: 24,
+                    width: 24,
+                    "&:hover": {
+                      boxShadow: "0px 0px 0px 8px rgba(0,0,0,0.16)",
+                    },
+                  },
+                }}
                 value={typeof hour === "number" ? hour : 0}
                 aria-label="Default"
                 valueLabelDisplay="auto"
@@ -760,6 +813,24 @@ const AddGoalHrs = ({
                 min={0}
                 step={5}
                 max={59}
+                sx={{
+                  "& .MuiSlider-track": {
+                    background: "transparent",
+                    height: 15,
+                  },
+                  "& .MuiSlider-rail": {
+                    background: `linear-gradient(90deg, ${theme.palette.primary.main} 40%, ${theme.palette.secondary.main} 60%)`,
+                    height: 15,
+                  },
+                  "& .MuiSlider-thumb": {
+                    backgroundColor: theme.palette.secondary.main,
+                    height: 24,
+                    width: 24,
+                    "&:hover": {
+                      boxShadow: "0px 0px 0px 8px rgba(0,0,0,0.16)",
+                    },
+                  },
+                }}
                 getAriaValueText={(value) => `${value}mins`}
                 value={typeof minutes === "number" ? minutes : 0}
                 aria-label="Default"

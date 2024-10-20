@@ -10,7 +10,6 @@ import {
 } from "@mui/material";
 import Banner from "../assets/friends.jpg";
 import Menubar from "../components/Menubar";
-import { buildStyles, CircularProgressbar } from "react-circular-progressbar";
 import GroupIcon from "@mui/icons-material/Group";
 import { Link } from "react-router-dom";
 import axios from "axios";
@@ -20,7 +19,7 @@ import ProgressMeter from "../components/ProgressMeter";
 import CloseIcon from "@mui/icons-material/Close";
 import PersonRemoveRoundedIcon from "@mui/icons-material/PersonRemoveRounded";
 
-const ENDPOINT = "http://localhost:9094/central/api";
+const ENDPOINT = process.env.REACT_APP_API_URI;
 
 interface Subject {
   id: string;
@@ -213,32 +212,32 @@ export default function Friends() {
                         alignItems="center"
                       >
                         <Box sx={{ width: 50 }}>
-                          <CircularProgressbar
-                            value={
+                          <ProgressMeter
+                            progress={
                               progress.goalHours > 0 && progress.actualHours > 0
-                                ? (progress.actualHours / progress.goalHours) *
-                                  100
+                                ? parseFloat(
+                                    (
+                                      (progress.actualHours /
+                                        progress.goalHours) *
+                                      100
+                                    ).toFixed(1)
+                                  )
                                 : 0
                             }
-                            strokeWidth={12}
-                            text={
-                              progress.goalHours > 0 && progress.actualHours > 0
-                                ? `${Math.round(
-                                    (progress.actualHours /
-                                      progress.goalHours) *
-                                      100
-                                  )}%`
-                                : `0%`
-                            }
-                            styles={buildStyles({
-                              strokeLinecap: "round",
-                              textSize: "30px",
-                              pathTransitionDuration: 0.5,
-                              // Colors
-                              pathColor: theme.palette.primary.main,
-                              textColor: theme.palette.primary.main,
-                              trailColor: theme.palette.grey[200],
-                            })}
+                            showMiniCircle={false}
+                            sx={{
+                              strokeColor: theme.palette.primary.main,
+                              bgStrokeColor: theme.palette.grey[300],
+                              barWidth: 12,
+                              valueSize: 30,
+                              valueWeight: "normal",
+                              valueColor: theme.palette.secondary.main,
+                              textColor: theme.palette.secondary.main,
+                              loadingTime: 1500,
+                              shape: "threequarters",
+                              textFamily: "Fredoka",
+                              valueFamily: "Fredoka",
+                            }}
                           />
                         </Box>
                         <Typography variant="caption" sx={{ marginTop: 1 }}>

@@ -1,10 +1,17 @@
 import React, { useState, useEffect } from "react";
-import { BottomNavigation, BottomNavigationAction, Box } from "@mui/material";
+import {
+  alpha,
+  BottomNavigation,
+  BottomNavigationAction,
+  Box,
+  Divider,
+} from "@mui/material";
 import { useNavigate, useLocation } from "react-router-dom";
 import HomeIcon from "@mui/icons-material/Home";
 import PersonIcon from "@mui/icons-material/Person";
 import GroupIcon from "@mui/icons-material/Group";
 import { MenuBook } from "@mui/icons-material";
+import { theme } from "../theme/theme";
 
 export default function Menubar() {
   const navigate = useNavigate();
@@ -40,6 +47,7 @@ export default function Menubar() {
 
   return (
     <Box sx={{ width: "100%", position: "fixed", bottom: 0 }}>
+      <Divider />
       <BottomNavigation
         value={value}
         onChange={(event, newValue) => {
@@ -47,9 +55,12 @@ export default function Menubar() {
         }}
         showLabels
         sx={{
-          backgroundColor: "white",
+          backgroundColor: theme.palette.grey[100],
           borderTopLeftRadius: "1rem",
           borderTopRightRadius: "1rem",
+          "& .Mui-selected": {
+            color: theme.palette.primary.main,
+          },
         }}
       >
         <BottomNavigationAction label="Subjects" icon={<MenuBook />} />

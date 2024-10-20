@@ -5,6 +5,7 @@ import {
   Box,
   Button,
   Divider,
+  Fab,
   LinearProgress,
   List,
   ListItem,
@@ -26,10 +27,10 @@ import MoreVertIcon from "@mui/icons-material/MoreVert";
 import Menu from "@mui/material/Menu";
 import MenuItem from "@mui/material/MenuItem";
 import { useAuth0 } from "@auth0/auth0-react";
-import { Delete, Inbox, MenuBook } from "@mui/icons-material";
+import { Add, Delete, Inbox, MenuBook } from "@mui/icons-material";
 import { SubjectRecordsResponse } from "./RecordStudySession";
 
-const ENDPOINT = "http://localhost:9094/central/api";
+const ENDPOINT = process.env.REACT_APP_API_URI;
 
 export interface Lesson {
   id: string;
@@ -357,6 +358,7 @@ export default function AddSubject() {
               return (
                 <>
                   <ListItem
+                    disablePadding
                     sx={{
                       background: `linear-gradient(45deg, ${alpha(
                         theme.palette.secondary.light,
@@ -428,22 +430,15 @@ export default function AddSubject() {
         mb={3}
         mt={6}
       >
-        <Button
-          variant="contained"
+        <Fab
+          sx={{ position: "fixed", bottom: 80, right: 30 }}
           color="secondary"
+          size="large"
           disabled={loading}
-          startIcon={<AddIcon sx={{ fontSize: 28, color: "white" }} />}
           onClick={handleClickOpen}
-          sx={{
-            width: "80%",
-            fontWeight: "600",
-            fontSize: "1.3rem",
-            py: 2,
-            borderRadius: "100px",
-          }}
         >
-          Add Subject
-        </Button>
+          <Add />
+        </Fab>
       </Box>
 
       {/* Dialog for Selecting a Subject */}

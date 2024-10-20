@@ -9,6 +9,7 @@ import {
 } from "@mui/material";
 import { TransitionProps } from "@mui/material/transitions";
 import React from "react";
+import { theme } from "../theme/theme";
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
@@ -41,7 +42,13 @@ export default function DialogBox({
       onClose={handleClose}
       aria-describedby="alert-dialog-slide-description"
     >
-      <DialogTitle>{title}</DialogTitle>
+      <DialogTitle sx={{
+        color: theme.palette.grey[600],
+        borderBottom: "1px solid #ddd",
+        padding: "10px 20px",
+        fontSize: "1.5rem",
+        fontWeight: 600,
+      }}>{title}</DialogTitle>
       <DialogContent>{children}</DialogContent>
       <DialogActions>{actions}</DialogActions>
     </Dialog>
