@@ -57,14 +57,25 @@ Follow these steps to execute the application:
 
 ### 1. Configure Each Service:
 
-For each microservice (User Service, Subject Service, Study Service) and the Central Service, create `config.toml` file in their respective directories:
+- For each microservice (User Service, Subject Service, Study Service) create `config.toml` file in their respective directories:
 
-```toml
-DATABASE_NAME = "<your-database-name>"
-CONNECTION_URL = "<your-connection-url>"
-```
+  ```toml
+  DATABASE_NAME = "<your-database-name>"
+  CONNECTION_URL = "<your-connection-url>"
+  ```
 
-Ensure the `DATABASE_NAME` and `CONNECTION_URL` values are correctly set for each service.
+  Ensure the `DATABASE_NAME` and `CONNECTION_URL` values are correctly set for each service.
+
+- For the Central Service, create `config.toml` file in the `central_service` directory:
+
+  ```toml
+  OAUTH2 = "<your-oauth2-token>"
+  USER_SERVICE = "http://localhost:9090/"
+  SUBJECT_SERVICE = "http://localhost:9091/"
+  STUDY_SERVICE = "http://localhost:9092/"
+  ```
+
+  Ensure all services are correctly configured with the appropriate URLs and tokens for smooth communication between the microservices.
 
 ### 2. Configure the Frontend:
 
