@@ -22,6 +22,7 @@ import Loader from '../components/Loader';
 import SearchIcon from '@mui/icons-material/Search';
 import DialogBox from '../components/DialogBox';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import Logo from '../assets/studifyLogo.svg';
 
 const ENDPOINT = process.env.REACT_APP_API_URI;
 
@@ -269,8 +270,9 @@ export default function AddFriends() {
           top={16}
           left={16}
         >
-          StRings
+          Studify
         </Typography>
+      
 
         <Box position='absolute' top={16} right={16}>
           <SearchIcon

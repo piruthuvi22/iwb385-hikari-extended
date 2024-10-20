@@ -7,6 +7,7 @@ import {
   Grid,
   useTheme,
   IconButton,
+  LinearProgress,
 } from "@mui/material";
 import Banner from "../assets/friends.jpg";
 import Menubar from "../components/Menubar";
@@ -90,58 +91,62 @@ export default function Friends() {
   }
 
   return (
-    <Box
-      minHeight={"100vh"}
-      bgcolor={theme.palette.grey[100]}
-      display={"flex"}
-      flexDirection={"column"}
-      alignItems={"center"}
-      paddingBottom={10}
-    >
-      <Box
-        width={"100%"}
-        height={"20vh"}
-        position={"fixed"}
-        top={0}
-        zIndex={1000}
-      >
+    <Box minHeight={"100vh"} bgcolor={theme.palette.grey[100]}>
+      <Box sx={{ position: "relative" }}>
+        {loading && (
+          <Box position={"fixed"} top={0} left={0} right={0}>
+            <LinearProgress color="secondary" sx={{ height: 6 }} />
+          </Box>
+        )}
         <img
           src={Banner}
           alt="Banner"
           style={{
             width: "100%",
-            height: "100%",
+            height: "20vh",
             objectFit: "cover",
             borderBottomLeftRadius: "1.5rem",
             borderBottomRightRadius: "1.5rem",
-            boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
           }}
         />
-        <Typography
-          variant="h4"
-          color="white"
-          position="absolute"
-          top={16}
-          left={16}
+        <Box
+          sx={{
+            position: "absolute",
+            bottom: 0,
+            top: 0,
+            left: 0,
+            right: 0,
+            boxShadow: "inset 0px -100px 50px 0px rgba(0,0,0,0.85)",
+            borderBottomLeftRadius: "1.5rem",
+            borderBottomRightRadius: "1.5rem",
+          }}
         >
-          StRings
-        </Typography>
+          <Box
+            display={"flex"}
+            width={"100%"}
+            justifyContent={"space-between"}
+            alignItems={"center"}
+            gap={2}
+            position={"absolute"}
+            bottom={0}
+          >
+            <Typography variant="h3" color="white" padding={2}>
+              Studify
+            </Typography>
 
-        <Box position="absolute" top={16} right={16}>
-          <Link to="/add-friends">
-            <GroupIcon sx={{ color: "white", cursor: "pointer" }} />
-          </Link>
+            <Box pr={2}>
+              <Link to="/add-friends">
+                <IconButton>
+                  <GroupIcon sx={{ color: "white", cursor: "pointer" }} />
+                </IconButton>
+              </Link>
+            </Box>
+          </Box>
         </Box>
       </Box>
 
-      <Box mt={"22vh"} width={"100%"} textAlign={"center"}>
-        <Typography variant="h5" color="text.primary">
-          Sharing
-        </Typography>
-      </Box>
-
       {/* Grid of friend cards */}
-      <Box mt={2} width={"90%"} flexGrow={1}>
+      <Box mt={2} px={2} flexGrow={1}>
         {!loading && friends.length === 0 && (
           <Typography
             variant="body2"
@@ -252,7 +257,6 @@ export default function Friends() {
           ))}
         </Grid>
       </Box>
-      {loading && <Loader />}
       <Menubar />
     </Box>
   );

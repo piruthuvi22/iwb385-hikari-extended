@@ -48,6 +48,8 @@ import Menubar from "../components/Menubar";
 import { theme } from "../theme/theme";
 import ProgressMeter from "../components/ProgressMeter";
 
+import Banner from "../assets/study.jpg";
+
 const ENDPOINT = process.env.REACT_APP_API_URI;
 
 interface Lesson {
@@ -220,7 +222,7 @@ export default function RecordStudySession() {
           </Box>
         )}
         <img
-          src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRkOaTwJnmXUjkpj62We__JoTQ2liCX2fLcHQ&s"
+          src={Banner}
           alt="cover"
           style={{
             width: "100%",

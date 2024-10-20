@@ -63,7 +63,7 @@ export default function FriendProfile() {
           top={16}
           left={16}
         >
-          StRings
+          Studify
         </Typography>
       </Box>
 

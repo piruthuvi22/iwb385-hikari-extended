@@ -29,6 +29,8 @@ import MenuItem from "@mui/material/MenuItem";
 import { useAuth0 } from "@auth0/auth0-react";
 import { Add, Delete, Inbox, MenuBook } from "@mui/icons-material";
 import { SubjectRecordsResponse } from "./RecordStudySession";
+import Logo from "../assets/studifyLogo.svg";
+import LogoHorz from "../assets/studify-logo-horz.svg";
 
 const ENDPOINT = process.env.REACT_APP_API_URI;
 
@@ -297,12 +299,7 @@ export default function AddSubject() {
 
   return (
     <Box minHeight={"100vh"} bgcolor={theme.palette.grey[100]}>
-      <Box
-        sx={{
-          position: "relative",
-          // height: 300,
-        }}
-      >
+      <Box sx={{ position: "relative" }}>
         {loading && (
           <Box position={"fixed"} top={0} left={0} right={0}>
             <LinearProgress color="secondary" sx={{ height: 6 }} />
@@ -335,13 +332,23 @@ export default function AddSubject() {
             display={"flex"}
             width={"100%"}
             justifyContent={"space-between"}
+            alignItems={"center"}
             gap={2}
             position={"absolute"}
             bottom={0}
           >
             <Typography variant="h3" color="white" padding={2}>
-              {"StRings"}
+              Studify
             </Typography>
+            <img
+              src={Logo}
+              alt="Banner"
+              style={{
+                width: 80,
+                height: 80,
+                paddingRight: 20,
+              }}
+            />
           </Box>
         </Box>
       </Box>
