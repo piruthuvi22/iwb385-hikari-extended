@@ -73,6 +73,7 @@ In the `frontend` directory, create a `.env` file with the following environment
 ```bash
 REACT_APP_AUTH0_DOMAIN="<your-auth0-domain>"
 REACT_APP_AUTH0_CLIENT_ID="<your-auth0-client-id>"
+REACT_APP_API_URI="http://localhost:9094/central/api"
 ```
 
 Ensure these values are properly set for Auth0 authentication.
