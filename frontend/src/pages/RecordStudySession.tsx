@@ -295,6 +295,7 @@ export default function RecordStudySession() {
             >
               <Box sx={{ width: 150 }}>
                 <ProgressMeter
+                  // progress={64.8945168468541}
                   progress={parseFloat(progress.toFixed(1))}
                   showMiniCircle={false}
                   sx={{

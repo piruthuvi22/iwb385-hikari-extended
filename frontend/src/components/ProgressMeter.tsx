@@ -140,9 +140,14 @@ const ProgressMeter: React.FC<IFlat> = ({
             >
               {sign.position === "start"
                 ? sign.value +
-                  (valueAnimation ? animatedValue : progress).toString()
-                : (valueAnimation ? animatedValue : progress)
+                  (valueAnimation ? animatedValue : progress)
+                    // .toFixed(2)
                     .toString()
+                    .substring(0, 4)
+                : (valueAnimation ? animatedValue : progress)
+                    // .toFixed(2)
+                    .toString()
+                    .substring(0, 4)
                     .concat(sign.value)}
             </tspan>
           </text>
