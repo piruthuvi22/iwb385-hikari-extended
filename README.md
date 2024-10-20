@@ -6,9 +6,9 @@ The app color-codes lesson statuses based on how recently they were studied:
 
 - **Green**: Studied recently (within a week).
 - **Yellow**: Last studied between a week ago and a month.
-- **Red**: Last studied more than a month ago.
+- **Red**: Last studied more than 10 weeks ago.
 
-Students can also add friends from their classroom, and receive notifications when a friend achieves their weekly study goal for a subject.
+Students can also add friends from their classroom, and know when a friend achieves their weekly study goal for a subject.
 
 ## Functional Requirements
 
@@ -57,7 +57,7 @@ Follow these steps to execute the application:
 
 ### 1. Configure Each Service:
 
-- For each microservice (User Service, Subject Service, Study Service) create `config.toml` file in their respective directories:
+- For each microservice (User Service, Subject Service, Study Service) create a `Config.toml` file in their respective directories:
 
   ```toml
   DATABASE_NAME = "<your-database-name>"
@@ -66,10 +66,10 @@ Follow these steps to execute the application:
 
   Ensure the `DATABASE_NAME` and `CONNECTION_URL` values are correctly set for each service.
 
-- For the Central Service, create `config.toml` file in the `central_service` directory:
+- For the Central Service, create a `Config.toml` file in the `central_service` directory:
 
   ```toml
-  OAUTH2 = "<your-oauth2-token>"
+  OAUTH2 = "<your-oauth2-endpoint>"
   USER_SERVICE = "http://localhost:9090/"
   SUBJECT_SERVICE = "http://localhost:9091/"
   STUDY_SERVICE = "http://localhost:9092/"
