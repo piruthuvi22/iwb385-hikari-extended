@@ -1,5 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { Box, Typography, Card, Avatar, Grid, useTheme } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Card,
+  Avatar,
+  Grid,
+  useTheme,
+  IconButton,
+} from "@mui/material";
 import Banner from "../assets/friends.jpg";
 import Menubar from "../components/Menubar";
 import GroupIcon from "@mui/icons-material/Group";
@@ -8,6 +16,8 @@ import axios from "axios";
 import Loader from "../components/Loader";
 import { useAuth0 } from "@auth0/auth0-react";
 import ProgressMeter from "../components/ProgressMeter";
+import CloseIcon from "@mui/icons-material/Close";
+import PersonRemoveRoundedIcon from "@mui/icons-material/PersonRemoveRounded";
 
 const ENDPOINT = process.env.REACT_APP_API_URI;
 
@@ -49,6 +59,31 @@ export default function Friends() {
       setFriends(friends.data.following);
     } catch (error) {
       console.error("Failed to fetch subjects", error);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function unfollowFriend(friendId: string) {
+    setLoading(true);
+    try {
+      const TOKEN = await getAccessTokenSilently({});
+      const response = await axios.delete(ENDPOINT + "/users/follow-friend", {
+        headers: {
+          Authorization: "Bearer " + TOKEN,
+        },
+        data: { id: friendId },
+      });
+
+      if (response.status === 200) {
+        setFriends((prevFriends) =>
+          prevFriends.filter((friend) => friend.id !== friendId)
+        );
+      } else {
+        console.error("Error deleting the subject");
+      }
+    } catch (error) {
+      console.error("Failed to unfollow friend", error);
     } finally {
       setLoading(false);
     }
@@ -107,6 +142,16 @@ export default function Friends() {
 
       {/* Grid of friend cards */}
       <Box mt={2} width={"90%"} flexGrow={1}>
+        {!loading && friends.length === 0 && (
+          <Typography
+            variant="body2"
+            color="textSecondary"
+            mt={4}
+            textAlign="center"
+          >
+            You are not following any friends.
+          </Typography>
+        )}
         <Grid container spacing={2}>
           {friends.map((friend) => (
             <Grid item xs={12} sm={6} md={4} key={friend.id}>
@@ -119,8 +164,17 @@ export default function Friends() {
                   flexDirection: "column",
                   height: "auto",
                   justifyContent: "flex-start",
+                  position: "relative",
                 }}
               >
+                <IconButton
+                  aria-label="unfollow"
+                  sx={{ position: "absolute", top: 8, right: 8 }}
+                  onClick={() => unfollowFriend(friend.id)}
+                >
+                  <PersonRemoveRoundedIcon />
+                </IconButton>
+
                 {/* Box for Avatar and Name */}
                 <Box
                   display="flex"
