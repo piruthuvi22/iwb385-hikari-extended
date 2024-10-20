@@ -42,7 +42,7 @@ The Studify App follows a **microservice architecture** where different function
 
 The architecture diagram below illustrates how these components interact:
 
-![Architecture Diagram](https://firebasestorage.googleapis.com/v0/b/chat-c9b11.appspot.com/o/Architecture%20Diagram.png?alt=media&token=bdb93f08-b0fc-4215-ba18-928845e239e8)
+![Architecture Diagram](https://firebasestorage.googleapis.com/v0/b/chat-c9b11.appspot.com/o/Architecture%20Diagram.png?alt=media&token=52d5161a-7779-4840-a7ec-e7ca20d0bedf)
 
 ## Instructions to Execute the Application
 
@@ -73,6 +73,7 @@ In the `frontend` directory, create a `.env` file with the following environment
 ```bash
 REACT_APP_AUTH0_DOMAIN="<your-auth0-domain>"
 REACT_APP_AUTH0_CLIENT_ID="<your-auth0-client-id>"
+REACT_APP_API_URI="http://localhost:9094/central/api"
 ```
 
 Ensure these values are properly set for Auth0 authentication.
