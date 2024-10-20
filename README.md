@@ -1,12 +1,12 @@
 # Studify App
 
-This app is designed for school students to track their study activities, enabling them to set study goals for each subject, log the hours spent, mark completed lessons, and monitor their progress toward weekly targets. For example, a student studying ICT might set a goal of 3 hours per week. Each subject page features a circular progress bar to visually represent how much of the goal has been completed. Additionally, students can mark lessons they've studied.
+**Studify** is a study tracking app tailored for school students to help them set and achieve study goals effectively. It allows students to set weekly goals for each subject, log study hours, and track lesson completion. For example, a student studying ICT could aim for 3 hours of study per week. Each subject's progress is visually represented with a circular progress bar, offering a clear overview of how close they are to meeting their goals. Additionally, students can mark lessons as studied, making it easy to monitor their progress.
 
 The app color-codes lesson statuses based on how recently they were studied:
 
-- Green: Studied recently (within a week).
-- Yellow: Last studied between a week ago and a month.
-- Red: Last studied more than a month ago.
+- **Green**: Studied recently (within a week).
+- **Yellow**: Last studied between a week ago and a month.
+- **Red**: Last studied more than a month ago.
 
 Students can also add friends from their classroom, and receive notifications when a friend achieves their weekly study goal for a subject.
 
@@ -27,9 +27,31 @@ Students can also add friends from their classroom, and receive notifications wh
 
 ## Architecture Diagram
 
-![Architecture Diagram](https://firebasestorage.googleapis.com/v0/b/chat-c9b11.appspot.com/o/Architecture%20Diagram.png?alt=media&token=f66f4172-9e68-47b1-9653-50e0c68f4153)
+The Studify App follows a **microservice architecture** where different functionalities are separated into individual services that communicate with each other. The key components of the system include:
+
+- **Backend Microservices**:
+
+  - **User Service**: Manages user registration, authentication, and friend connections.
+  - **Subject Service**: Handles subject-related operations like setting study goals.
+  - **Study Service**: Manages logging of study hours and tracking progress.
+  - **Central Service**: Coordinates communication between services, acting as a mediator.
+
+- **Frontend UI**: A React-based user interface that interacts with the backend microservices through REST APIs.
+
+- **Database**: Each microservice connects to its own database instance, ensuring data separation and independence across services.
+
+The architecture diagram below illustrates how these components interact:
+
+![Architecture Diagram](https://firebasestorage.googleapis.com/v0/b/chat-c9b11.appspot.com/o/Architecture%20Diagram.png?alt=media&token=bdb93f08-b0fc-4215-ba18-928845e239e8)
 
 ## Instructions to Execute the Application
+
+### Prerequisites
+
+Ensure you have the following installed on your system:
+
+- [Ballerina](https://ballerina.io/downloads/)
+- [Node.js](https://nodejs.org/en/download/)
 
 Follow these steps to execute the application:
 
