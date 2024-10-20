@@ -42,7 +42,7 @@ The Studify App follows a **microservice architecture** where different function
 
 The architecture diagram below illustrates how these components interact:
 
-![Architecture Diagram](https://firebasestorage.googleapis.com/v0/b/chat-c9b11.appspot.com/o/Architecture%20Diagram.png?alt=media&token=bdb93f08-b0fc-4215-ba18-928845e239e8)
+![Architecture Diagram](https://firebasestorage.googleapis.com/v0/b/chat-c9b11.appspot.com/o/Architecture%20Diagram.png?alt=media&token=52d5161a-7779-4840-a7ec-e7ca20d0bedf)
 
 ## Instructions to Execute the Application
 
